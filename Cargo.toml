@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    'parcel-thief',
+    'thief-injector'
+]
