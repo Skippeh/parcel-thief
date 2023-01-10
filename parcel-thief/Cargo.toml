@@ -1,28 +1,5 @@
-[package]
-name = "parcel-thief"
-version = "0.1.0"
-edition = "2021"
-
-[lib]
-crate-type = ["cdylib"]
-
-[dependencies]
-anyhow = "1.0.57"
-detour = { git = "https://github.com/Hpmason/detour-rs", branch = "fix-nightly1.67.0-changes" }
-lazy_static = "1.4.0"
-
-[dependencies.tokio]
-version = "1"
-features = [
-    "fs", "time", "rt-multi-thread"
-]
-
-
-[dependencies.windows]
-version = "0.36.1"
-features = [
-    "alloc",
-    "Win32_System_Console",
-    "Win32_Foundation",
-    "Win32_System_SystemServices",
+[workspace]
+members = [
+    'parcel-thief',
+    'thief-injector'
 ]
