@@ -1,0 +1,26 @@
+MESSAGE DATA LAYOUT:
+0-11: IV key
+12-(^16-1): encrypted data
+^16-(EOF-1): encrypted hash
+^ means from end of message
+
+the IV key is randomly generated before every encryption
+the final byte of the IV key is set to 2 when encrypting/decrypting the data, and 1 when encrypting/decrypting the hash
+
+aes mode of operation is CTR
+
+aes-256 secret:
+0x4C, 0x48, 0x77, 0x55, 0x47, 0x6E, 0x6B, 0x74,
+0x43, 0x6C, 0x4E, 0x76, 0x39, 0x55, 0x6F, 0x63,
+0x31, 0x47, 0x71, 0x7A, 0x63, 0x63, 0x62, 0x68,
+0x72, 0x64, 0x61, 0x4A, 0x33, 0x41, 0x06, 0x0A
+
+the hashing algorithm seems to be an in house solution. there's a c# implementation available in the testing project
+the hash is calculated the same way on encrypt and decrypt. on decrypt it's also encrypted again to verify it matches the encrypted hash from the incoming message.
+the hash is based on the following data:
+- encrypted data
+- a static 128 bit salt
+- the length of the salt (16)
+- the length of the data
+- it's also technically based on an additional byte array, but it's always 0 length so it's not implemented in c#.
+  implementing it would however be trivial if necessary
