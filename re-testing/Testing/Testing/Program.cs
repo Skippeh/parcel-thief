@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Text;
+﻿using System.Text;
 using CodecTest;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -31,10 +30,8 @@ internal class Program
         var jObject = JsonConvert.DeserializeObject<JObject>(decryptedData);
         decryptedData = JsonConvert.SerializeObject(jObject, Formatting.Indented);
 
-        var hashSw = Stopwatch.StartNew();
         Span<byte> hash = stackalloc byte[16];
         Hash.GenerateHash(encryptedData, hash);
-        hashSw.Stop();
 
         ivKey[15] = 1; // final iv key byte is 1 when encrypting/decrypting hash
         var compareEncryptedHash = EncryptDecryptBytes(hash, AesSecret, ivKey);
