@@ -1,5 +1,5 @@
-﻿using System.Text;
-using CodecTest;
+﻿using System.Security.Cryptography;
+using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -19,66 +19,20 @@ internal class Program
     public static void Main(string[] args)
     {
         var messageBytes = Convert.FromBase64String(B64Message).AsMemory();
-        Span<byte> ivKey = stackalloc byte[16];
-        messageBytes.Span[..12].CopyTo(ivKey);
+        Span<byte> nonce = stackalloc byte[16];
+        messageBytes.Span[..12].CopyTo(nonce);
         var encryptedData = messageBytes.Span[12..^16];
-        var encryptedHash = messageBytes.Span[^16..];
+        var tag = messageBytes.Span[^16..];
 
-        ivKey[15] = 2; // final iv key byte is 2 when encrypting/decrypting data
-        string decryptedData = EncryptDecryptString(encryptedData, AesSecret, ivKey);
+        var aesGcm = new AesGcm(AesSecret);
+        Span<byte> decryptedData = stackalloc byte[encryptedData.Length];
+        aesGcm.Decrypt(messageBytes[..12].Span, encryptedData, tag, decryptedData, null);
+        string decryptedString = Encoding.UTF8.GetString(decryptedData);
+        
+        var jObject = JsonConvert.DeserializeObject<JObject>(decryptedString);
+        decryptedString = JsonConvert.SerializeObject(jObject, Formatting.Indented);
 
-        var jObject = JsonConvert.DeserializeObject<JObject>(decryptedData);
-        decryptedData = JsonConvert.SerializeObject(jObject, Formatting.Indented);
-
-        Span<byte> hash = stackalloc byte[16];
-        Hash.GenerateHash(encryptedData, hash);
-
-        ivKey[15] = 1; // final iv key byte is 1 when encrypting/decrypting hash
-        var compareEncryptedHash = EncryptDecryptBytes(hash, AesSecret, ivKey);
-
-        Console.WriteLine(decryptedData);
-
-        if (CompareSpans(encryptedHash, compareEncryptedHash))
-        {
-            Console.WriteLine("The data is valid, hashes match");
-        }
-        else
-        {
-            Console.WriteLine($"The data is NOT valid, hashes do not match");
-        }
-    }
-
-    private static bool CompareSpans(Span<byte> a, Span<byte> b)
-    {
-        if (a.Length != b.Length)
-            return false;
-
-        for (int i = 0; i < a.Length; ++i)
-        {
-            if (a[i] != b[i])
-                return false;
-        }
-
-        return true;
-    }
-
-    private static string EncryptDecryptString(Span<byte> data, Span<byte> secret, Span<byte> iv)
-    {
-        return Encoding.UTF8.GetString(EncryptDecryptBytes(data, secret, iv));
-    }
-
-    private static byte[] EncryptDecryptBytes(Span<byte> data, Span<byte> secret, Span<byte> iv)
-    {
-        using var aes = new AesCtr();
-        aes.Key = secret.ToArray();
-        aes.IV = iv.ToArray();
-
-        var decryptor = aes.CreateEncryptor(); // CTR uses same method to encrypt and decrypt
-        byte[] outputBuffer = new byte[data.Length];
-
-        decryptor.TransformBlock(data.ToArray(), 0, data.Length, outputBuffer, 0);
-
-        return outputBuffer;
+        Console.WriteLine(decryptedString);
     }
     
     internal static string ByteArrayToString(Span<byte> bytes)
