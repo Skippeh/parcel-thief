@@ -41,13 +41,10 @@ pub async fn parse_request(stream: &mut TlsStream<TcpStream>) -> Result<Request<
                 );
 
                 if header.name.eq_ignore_ascii_case("content-length") {
-                    let len_str =
-                        String::from_utf8(header.value.into()).context("invalid content length")?;
+                    let len_str = String::from_utf8(header.value.into())
+                        .context("invalid content length encoding")?;
 
-                    content_len = len_str
-                        .parse::<usize>()
-                        .context("invalid content length")
-                        .unwrap_or_default();
+                    content_len = len_str.parse::<usize>().context("invalid content length")?;
                 }
             }
 
