@@ -19,8 +19,6 @@ internal class Program
     public static void Main(string[] args)
     {
         var messageBytes = Convert.FromBase64String(B64Message).AsMemory();
-        Span<byte> nonce = stackalloc byte[16];
-        messageBytes.Span[..12].CopyTo(nonce);
         var encryptedData = messageBytes.Span[12..^16];
         var tag = messageBytes.Span[^16..];
 
