@@ -6,6 +6,8 @@ use httparse::EMPTY_HEADER;
 use tokio::{io::AsyncReadExt, net::TcpStream};
 use tokio_rustls::server::TlsStream;
 
+use crate::http_utility::read_headers;
+
 pub async fn parse_request(stream: &mut TlsStream<TcpStream>) -> Result<Request<String>> {
     let mut headers = [EMPTY_HEADER; 64];
     let mut req = httparse::Request::new(&mut headers);
@@ -33,7 +35,7 @@ pub async fn parse_request(stream: &mut TlsStream<TcpStream>) -> Result<Request<
                     break;
                 }
 
-                let headers = request.headers_mut().insert(
+                request.headers_mut().insert(
                     HeaderName::from_str(header.name).context("invalid header name")?,
                     HeaderValue::from_bytes(header.value).context("invalid header value")?,
                 );
@@ -62,20 +64,4 @@ pub async fn parse_request(stream: &mut TlsStream<TcpStream>) -> Result<Request<
         }
         httparse::Status::Partial => anyhow::bail!("partial request received"),
     }
-}
-
-async fn read_headers(stream: &mut TlsStream<TcpStream>) -> Result<Vec<u8>> {
-    let mut buf = Vec::with_capacity(128);
-
-    loop {
-        let u8 = stream.read_u8().await?;
-
-        buf.push(u8);
-
-        if buf.ends_with(b"\r\n\r\n") {
-            break;
-        }
-    }
-
-    Ok(buf)
 }

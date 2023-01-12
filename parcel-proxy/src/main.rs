@@ -20,6 +20,8 @@ use tokio_rustls::{
     TlsAcceptor,
 };
 
+use crate::http_utility::ToHttp;
+
 #[derive(Parser)]
 struct Options {
     cert: PathBuf,
@@ -57,20 +59,21 @@ async fn main() -> anyhow::Result<()> {
                 Ok(request) => match outgoing::proxy_request(&request).await {
                     Ok(response) => {
                         stream
-                            .write_all(http_utility::into_raw_http(response).as_bytes())
+                            .write_all(response.to_raw_http(None).as_bytes())
                             .await?;
+
+                        println!("request:\n{:#?}\n\nresponse:\n{:#?}", request, response);
                     }
                     Err(err) => {
                         eprintln!("error occured while proxying request: {}", err);
                         stream
                             .write_all(
-                                http_utility::into_raw_http(
-                                    Response::builder()
-                                        .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                        .body("".into())
-                                        .unwrap(),
-                                )
-                                .as_bytes(),
+                                Response::builder()
+                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                    .body("".into())
+                                    .unwrap()
+                                    .to_raw_http(None)
+                                    .as_bytes(),
                             )
                             .await?;
                     }
@@ -79,13 +82,12 @@ async fn main() -> anyhow::Result<()> {
                     eprintln!("invalid request received: {}", err);
                     stream
                         .write_all(
-                            http_utility::into_raw_http(
-                                Response::builder()
-                                    .status(StatusCode::BAD_REQUEST)
-                                    .body("".into())
-                                    .unwrap(),
-                            )
-                            .as_bytes(),
+                            Response::builder()
+                                .status(StatusCode::BAD_REQUEST)
+                                .body("".into())
+                                .unwrap()
+                                .to_raw_http(None)
+                                .as_bytes(),
                         )
                         .await?;
                 }
