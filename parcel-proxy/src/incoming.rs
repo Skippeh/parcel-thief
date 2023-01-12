@@ -51,8 +51,7 @@ pub async fn parse_request(stream: &mut TlsStream<TcpStream>) -> Result<Request<
             if content_len > 0 {
                 let mut content_buf = vec![0; content_len];
                 stream.read_exact(&mut content_buf).await?;
-                let content = String::from_utf8(content_buf)
-                    .context("invalid content encoding (expected utf8)")?;
+                let content = String::from_utf8(content_buf).context("invalid content encoding")?;
 
                 *request.body_mut() = content;
             }
