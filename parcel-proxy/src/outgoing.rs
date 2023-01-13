@@ -36,22 +36,22 @@ pub async fn proxy_request(request: &Request<String>) -> Result<Response<String>
     match parsed_response.parse(&headers_buf) {
         Ok(status) => match status {
             httparse::Status::Complete(_) => {
-                let content_len = parsed_response
+                let content_len_header = parsed_response
                     .headers
                     .iter()
                     .find(|header| header.name.eq_ignore_ascii_case("content-length"));
 
-                let body_len = match content_len {
+                let content_len = match content_len_header {
                     Some(header) => String::from_utf8_lossy(header.value)
                         .parse::<usize>()
                         .unwrap_or_default(),
                     None => 0,
                 };
 
-                let mut body_buf = vec![0u8; body_len];
+                let mut body_buf = vec![0u8; content_len];
                 socket.read_exact(&mut body_buf).await?;
-                let body = String::from_utf8_lossy(&body_buf);
 
+                let body = String::from_utf8_lossy(&body_buf);
                 let mut response = Response::new(body.into_owned());
 
                 *response.version_mut() = Version::HTTP_11;
@@ -63,7 +63,8 @@ pub async fn proxy_request(request: &Request<String>) -> Result<Response<String>
 
                 for header in parsed_response.headers {
                     response.headers_mut().append(
-                        HeaderName::from_bytes(header.name.as_bytes())?,
+                        HeaderName::from_bytes(header.name.as_bytes())
+                            .context("parsing header name")?,
                         HeaderValue::from_bytes(header.value).context("parsing header value")?,
                     );
                 }
@@ -72,6 +73,6 @@ pub async fn proxy_request(request: &Request<String>) -> Result<Response<String>
             }
             httparse::Status::Partial => anyhow::bail!("received partial response"),
         },
-        Err(err) => Err(err.into()),
+        Err(err) => Err(anyhow::anyhow!("could not parse response: {:#?}", err)),
     }
 }

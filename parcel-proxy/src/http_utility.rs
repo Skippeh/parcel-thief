@@ -13,8 +13,9 @@ impl ToHttp for Response<String> {
 
         for (name, value) in self.headers() {
             let mut value = String::from_utf8_lossy(value.as_bytes());
-            if name.as_str().eq_ignore_ascii_case("host") {
-                if let Some(new_host_header) = new_host_header {
+
+            if let Some(new_host_header) = new_host_header {
+                if name.as_str().eq_ignore_ascii_case("host") {
                     value = new_host_header.into();
                 }
             }
@@ -23,7 +24,6 @@ impl ToHttp for Response<String> {
         }
 
         result.push_str("\r\n");
-
         let body = self.body();
 
         if !body.is_empty() {
@@ -57,7 +57,6 @@ impl ToHttp for Request<String> {
         }
 
         result.push_str("\r\n");
-
         result.push_str(self.body());
 
         result
