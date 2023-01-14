@@ -1,75 +1,22 @@
-use detour::static_detour;
+use std::{
+    mem,
+    sync::{Arc, Mutex},
+};
 
-static_detour! {
-    static ENCRYPT_MESSAGE_HOOK: unsafe extern "fastcall" fn(*mut u8, i32, i64, *mut u8, i64);
-    static DECRYPT_MESSAGE_HOOK: unsafe extern "fastcall" fn(*mut u8, i32, i64, i64, *mut *mut u8) -> i8;
+use lazy_static::lazy_static;
+use libc::c_void;
+use windows::{w, Win32::System::LibraryLoader::GetModuleHandleW};
+
+lazy_static! {
+    static ref AUTH_URL_ADDR: Arc<Mutex<usize>> = Arc::new(Mutex::new(0));
 }
 
-fn encrypt_message_detour(
-    p_data: *mut u8,
-    data_len: i32,
-    a3: i64,
-    p_encrypted_data: *mut u8,
-    a5: i64,
-) {
-    unsafe {
-        let p_data_as_num = p_data as u64;
-        let p_encrypted_data_as_num = p_encrypted_data as u64;
-        println!("encrypt_message({p_data_as_num:#18X}, {data_len}, {a3:#18X}, {p_encrypted_data_as_num:#18X}, {a5:#18X})");
-
-        let data_slice = std::slice::from_raw_parts(p_data as _, data_len as _);
-        let data = String::from_utf8_lossy(data_slice);
-
-        println!("data as string: {data}");
-
-        println!();
-        ENCRYPT_MESSAGE_HOOK.call(p_data, data_len, a3, p_encrypted_data, a5)
-    }
-}
-
-fn decrypt_message_detour(
-    p_data: *mut u8,
-    data_len: i32,
-    a3: i64,
-    a4: i64,
-    p_p_decrypted_data: *mut *mut u8,
-) -> i8 {
-    unsafe {
-        let p_data_as_num = p_data as u64;
-        let p_p_decrypted_data_as_num = p_p_decrypted_data as u64;
-        println!("decrypt_message({p_data_as_num:#18X}, {data_len}, {a3:#18X}, {a4:#18X}, {p_p_decrypted_data_as_num:#18X})");
-
-        let result = DECRYPT_MESSAGE_HOOK.call(p_data, data_len, a3, a4, p_p_decrypted_data);
-
-        println!("returned {result}");
-
-        let decrypted_data_slice =
-            std::slice::from_raw_parts(*p_p_decrypted_data as _, data_len as _);
-        let decrypted_data = String::from_utf8_lossy(decrypted_data_slice);
-
-        println!("decrypted_data as string: {decrypted_data}");
-
-        println!();
-        result
-    }
-}
+const ORIGINAL_AUTH_URL_ADDR: usize = 0x4DF8108;
 
 pub unsafe fn load() -> anyhow::Result<()> {
     println!("detours::load");
 
-    ENCRYPT_MESSAGE_HOOK
-        .initialize(
-            std::mem::transmute(0x00007FF726D79290_i64),
-            encrypt_message_detour,
-        )?
-        .enable()?;
-
-    DECRYPT_MESSAGE_HOOK
-        .initialize(
-            std::mem::transmute(0x00007FF726D78F40_i64),
-            decrypt_message_detour,
-        )?
-        .enable()?;
+    set_auth_url(Some("http://localhost/auth/ds"));
 
     Ok(())
 }
@@ -77,8 +24,44 @@ pub unsafe fn load() -> anyhow::Result<()> {
 pub unsafe fn unload() -> anyhow::Result<()> {
     println!("detours::unload");
 
-    ENCRYPT_MESSAGE_HOOK.disable()?;
-    DECRYPT_MESSAGE_HOOK.disable()?;
+    set_auth_url(None); // restore original auth url
 
     Ok(())
+}
+
+unsafe fn set_auth_url(url: Option<&str>) {
+    // free last url if it's set
+    let mut current_auth_url_ptr = AUTH_URL_ADDR.lock().unwrap();
+
+    if *current_auth_url_ptr != 0 {
+        libc::free(*current_auth_url_ptr as *mut c_void);
+        *current_auth_url_ptr = 0;
+    }
+
+    let base_addr = get_base_addr().unwrap();
+    let auth_url_ptr = (base_addr + 0x4DF8130) as *mut *mut u8;
+
+    if let Some(url) = url {
+        // size = (string length as u32) * 2 + string length + terminator
+        let url_ptr = libc::malloc(8 + url.len() + 1) as *mut u8;
+        *current_auth_url_ptr = url_ptr as usize;
+
+        // write len as u32 twice to the first 8 bytes
+        // not sure why the game does this, but it do
+        *(url_ptr as *mut u32) = url.len() as u32;
+        *(url_ptr.add(4) as *mut u32) = url.len() as u32;
+
+        // write characters at +8 offset from ptr
+        url.as_ptr().copy_to(url_ptr.add(8), url.len());
+        *(url_ptr.add(8 + url.len())) = 0u8;
+
+        *auth_url_ptr = url_ptr.add(8);
+    } else {
+        *auth_url_ptr = (base_addr + ORIGINAL_AUTH_URL_ADDR) as *mut u8;
+    }
+}
+
+unsafe fn get_base_addr() -> anyhow::Result<usize> {
+    let base_addr = GetModuleHandleW(w!("ds.exe"))?;
+    Ok(mem::transmute(base_addr))
 }
