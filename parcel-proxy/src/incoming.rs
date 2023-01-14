@@ -3,12 +3,14 @@ use std::str::FromStr;
 use anyhow::{Context, Result};
 use http::{header::HeaderName, HeaderValue, Method, Request};
 use httparse::EMPTY_HEADER;
-use tokio::{io::AsyncReadExt, net::TcpStream};
-use tokio_rustls::server::TlsStream;
+use tokio::io::{AsyncRead, AsyncReadExt};
 
 use crate::http_utility::read_headers;
 
-pub async fn parse_request(stream: &mut TlsStream<TcpStream>) -> Result<Request<String>> {
+pub async fn parse_request<T>(stream: &mut T) -> Result<Request<String>>
+where
+    T: AsyncRead + Unpin,
+{
     let mut headers = [EMPTY_HEADER; 64];
     let mut req = httparse::Request::new(&mut headers);
     let raw_headers = read_headers(stream).await?;
