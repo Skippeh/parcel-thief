@@ -1,3 +1,4 @@
+pub mod aes;
 mod http_utility;
 mod incoming;
 pub mod logger;
@@ -118,8 +119,6 @@ where
                 stream
                     .write_all(response.to_raw_http(None).as_bytes())
                     .await?;
-
-                //println!("request:\n{:#?}\n\nresponse:\n{:#?}", request, response);
             }
             Err(err) => {
                 eprintln!("error occured while proxying request: {}", err);
