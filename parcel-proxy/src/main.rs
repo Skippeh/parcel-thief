@@ -25,7 +25,7 @@ struct Options {
     #[arg(long, name = "bind_interface", default_value = "0.0.0.0")]
     bind_interface: IpAddr,
     /// The domain or ip of the gateway. This will be part of the public url returned to the game when authenticating.
-    /// If unspecified the value depends on the bind interface (if set to 0.0.0.0 it will be localhost, otherwise it match the interface address)
+    /// If unspecified the value depends on the bind interface (if set to 0.0.0.0 it will be localhost, otherwise it'll match the interface address)
     #[arg(long)]
     gateway_domain: Option<String>,
 }
