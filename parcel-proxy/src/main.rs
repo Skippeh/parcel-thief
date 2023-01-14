@@ -1,4 +1,5 @@
 pub mod aes;
+pub mod frontend;
 mod http_utility;
 mod incoming;
 pub mod logger;
@@ -7,10 +8,18 @@ mod proxy_response_handler;
 pub mod server;
 
 use clap::Parser;
-use std::{net::IpAddr, path::PathBuf, process::ExitCode};
+use crossterm::{
+    event::{DisableMouseCapture, EnableMouseCapture},
+    execute,
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+};
+use std::{io, net::IpAddr, path::PathBuf, process::ExitCode};
 use tokio::select;
+use tui::{backend::CrosstermBackend, Terminal};
 
 use server::start_http_server;
+
+use crate::frontend::start_frontend_ui;
 
 #[derive(Debug, Parser)]
 struct Options {
@@ -44,14 +53,35 @@ async fn main() -> anyhow::Result<ExitCode> {
         false => None,
     };
 
+    enable_raw_mode()?; // disables some default console behaviour
+
+    let mut stdout = io::stdout();
+    execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
+    let backend = CrosstermBackend::new(stdout);
+    let mut terminal = Terminal::new(backend)?;
+
+    let run_result;
+
     select! {
         result = start_http_server(secure_options, args.listen_port, args.bind_interface, args.gateway_domain.as_deref()) => {
-            if let Err(err) = result {
-                eprintln!("{:?}", err);
-            }
+            run_result = result;
         }
-        _ = tokio::signal::ctrl_c() => {}
+        result = start_frontend_ui(&mut terminal) => {
+            run_result = result;
+        }
     };
+
+    disable_raw_mode()?;
+    execute!(
+        terminal.backend_mut(),
+        LeaveAlternateScreen,
+        DisableMouseCapture
+    )?;
+    terminal.show_cursor()?;
+
+    if let Err(err) = run_result {
+        eprintln!("Fatal error: {:?}", err);
+    }
 
     Ok(ExitCode::from(0))
 }

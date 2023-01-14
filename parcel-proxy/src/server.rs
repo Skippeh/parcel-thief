@@ -1,7 +1,7 @@
 use std::{
     fs::File,
     io::BufReader,
-    net::{IpAddr, Ipv4Addr, SocketAddr},
+    net::{IpAddr, SocketAddr},
     path::Path,
     sync::Arc,
 };
