@@ -4,164 +4,54 @@ mod incoming;
 pub mod logger;
 mod outgoing;
 mod proxy_response_handler;
+pub mod server;
 
-use std::{
-    fs::File,
-    io::BufReader,
-    net::{IpAddr, Ipv4Addr, SocketAddr},
-    path::{Path, PathBuf},
-    sync::Arc,
-};
-
-use anyhow::{Context, Result};
 use clap::Parser;
-use http::{Response, StatusCode};
-use lazy_static::lazy_static;
-use rustls_pemfile::{certs, pkcs8_private_keys};
-use tokio::{
-    io::{AsyncReadExt, AsyncWriteExt},
-    net::{TcpListener, TcpStream},
-    sync::Mutex,
-};
-use tokio_rustls::{
-    rustls::{Certificate, PrivateKey, ServerConfig},
-    TlsAcceptor,
-};
+use std::{net::IpAddr, path::PathBuf, process::ExitCode};
+use tokio::select;
 
-use crate::{http_utility::ToHttp, proxy_response_handler::handle_proxy_response};
+use server::start_http_server;
 
-lazy_static! {
-    pub static ref PUBLIC_URL: Arc<Mutex<String>> = Arc::new(Mutex::new("".into()));
-}
-
-#[derive(Parser)]
+#[derive(Debug, Parser)]
 struct Options {
+    /// Path to the file that contains the public certificate
     cert: Option<PathBuf>,
+    /// Path to the file that contains the private key for the public certificate
     key: Option<PathBuf>,
+    /// The port to listen on. Default value uses 80 if cert and key are not set, and 443 if they are
+    #[arg(long)]
+    listen_port: Option<u16>,
+    /// The network interface to bind on
+    #[arg(long, name = "bind_interface", default_value = "0.0.0.0")]
+    bind_interface: IpAddr,
+    /// The domain or ip of the gateway. This will be part of the public url returned to the game when authenticating.
+    /// If unspecified the value depends on the bind interface (if set to 0.0.0.0 it will be localhost, otherwise it match the interface address)
+    #[arg(long)]
+    gateway_domain: Option<String>,
 }
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() -> anyhow::Result<ExitCode> {
     let args = Options::parse();
 
-    let mut certs: Option<Vec<Certificate>> = None;
-    let mut secure_mode = true;
-
-    if let Some(cert) = args.cert {
-        certs = Some(load_certs(&cert)?);
-    } else {
-        secure_mode = false;
+    if args.cert.is_some() != args.key.is_some() {
+        println!("Both certificate and private key paths need to be specified");
+        return Ok(ExitCode::from(1));
     }
 
-    let mut keys: Option<Vec<PrivateKey>> = None;
-
-    if let Some(key) = args.key {
-        keys = Some(load_keys(&key)?);
-    } else {
-        secure_mode = false;
-    }
-
-    let acceptor: Option<TlsAcceptor> = match secure_mode {
-        true => {
-            let config = ServerConfig::builder()
-                .with_safe_defaults()
-                .with_no_client_auth()
-                .with_single_cert(
-                    certs.unwrap(),
-                    keys.unwrap()
-                        .pop()
-                        .context("no pkcs8 private keys found in keys file")?,
-                )?;
-            Some(TlsAcceptor::from(Arc::new(config)))
-        }
+    let secure_options = match args.cert.is_some() {
+        true => Some((args.cert.as_deref().unwrap(), args.key.as_deref().unwrap())),
         false => None,
     };
-    let addr = SocketAddr::new(
-        IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)),
-        if secure_mode { 443 } else { 80 },
-    );
-    let listener = TcpListener::bind(addr).await?;
 
-    println!("bound on {}", addr);
-
-    *PUBLIC_URL.lock().await = match secure_mode {
-        true => "https://127.0.0.1/ds",
-        false => "http://127.0.0.1/ds",
-    }
-    .into();
-
-    loop {
-        let (stream, _peer_addr) = listener.accept().await?;
-        let acceptor = acceptor.as_ref().cloned();
-        let result;
-
-        if secure_mode {
-            let stream = acceptor.unwrap().accept(stream).await?;
-            result = handle_stream(stream).await;
-        } else {
-            result = handle_stream::<TcpStream>(stream).await;
-        }
-
-        if let Err(err) = result {
-            eprintln!("unhandled critical error: {:?}", err);
-        }
-    }
-}
-
-async fn handle_stream<T>(mut stream: T) -> Result<()>
-where
-    T: AsyncReadExt + AsyncWriteExt + Unpin,
-{
-    match incoming::parse_request(&mut stream).await {
-        Ok(request) => match outgoing::proxy_request(&request).await {
-            Ok(mut response) => {
-                handle_proxy_response(&request, &mut response).await?;
-                stream
-                    .write_all(response.to_raw_http(None).as_bytes())
-                    .await?;
+    select! {
+        result = start_http_server(secure_options, args.listen_port, args.bind_interface, args.gateway_domain.as_deref()) => {
+            if let Err(err) = result {
+                eprintln!("{:?}", err);
             }
-            Err(err) => {
-                eprintln!("error occured while proxying request: {}", err);
-                stream
-                    .write_all(
-                        Response::builder()
-                            .status(StatusCode::INTERNAL_SERVER_ERROR)
-                            .body("".into())
-                            .unwrap()
-                            .to_raw_http(None)
-                            .as_bytes(),
-                    )
-                    .await?;
-            }
-        },
-        Err(err) => {
-            eprintln!("invalid request received: {}", err);
-            stream
-                .write_all(
-                    Response::builder()
-                        .status(StatusCode::BAD_REQUEST)
-                        .body("".into())
-                        .unwrap()
-                        .to_raw_http(None)
-                        .as_bytes(),
-                )
-                .await?;
         }
-    }
+        _ = tokio::signal::ctrl_c() => {}
+    };
 
-    stream.shutdown().await?;
-
-    Ok(()) as Result<()>
-}
-
-fn load_certs(path: &Path) -> Result<Vec<Certificate>> {
-    certs(&mut BufReader::new(File::open(path)?))
-        .map_err(|_| anyhow::anyhow!("Invalid certificates file"))
-        .map(|mut certs| certs.drain(..).map(Certificate).collect())
-}
-
-fn load_keys(path: &Path) -> Result<Vec<PrivateKey>> {
-    pkcs8_private_keys(&mut BufReader::new(File::open(path)?))
-        .map_err(|_| anyhow::anyhow!("Invalid private keys file"))
-        .map(|mut keys| keys.drain(..).map(PrivateKey).collect())
+    Ok(ExitCode::from(0))
 }

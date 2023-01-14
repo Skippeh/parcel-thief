@@ -69,7 +69,7 @@ async fn handle_auth_response_gateway(
     let mut auth_response =
         serde_json::from_str::<AuthResponse>(json).context("could not deserialize json body")?;
 
-    auth_response.session.gateway = crate::PUBLIC_URL.lock().await.clone();
+    auth_response.session.gateway = crate::server::PUBLIC_URL.lock().await.clone();
     *response.body_mut() =
         serde_json::to_string(&auth_response).context("failed to serialize new json body")?;
 
