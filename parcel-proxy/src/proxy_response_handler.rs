@@ -47,7 +47,7 @@ pub async fn handle_proxy_response(
         // todo: decrypt data
     }
 
-    log_request_and_response(&original_request, &response)
+    log_request_and_response(original_request, response)
         .await
         .context("failed to log")?;
 
