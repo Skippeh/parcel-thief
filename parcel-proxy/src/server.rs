@@ -22,18 +22,18 @@ use tokio_rustls::{
 
 use crate::{
     http_utility::ToHttp, incoming, outgoing, proxy_response_handler::handle_proxy_response,
+    Options,
 };
 
 lazy_static! {
     pub static ref PUBLIC_URL: Arc<Mutex<String>> = Arc::new(Mutex::new("".into()));
 }
 
-pub async fn start_http_server(
-    certs_and_keys: Option<(&Path, &Path)>,
-    listen_port: Option<u16>,
-    bind_interface: IpAddr,
-    gateway_domain: Option<&str>,
-) -> Result<()> {
+pub async fn start_http_server(args: Options) -> Result<()> {
+    let certs_and_keys = match args.cert.is_some() {
+        true => Some((args.cert.as_deref().unwrap(), args.key.as_deref().unwrap())),
+        false => None,
+    };
     let certs_and_keys = match certs_and_keys {
         Some((cert, key)) => Some((load_certs(cert)?, load_keys(key)?)),
         None => None,
@@ -54,7 +54,7 @@ pub async fn start_http_server(
         }
         None => None,
     };
-    let listen_port = match listen_port {
+    let listen_port = match args.listen_port {
         Some(port) => port,
         None => {
             if certs_and_keys.is_some() {
@@ -64,7 +64,7 @@ pub async fn start_http_server(
             }
         }
     };
-    let addr = SocketAddr::new(bind_interface, listen_port);
+    let addr = SocketAddr::new(args.bind_interface, listen_port);
     let listener = TcpListener::bind(addr)
         .await
         .with_context(|| format!("Could not bind tcp listener to {addr}"))?;
@@ -73,13 +73,13 @@ pub async fn start_http_server(
 
     {
         let mut public_url = PUBLIC_URL.lock().await;
-        let gateway_domain = match gateway_domain {
-            Some(gd) => gd.to_string(),
+        let gateway_domain = match args.gateway_domain {
+            Some(gd) => gd,
             None => {
-                if bind_interface.is_unspecified() {
+                if args.bind_interface.is_unspecified() {
                     "localhost".to_string()
                 } else {
-                    bind_interface.to_string()
+                    args.bind_interface.to_string()
                 }
             }
         };
