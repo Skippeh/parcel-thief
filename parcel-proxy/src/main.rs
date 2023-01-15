@@ -22,7 +22,7 @@ use server::start_http_server;
 use crate::frontend::start_frontend_ui;
 
 #[derive(Debug, Parser)]
-pub struct Options {
+struct Options {
     /// Path to the file that contains the public certificate
     cert: Option<PathBuf>,
     /// Path to the file that contains the private key for the public certificate
@@ -48,6 +48,11 @@ async fn main() -> anyhow::Result<ExitCode> {
         return Ok(ExitCode::from(1));
     }
 
+    let secure_options = match args.cert.is_some() {
+        true => Some((args.cert.as_deref().unwrap(), args.key.as_deref().unwrap())),
+        false => None,
+    };
+
     enable_raw_mode()?; // disables some default console behaviour
 
     let mut stdout = io::stdout();
@@ -58,8 +63,8 @@ async fn main() -> anyhow::Result<ExitCode> {
     let run_result;
 
     select! {
-        result = tokio::spawn(start_http_server(args)) => {
-            run_result = result?;
+        result = start_http_server(secure_options, args.listen_port, args.bind_interface, args.gateway_domain.as_deref()) => {
+            run_result = result;
         }
         result = start_frontend_ui(&mut terminal) => {
             run_result = result;
