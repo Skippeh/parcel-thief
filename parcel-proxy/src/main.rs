@@ -7,10 +7,22 @@ mod proxy_response_handler;
 pub mod server;
 
 use clap::Parser;
-use std::{net::IpAddr, path::PathBuf, process::ExitCode};
+use lazy_static::lazy_static;
+use std::{
+    net::IpAddr,
+    path::PathBuf,
+    process::ExitCode,
+    str::FromStr,
+    sync::{Arc, Mutex},
+};
 use tokio::select;
 
 use server::start_http_server;
+
+lazy_static! {
+    pub static ref LOG_DIRECTORY: Arc<Mutex<PathBuf>> =
+        Arc::new(Mutex::new(PathBuf::from_str("./logs").unwrap()));
+}
 
 #[derive(Debug, Parser)]
 struct Options {
@@ -28,6 +40,9 @@ struct Options {
     /// If unspecified the value depends on the bind interface (if set to 0.0.0.0/:: it will be localhost, otherwise it'll match the interface address)
     #[arg(long)]
     gateway_domain: Option<String>,
+    /// The path to the directory where logs should be saved. Default is a subfolder in current working directory called "logs"
+    #[arg(long)]
+    logs_dir: Option<PathBuf>,
 }
 
 #[tokio::main]
@@ -37,6 +52,20 @@ async fn main() -> anyhow::Result<ExitCode> {
     if args.cert.is_some() != args.key.is_some() {
         println!("Both certificate and private key paths need to be specified");
         return Ok(ExitCode::from(1));
+    }
+
+    {
+        let mut log_directory = LOG_DIRECTORY.lock().unwrap();
+        if let Some(logs_dir) = args.logs_dir {
+            if !logs_dir.is_dir() {
+                println!("Logs directory does not point to a directory. Does the directory exist?");
+                return Ok(ExitCode::from(1));
+            } else {
+                let abs_path = std::fs::canonicalize(&logs_dir)?;
+                println!("Logs will be saved in \"{}\"", abs_path.display());
+                *log_directory = abs_path;
+            }
+        }
     }
 
     let secure_options = match args.cert.is_some() {

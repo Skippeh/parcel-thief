@@ -10,7 +10,7 @@ const AES_SECRET: &[u8] = &[
 
 #[derive(Deserialize)]
 struct EncryptedDataResponse {
-    data: String,
+    data: Option<String>,
 }
 
 struct EncryptedMessageParts<'a> {
@@ -18,14 +18,20 @@ struct EncryptedMessageParts<'a> {
     encrypted_data_with_tag: &'a [u8],
 }
 
-pub fn decrypt_json_response(body: &str) -> Result<String> {
+pub fn decrypt_json_response(body: &str) -> Result<Option<String>> {
     let response = serde_json::from_str::<EncryptedDataResponse>(body)
         .context("could not deserialize response json body")?;
-    let mut buffer = vec![0; base64::decoded_len_estimate(response.data.len())];
-    let parts =
-        decode_data(&response.data, &mut buffer).context("could not decode message from base64")?;
 
-    decrypt_data(parts.nonce, parts.encrypted_data_with_tag)
+    match response.data {
+        Some(data) => {
+            let mut buffer = vec![0; base64::decoded_len_estimate(data.len())];
+            let parts =
+                decode_data(&data, &mut buffer).context("could not decode message from base64")?;
+
+            decrypt_data(parts.nonce, parts.encrypted_data_with_tag).map(Some)
+        }
+        None => Ok(None),
+    }
 }
 
 fn decode_data<'a>(base64_str: &str, buffer: &'a mut [u8]) -> Result<EncryptedMessageParts<'a>> {

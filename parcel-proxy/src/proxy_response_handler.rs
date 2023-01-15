@@ -95,8 +95,8 @@ async fn handle_gateway_action(
     };
 
     log_gateway_request_and_response(
-        (original_request, request_json.as_ref()),
-        (response, response_json.as_ref()),
+        (original_request, request_json.as_ref().map(|d| d.as_ref())),
+        (response, response_json.as_ref().map(|d| d.as_ref())),
     )
     .await
     .context("failed to log")?;
