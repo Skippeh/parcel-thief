@@ -26,7 +26,7 @@ pub async fn log_gateway_request_and_response(
         .map(|map| serde_json::to_string_pretty(&map))
         .unwrap_or_else(|| Ok("".into()))?;
 
-    crate::cprintln!(
+    println!(
         "{} {}:\n{}\n====\n{}:\n{}\n",
         request.0.method(),
         request.0.uri().path(),
@@ -41,6 +41,6 @@ pub async fn log_gateway_request_and_response(
 pub async fn log_auth(request: &Request<String>, mut response: AuthResponse) -> Result<()> {
     response.session.token = "***".into();
 
-    crate::cprintln!("AUTH:\n{:#?}\n====\n{:#?}\n", request, response);
+    println!("AUTH:\n{:#?}\n====\n{:#?}\n", request, response);
     Ok(())
 }
