@@ -50,8 +50,8 @@ pub async fn handle_proxy_response(
         match handle_gateway_action(original_request, response).await {
             Ok(_) => {}
             Err(err) => {
-                println!("failed to record gateway action: {:?}", err);
-                println!("{}\n{}", original_request.body(), response.body());
+                crate::cprintln!("failed to record gateway action: {:?}", err);
+                crate::cprintln!("{}\n{}", original_request.body(), response.body());
             }
         }
     }

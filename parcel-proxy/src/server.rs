@@ -13,7 +13,7 @@ use rustls_pemfile::{certs, pkcs8_private_keys};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::{TcpListener, TcpStream},
-    sync::Mutex,
+    sync::{mpsc, Mutex},
 };
 use tokio_rustls::{
     rustls::{Certificate, PrivateKey, ServerConfig},
@@ -22,14 +22,18 @@ use tokio_rustls::{
 
 use crate::{
     http_utility::ToHttp, incoming, outgoing, proxy_response_handler::handle_proxy_response,
-    Options,
+    AppState, Options, UiMessage,
 };
 
 lazy_static! {
     pub static ref PUBLIC_URL: Arc<Mutex<String>> = Arc::new(Mutex::new("".into()));
 }
 
-pub async fn start_http_server(args: Options) -> Result<()> {
+pub async fn start_http_server(
+    args: Options,
+    app_state: AppState,
+    ui_tx: mpsc::UnboundedSender<UiMessage>,
+) -> Result<()> {
     let certs_and_keys = match args.cert.is_some() {
         true => Some((args.cert.as_deref().unwrap(), args.key.as_deref().unwrap())),
         false => None,
@@ -69,7 +73,7 @@ pub async fn start_http_server(args: Options) -> Result<()> {
         .await
         .with_context(|| format!("Could not bind tcp listener to {addr}"))?;
 
-    println!("Listening on {}", addr);
+    crate::cprintln!("Listening on {}", addr);
 
     {
         let mut public_url = PUBLIC_URL.lock().await;
@@ -88,7 +92,7 @@ pub async fn start_http_server(args: Options) -> Result<()> {
             false => format!("http://{}:{}/ds", gateway_domain, listen_port),
         };
 
-        println!("Gateway address set to {}", public_url);
+        crate::cprintln!("Gateway address set to {}", public_url);
     }
 
     loop {
@@ -104,7 +108,7 @@ pub async fn start_http_server(args: Options) -> Result<()> {
         }
 
         if let Err(err) = result {
-            eprintln!("unhandled critical error: {:?}", err);
+            crate::cprintln!("unhandled critical error: {:?}", err);
         }
     }
 }
@@ -122,7 +126,7 @@ where
                     .await?;
             }
             Err(err) => {
-                eprintln!("error occured while proxying request: {}", err);
+                crate::cprintln!("error occured while proxying request: {}", err);
                 stream
                     .write_all(
                         Response::builder()
@@ -136,7 +140,7 @@ where
             }
         },
         Err(err) => {
-            eprintln!("invalid request received: {}", err);
+            crate::cprintln!("invalid request received: {}", err);
             stream
                 .write_all(
                     Response::builder()
