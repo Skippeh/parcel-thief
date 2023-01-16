@@ -1,5 +1,6 @@
 # Rust
 /*/target
+/re-testing/*/target
 Cargo.lock
 
 # CSharp
@@ -457,3 +458,8 @@ $RECYCLE.BIN/
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+### End of CSharp
+
+# Ignore env files
+*.env
