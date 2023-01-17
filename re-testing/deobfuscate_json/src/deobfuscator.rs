@@ -146,7 +146,7 @@ fn deobfuscate_key(key: &str, string_pairs: &BTreeMap<String, Vec<String>>) -> S
     match string_pairs.get(key) {
         Some(keys) => {
             let mut new_key = key.to_owned();
-            new_key.push('_');
+            new_key.push_str(": ");
 
             for (i, key) in keys.iter().enumerate() {
                 new_key.push_str(key);
