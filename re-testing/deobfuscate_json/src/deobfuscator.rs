@@ -117,15 +117,13 @@ async fn deobfuscate_log(
 }
 
 fn replace_keys(obj: Value, string_pairs: &BTreeMap<String, Vec<String>>) -> Value {
-    let result: Value;
-
     match obj {
         Value::Array(array) => {
             let mut new_val = Vec::new();
             for val in array {
                 new_val.push(replace_keys(val, string_pairs));
             }
-            result = Value::Array(new_val);
+            Value::Array(new_val)
         }
         Value::Object(map) => {
             let mut new_map = Map::new();
@@ -138,18 +136,14 @@ fn replace_keys(obj: Value, string_pairs: &BTreeMap<String, Vec<String>>) -> Val
                 };
                 new_map.insert(new_key, new_val);
             }
-            result = Value::Object(new_map);
+            Value::Object(new_map)
         }
-        _ => result = obj,
+        _ => obj,
     }
-
-    result
 }
 
 fn deobfuscate_key(key: &str, string_pairs: &BTreeMap<String, Vec<String>>) -> String {
-    let matches = string_pairs.get(key);
-
-    match matches {
+    match string_pairs.get(key) {
         Some(keys) => {
             let mut new_key = key.to_owned();
             new_key.push('_');
