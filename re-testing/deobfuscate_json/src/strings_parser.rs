@@ -42,6 +42,11 @@ pub async fn parse_string_pairs(file_path: &Path) -> Result<BTreeMap<String, Vec
 
     assert_eq!(lines.next(), None);
 
+    // Sort values
+    for (_, val) in result.iter_mut() {
+        val.sort_unstable();
+    }
+
     Ok(result)
 }
 
