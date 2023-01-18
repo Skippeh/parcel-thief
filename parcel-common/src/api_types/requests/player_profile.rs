@@ -12,11 +12,11 @@ pub struct SetPlayerProfileRequest {
 }
 
 #[derive(Debug, Serialize, Clone)]
-pub struct SetPlayerProfileResponse<'a> {
+pub struct SetPlayerProfileResponse {
     #[serde(rename = "b")]
-    pub basic: &'a BasicPlayerProfile,
+    pub basic: BasicPlayerProfile,
     #[serde(rename = "id")]
-    pub account_id: &'a str,
+    pub account_id: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -34,14 +34,14 @@ pub struct ProfileRequest {
 }
 
 #[derive(Debug, Serialize, Clone)]
-pub struct GetPlayerProfileResponse<'vec, 'res> {
-    pub profiles: &'vec Vec<ProfileResponse<'res>>,
+pub struct GetPlayerProfileResponse {
+    pub profiles: Vec<ProfileResponse>,
 }
 
 #[derive(Debug, Serialize, Clone)]
-pub struct ProfileResponse<'a> {
+pub struct ProfileResponse {
     #[serde(rename = "b")]
-    pub basic: &'a BasicPlayerProfile,
+    pub basic: BasicPlayerProfile,
     #[serde(rename = "id")]
-    pub account_id: &'a str,
+    pub account_id: String,
 }
