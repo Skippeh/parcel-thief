@@ -4,6 +4,7 @@ use crate::api_types::player_profile::BasicPlayerProfile;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GetPlayerProfileRequest {
+    #[serde(rename = "profiles")]
     pub profiles: Vec<ProfileRequest>,
 }
 
@@ -18,6 +19,7 @@ pub struct ProfileRequest {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GetPlayerProfileResponse {
+    #[serde(rename = "profiles")]
     pub profiles: Vec<ProfileResponse>,
 }
 

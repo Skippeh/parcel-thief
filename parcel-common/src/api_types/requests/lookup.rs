@@ -8,6 +8,7 @@ pub struct LookupRequest {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LookupResponse {
+    #[serde(rename = "users")]
     pub users: Vec<LookupUserInfo>,
 }
 
