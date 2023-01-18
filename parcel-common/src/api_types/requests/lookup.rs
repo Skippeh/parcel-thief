@@ -19,7 +19,7 @@ pub struct LookupUserInfo {
     /// On steam this would the the user's steamid64.
     /// On epic it's the unique user id.
     #[serde(rename = "b")]
-    pub bound_account: String,
+    pub provider_account_id: String,
     #[serde(rename = "d")]
     pub display_name: String,
     /// The platform this player is on, "steam" or "epic".
