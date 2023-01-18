@@ -16,8 +16,21 @@ internal class Program
         0x72, 0x64, 0x61, 0x4A, 0x33, 0x41, 0x06, 0x0A,
     };
 
+    // Date expressed as microseconds since 0001-01-01 00:00:00
+    private const long Date = 63809414576271777;
+
+    private static long ConvertDateToEpochMs(long date)
+    {
+        date -= 62135596800000000; // unix epoch expressed in microseconds
+        date /= 1000;
+        return date;
+    }
+
     public static void Main(string[] args)
     {
+        Console.WriteLine(new DateTime(0));
+        Console.WriteLine(ConvertDateToEpochMs(Date));
+    
         var messageBytes = Convert.FromBase64String(B64Message).AsMemory();
         var encryptedData = messageBytes.Span[12..^16];
         var tag = messageBytes.Span[^16..];
