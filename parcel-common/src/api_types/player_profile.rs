@@ -33,7 +33,7 @@ pub struct BasicPlayerProfile {
     pub legend_count: i32,
     /// Last login date expressed in epoch (milliseconds)
     #[serde(rename = "ll")]
-    pub last_login: u64,
+    pub last_login: i64,
     #[serde(rename = "md")]
     pub distance_traveled: i32,
     /// Maybe a bitflag of unlocked music tracks?

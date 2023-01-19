@@ -17,7 +17,7 @@ pub struct GetRankingSchedulesResponse {
     pub schedules: Vec<RankingSchedule>,
     /// The time when this data was updated, expressed in epoch (milliseconds)
     #[serde(rename = "ut")]
-    pub updated_time: u64,
+    pub updated_time: i64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -29,8 +29,8 @@ pub struct RankingSchedule {
     pub bi: i32,
     #[serde(rename = "e")]
     /// The end date expressed in epoch (milliseconds)
-    pub end_date: u64,
+    pub end_date: i64,
     #[serde(rename = "s")]
     /// The start date expressed in epoch (milliseconds)
-    pub start_date: u64,
+    pub start_date: i64,
 }

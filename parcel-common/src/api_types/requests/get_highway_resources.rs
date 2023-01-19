@@ -14,7 +14,7 @@ pub struct ConstructionRequest {
     pub construction_id: i32,
     /// This date is expressed as microseconds since 0001-01-01 00:00:00
     #[serde(rename = "lgd")]
-    pub last_login_date: u64,
+    pub last_login_date: i64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
