@@ -14,7 +14,7 @@ pub struct GetLikeHistoryRequest {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct GetLiekHistoryResponse {
+pub struct GetLikeHistoryResponse {
     #[serde(rename = "like_histories")]
     pub like_histories: Vec<LikeHistory>,
 }
@@ -35,6 +35,10 @@ pub struct LikeHistory {
     pub online_id: String,
     /// Not sure what this is. It's not manual + auto likes.
     /// It's almost always zero seemingly, but not always.
+    ///
+    /// It might be if too many people liked a single object,
+    /// and it'll say "Player and 13 other players liked this object"
+    /// and the account_id belongs to the player with the most likes.
     #[serde(rename = "sc")]
     pub summarized_count: i32,
     /// The time when the likes were given, expressed in epoch (milliseconds)
