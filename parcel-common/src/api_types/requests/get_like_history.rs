@@ -33,11 +33,11 @@ pub struct LikeHistory {
     /// The online id of the object that was liked
     #[serde(rename = "oid")]
     pub online_id: String,
-    /// The amount of likes received from sources beyond the top 5 "like sources"
+    /// The amount of players who are summarized in this history.
     ///
     /// For example (paraphrasing): You received 500 likes from 52 players
     #[serde(rename = "sc")]
-    pub summarized_count: i32,
+    pub summarized_player_count: i32,
     /// The time when the likes were given, expressed in epoch (milliseconds)
     #[serde(rename = "t")]
     pub time: i64,
