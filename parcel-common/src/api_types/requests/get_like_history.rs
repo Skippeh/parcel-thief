@@ -33,18 +33,17 @@ pub struct LikeHistory {
     /// The online id of the object that was liked
     #[serde(rename = "oid")]
     pub online_id: String,
-    /// Not sure what this is. It's not manual + auto likes.
-    /// It's almost always zero seemingly, but not always.
+    /// The amount of likes received from sources beyond the top 5 "like sources"
     ///
-    /// It might be if too many people liked a single object,
-    /// and it'll say "Player and 13 other players liked this object"
-    /// and the account_id belongs to the player with the most likes.
+    /// For example (paraphrasing): You received 500 likes from 52 players
     #[serde(rename = "sc")]
     pub summarized_count: i32,
     /// The time when the likes were given, expressed in epoch (milliseconds)
     #[serde(rename = "t")]
     pub time: i64,
-    /// The account id of the person who gave the likes
+    /// The account id of the person who gave the likes.
+    /// If summarized_count is > 0 then this will always be an empty string,
+    /// as the data is, you guessed it, summarized from multiple players.
     #[serde(rename = "uid")]
     pub account_id: String,
 }
