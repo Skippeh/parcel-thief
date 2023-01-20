@@ -5,7 +5,7 @@ pub struct GetRelationshipsRequest;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GetRelationshipResponse {
-    /// Last x people the player interacted with.
+    /// Last x people the player interacted with, ordered by last interaction time (latest first).
     ///
     /// The official server returns 10 players.
     #[serde(rename = "history")]
