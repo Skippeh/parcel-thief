@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 pub struct GetRelationshipsRequest;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct GetRelationshipResponse {
+pub struct GetRelationshipsResponse {
     /// Last x people the player interacted with, ordered by last interaction time (latest first).
     ///
     /// The official server returns 10 players.
