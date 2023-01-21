@@ -12,5 +12,6 @@ pub struct GetRoadDataRequest {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GetRoadDataResponse {
     /// Base64 string of some binary data (unknown format)
+    #[serde(rename = "data")]
     pub data: String,
 }
