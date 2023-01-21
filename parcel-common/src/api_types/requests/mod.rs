@@ -1,4 +1,5 @@
 pub mod delete_missions;
+pub mod delete_object;
 pub mod devote_highway_resources;
 pub mod get_highway_resources;
 pub mod get_like_history;
