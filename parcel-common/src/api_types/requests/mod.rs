@@ -5,6 +5,7 @@ pub mod devote_highway_resources;
 pub mod find_missions;
 pub mod get_highway_resources;
 pub mod get_like_history;
+pub mod get_ordered_missions;
 pub mod get_player_profile;
 pub mod get_ranking_schedules;
 pub mod get_relationships;
