@@ -2,6 +2,7 @@ pub mod add_missions;
 pub mod delete_missions;
 pub mod delete_object;
 pub mod devote_highway_resources;
+pub mod find_missions;
 pub mod get_highway_resources;
 pub mod get_like_history;
 pub mod get_player_profile;
