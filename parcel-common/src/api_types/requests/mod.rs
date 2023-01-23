@@ -14,4 +14,5 @@ pub mod get_version;
 pub mod lookup;
 pub mod reverse_lookup;
 pub mod send_like;
+pub mod set_mission_progress;
 pub mod set_player_profile;
