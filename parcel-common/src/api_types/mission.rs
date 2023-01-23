@@ -132,6 +132,8 @@ pub struct Mission {
     #[serde(skip)]
     pub worker_account_id: Option<String>,
     #[serde(rename = "qid")]
+    pub qpid_id: i32,
+    #[serde(rename = "sid")]
     pub qpid_start_location: i32,
     #[serde(rename = "eid")]
     pub qpid_end_location: i32,
