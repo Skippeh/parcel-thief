@@ -116,10 +116,10 @@ pub struct Baggage {
     pub y: i32,
     #[serde(rename = "z")]
     pub z: i32,
-    #[serde(rename = "ret")]
+    #[serde(rename = "ret", skip_serializing)]
     pub is_returned: bool,
     #[serde(rename = "am")]
-    pub ammo_info: AmmoInfo,
+    pub ammo_info: Option<AmmoInfo>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
