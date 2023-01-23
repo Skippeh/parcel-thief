@@ -10,10 +10,10 @@ pub struct DeleteMissionsRequest {
 pub struct Mission {
     /// The account id of the person who created the mission
     #[serde(rename = "cr")]
-    pub creator_id: String,
-    /// The id of the mission
+    pub creator_account_id: String,
+    /// The online id of the mission
     #[serde(rename = "id")]
-    pub id: String,
+    pub mission_online_id: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
