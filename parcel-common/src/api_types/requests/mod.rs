@@ -1,4 +1,5 @@
 pub mod add_missions;
+pub mod create_object;
 pub mod delete_missions;
 pub mod delete_object;
 pub mod devote_highway_resources;
