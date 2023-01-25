@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::area::AreaHash;
+use super::{area::AreaHash, mission::Mission, road::Road};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ConstructionMaterials {
@@ -182,4 +182,22 @@ pub struct Object {
     pub customize_info: Option<CustomizeInfo>,
     #[serde(rename = "tags")]
     pub tags: Option<Vec<String>>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct QpidObjectsResponse {
+    #[serde(rename = "ro")]
+    pub roads: Option<Vec<Road>>,
+    #[serde(rename = "m")]
+    pub missions: Option<Vec<Mission>>,
+    #[serde(rename = "oa")]
+    pub object_a: Option<Vec<Object>>,
+    #[serde(rename = "ob")]
+    pub object_b: Option<Vec<Object>>,
+    #[serde(rename = "od")]
+    pub object_d: Option<Vec<Object>>,
+    #[serde(rename = "oe")]
+    pub object_e: Option<Vec<Object>>,
+    #[serde(rename = "op")]
+    pub object_p: Option<Vec<Object>>,
 }
