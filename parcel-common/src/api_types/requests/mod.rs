@@ -15,6 +15,7 @@ pub mod get_ranking_schedules;
 pub mod get_relationships;
 pub mod get_road_data;
 pub mod get_version;
+pub mod get_wasted_baggages;
 pub mod lookup;
 pub mod reverse_lookup;
 pub mod send_like;

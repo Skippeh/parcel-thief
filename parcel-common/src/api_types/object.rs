@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use super::{area::AreaHash, mission::Mission, road::Road};
+use super::{area::AreaHash, baggage::ObjectBaggage, mission::Mission, road::Road};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ConstructionMaterials {
@@ -25,22 +25,6 @@ pub struct RecycleMaterials {
     pub materials: [i32; 6],
     #[serde(rename = "t")]
     pub time: i64,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct ObjectBaggage {
-    #[serde(rename = "hs")]
-    pub item_name_hash: i32,
-    #[serde(rename = "mid")]
-    pub mission_id: i32,
-    #[serde(rename = "cr")]
-    pub creator_account_id: String,
-    #[serde(rename = "lf")]
-    pub life: i32,
-    #[serde(rename = "en")]
-    pub endurance: i32,
-    #[serde(rename = "hn")]
-    pub handle: i32,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
