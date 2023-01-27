@@ -23,10 +23,8 @@ pub struct GetRankingSchedulesResponse {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RankingSchedule {
     /// Not sure what this is, but it seems to increment by 1 from each previous ranking
-    ///
-    /// Possible field names are basement_index and bridge_info
     #[serde(rename = "bi")]
-    pub bi: i32,
+    pub basement_index: i32,
     #[serde(rename = "e")]
     /// The end date expressed in epoch (milliseconds)
     pub end_date: i64,
