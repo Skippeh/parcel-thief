@@ -1,12 +1,8 @@
 mod inject;
 
-use std::{
-    fs::canonicalize,
-    path::{Path, PathBuf},
-    process::Command,
-};
+use std::path::{Path, PathBuf};
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 use clap::Parser;
 
 #[derive(Parser)]
@@ -31,23 +27,9 @@ fn main() -> Result<()> {
         );
     }
 
-    let mut exe_directory = args.exe_path.clone();
-    exe_directory.pop();
-    exe_directory = canonicalize(exe_directory)?;
-    let mut process = Command::new(args.exe_path)
-        .current_dir(exe_directory)
-        .spawn()
-        .context("could not start ds.exe")?;
-
-    let export_result = inject::inject_process_and_export(process.id(), args.dll_path.as_path());
-
-    if let Err(err) = &export_result {
+    if let Err(err) = inject::inject_process_and_export(&args.exe_path, &args.dll_path) {
         eprintln!("Could not export rtti data: {}", err);
     }
-
-    if let Err(err) = process.kill() {
-        eprintln!("Could not kill process: {}", err);
-    };
 
     Ok(())
 }
