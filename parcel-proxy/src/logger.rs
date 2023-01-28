@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 
 use anyhow::{Context, Result};
 use chrono::Local;
@@ -65,7 +65,7 @@ pub async fn log_gateway_request_and_response(
     Ok(())
 }
 
-pub async fn log_auth(request: &Request<String>, mut response: AuthResponse) -> Result<()> {
+pub async fn log_auth(_request: &Request<String>, mut response: AuthResponse) -> Result<()> {
     response.session.token = "***".into();
 
     println!("AUTH: Authenticated as {:?}", response.user);

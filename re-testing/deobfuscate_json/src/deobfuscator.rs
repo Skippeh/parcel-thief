@@ -38,7 +38,7 @@ pub async fn deobfuscate_json_logs(
                 let path = item.path();
 
                 if path.is_dir() {
-                    deobfuscate_json_logs(&path, &string_pairs, skip_deobfuscated).await?;
+                    deobfuscate_json_logs(&path, string_pairs, skip_deobfuscated).await?;
                 } else if path.is_file() {
                     let extension = path.extension();
 
