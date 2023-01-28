@@ -1,0 +1,19 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/CVS": true,
+      "**/.DS_Store": true,
+      "**/Thumbs.db": true,
+      "**/target/": true,
+      "**/Cargo.lock": true,
+      "**/.idea": true,
+      "**/bin/": true,
+      "**/obj/": true
+    }
+  }
+}

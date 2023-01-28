@@ -1,0 +1,9 @@
+[workspace]
+members = [
+    "parcel-common",
+    "parcel-proxy",
+    "parcel-thief/thief-injector",
+    "parcel-thief/parcel-thief",
+    "re-testing/deobfuscate_json",
+    "re-testing/rtti-exporter"
+]
