@@ -1,4 +1,8 @@
+mod libc_util;
+mod rtti;
+
 use std::{
+    io::Write,
     sync::{Arc, RwLock},
     thread::spawn,
     time::Duration,
@@ -46,9 +50,13 @@ pub extern "system" fn DllMain(_module: HINSTANCE, call_reason: u32, _reserved: 
 }
 
 unsafe fn attach() -> Result<()> {
-    println!("hello from attached dll");
-
     spawn(|| {
+        if let Err(err) = rtti::export() {
+            eprintln!("Failed to export data: {:?}", err);
+        }
+
+        println!("Data exported successfully");
+
         *WORK_FINISHED.write().unwrap() = true;
     });
     Ok(())

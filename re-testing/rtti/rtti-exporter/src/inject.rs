@@ -45,5 +45,7 @@ pub fn inject_process_and_export(exe_path: &Path, dll_path: &Path) -> Result<()>
 
     let _ = syringe.eject(module); // ignore result because the process terminates on eject after waiting for work to finish
 
+    std::thread::sleep(Duration::from_millis(500)); // Give the process some time to exit properly
+
     Ok(())
 }
