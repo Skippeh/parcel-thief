@@ -2,6 +2,7 @@
 members = [
     "parcel-common",
     "parcel-proxy",
+    "parcel-server",
     "parcel-thief/thief-injector",
     "parcel-thief/parcel-thief",
     "re-testing/deobfuscate_json",
