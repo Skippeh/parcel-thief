@@ -3,14 +3,13 @@ use std::collections::BTreeMap;
 use anyhow::{Context, Result};
 use chrono::Local;
 use http::{Request, Response};
+use parcel_common::api_types::auth::AuthResponse;
 use serde::Serialize;
 use serde_json::Value;
 use tokio::{
     fs::File,
     io::{AsyncWriteExt, BufWriter},
 };
-
-use crate::proxy_response_handler::AuthResponse;
 
 #[derive(Serialize)]
 struct LogData<'a> {

@@ -1,17 +1,12 @@
 use aes_gcm::{aead::Aead, Aes256Gcm, KeyInit};
 use anyhow::{Context, Result};
 use base64::Engine;
-use serde::Deserialize;
+use parcel_common::api_types::EncryptedData;
 
 const AES_SECRET: &[u8] = &[
     0x4C, 0x48, 0x77, 0x55, 0x47, 0x6E, 0x6B, 0x74, 0x43, 0x6C, 0x4E, 0x76, 0x39, 0x55, 0x6F, 0x63,
     0x31, 0x47, 0x71, 0x7A, 0x63, 0x63, 0x62, 0x68, 0x72, 0x64, 0x61, 0x4A, 0x33, 0x41, 0x06, 0x0A,
 ];
-
-#[derive(Deserialize)]
-struct EncryptedDataResponse {
-    data: Option<String>,
-}
 
 struct EncryptedMessageParts<'a> {
     nonce: &'a [u8],
@@ -19,7 +14,7 @@ struct EncryptedMessageParts<'a> {
 }
 
 pub fn decrypt_json_response(body: &str) -> Result<Option<String>> {
-    let response = serde_json::from_str::<EncryptedDataResponse>(body)
+    let response = serde_json::from_str::<EncryptedData>(body)
         .context("could not deserialize response json body")?;
 
     match response.data {

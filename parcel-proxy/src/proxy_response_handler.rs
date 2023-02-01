@@ -1,40 +1,11 @@
 use anyhow::{Context, Result};
 use http::{Request, Response};
-use serde::{Deserialize, Serialize};
+use parcel_common::api_types::auth::AuthResponse;
 
 use crate::{
     aes,
     logger::{log_auth, log_gateway_request_and_response},
 };
-
-// todo: move these to a common library project?
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct UserInfo {
-    pub provider: String,
-    pub id: String,
-    pub display_name: String,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct SessionProperties {
-    /// The epoch time in seconds of the last login (seems to always be same as the current time)
-    #[serde(rename = "ll")]
-    pub last_login: String,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct SessionInfo {
-    pub token: String,
-    pub gateway: String,
-    pub properties: SessionProperties,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub struct AuthResponse {
-    pub user: UserInfo,
-    pub session: SessionInfo,
-}
 
 pub async fn handle_proxy_response(
     original_request: &Request<String>,
