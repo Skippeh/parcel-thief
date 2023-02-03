@@ -1,4 +1,3 @@
-pub mod aes;
 mod http_utility;
 mod incoming;
 pub mod logger;

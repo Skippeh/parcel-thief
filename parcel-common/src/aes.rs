@@ -1,7 +1,13 @@
-use aes_gcm::{aead::Aead, Aes256Gcm, KeyInit};
+use std::sync::{Arc, RwLock};
+
+use aes_gcm::{aead::Aead, AeadInPlace, Aes256Gcm, KeyInit, Nonce};
 use anyhow::{Context, Result};
 use base64::Engine;
-use parcel_common::api_types::EncryptedData;
+use lazy_static::lazy_static;
+use rand::{Rng, RngCore, SeedableRng};
+use rand_chacha::ChaCha12Rng;
+
+use crate::api_types::EncryptedData;
 
 const AES_SECRET: &[u8] = &[
     0x4C, 0x48, 0x77, 0x55, 0x47, 0x6E, 0x6B, 0x74, 0x43, 0x6C, 0x4E, 0x76, 0x39, 0x55, 0x6F, 0x63,
@@ -16,17 +22,18 @@ struct EncryptedMessageParts<'a> {
 pub fn decrypt_json_response(body: &str) -> Result<Option<String>> {
     let response = serde_json::from_str::<EncryptedData>(body)
         .context("could not deserialize response json body")?;
-
     match response.data {
-        Some(data) => {
-            let mut buffer = vec![0; base64::decoded_len_estimate(data.len())];
-            let parts =
-                decode_data(&data, &mut buffer).context("could not decode message from base64")?;
-
-            decrypt_data(parts.nonce, parts.encrypted_data_with_tag).map(Some)
-        }
+        Some(data) => decrypt_json_data(&data).map(Some),
         None => Ok(None),
     }
+}
+
+pub fn decrypt_json_data(encrypted_data: &str) -> Result<String> {
+    let mut buffer = vec![0; base64::decoded_len_estimate(encrypted_data.len())];
+    let parts =
+        decode_data(encrypted_data, &mut buffer).context("could not decode message from base64")?;
+
+    decrypt_data(parts.nonce, parts.encrypted_data_with_tag)
 }
 
 fn decode_data<'a>(base64_str: &str, buffer: &'a mut [u8]) -> Result<EncryptedMessageParts<'a>> {
@@ -62,4 +69,29 @@ fn decrypt_data(nonce: &[u8], encrypted_data_with_tag: &[u8]) -> Result<String> 
         Ok(decrypted_bytes) => Ok(String::from_utf8(decrypted_bytes)?),
         Err(_) => anyhow::bail!("decryption unsuccessful (no reason available)"),
     }
+}
+
+lazy_static! {
+    static ref NONCE_RNG: Arc<RwLock<ChaCha12Rng>> =
+        Arc::new(RwLock::new(ChaCha12Rng::from_entropy()));
+}
+
+/// Encrypts json data and returns it as a base64 string
+pub fn encrypt_json_data(utf8_bytes: &[u8]) -> String {
+    let mut message = vec![0u8; 28 + utf8_bytes.len()];
+
+    // fill first 12 bytes with random values
+    NONCE_RNG.write().unwrap().fill_bytes(&mut message[..12]);
+
+    // encrypt data using the generated nonce
+    let gcm = Aes256Gcm::new_from_slice(AES_SECRET).unwrap();
+    let encrypted_bytes = gcm.encrypt(message[..12].into(), utf8_bytes).unwrap();
+    message[12..].copy_from_slice(&encrypted_bytes);
+
+    // return message as a base64 encoded string
+    let mut base64 =
+        String::with_capacity(base64::encoded_len(message.len(), true).unwrap_or_default());
+    base64::prelude::BASE64_STANDARD.encode_string(message, &mut base64);
+
+    base64
 }

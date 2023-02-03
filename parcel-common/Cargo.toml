@@ -7,3 +7,9 @@ edition = "2021"
 [dependencies]
 serde = { version = "1.0.152", features = ["derive"] }
 serde_json = "1.0.91"
+aes-gcm = "0.10.1"
+base64 = "0.21.0"
+anyhow = "1.0.68"
+lazy_static = "1.4.0"
+rand = "0.8.5"
+rand_chacha = "0.3.1"

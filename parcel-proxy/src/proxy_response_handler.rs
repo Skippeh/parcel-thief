@@ -1,11 +1,8 @@
 use anyhow::{Context, Result};
 use http::{Request, Response};
-use parcel_common::api_types::auth::AuthResponse;
+use parcel_common::{aes, api_types::auth::AuthResponse};
 
-use crate::{
-    aes,
-    logger::{log_auth, log_gateway_request_and_response},
-};
+use crate::logger::{log_auth, log_gateway_request_and_response};
 
 pub async fn handle_proxy_response(
     original_request: &Request<String>,

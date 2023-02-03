@@ -5,10 +5,11 @@ use std::{
     sync::Arc,
 };
 
-use actix_http::body::{EitherBody, MessageBody};
+use actix_http::body::{BoxBody, EitherBody, MessageBody};
 use actix_web::{
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
-    Error, HttpMessage, ResponseError,
+    web::{Bytes, BytesMut},
+    Error, HttpMessage, HttpResponse, ResponseError,
 };
 use futures_util::{future::LocalBoxFuture, StreamExt};
 use parcel_common::api_types::EncryptedData;
@@ -17,7 +18,8 @@ use parcel_common::api_types::EncryptedData;
 enum EncryptionError {
     InvalidUtf8Body(Utf8Error),
     InvalidJsonData(serde_json::Error),
-    InvalidAesData,
+    InvalidAesData(anyhow::Error),
+    EncryptResponseError(anyhow::Error),
 }
 
 impl fmt::Display for EncryptionError {
@@ -29,14 +31,24 @@ impl fmt::Display for EncryptionError {
             EncryptionError::InvalidJsonData(_) => {
                 write!(f, "The content body could not be deserialized")
             }
-            EncryptionError::InvalidAesData => write!(f, "The content body could not be decrypted"),
+            EncryptionError::InvalidAesData(err) => {
+                write!(f, "The content body could not be decrypted: {:?}", err)
+            }
+            EncryptionError::EncryptResponseError(err) => {
+                write!(f, "An internal error occured when encrypting response data")
+            }
         }
     }
 }
 
 impl ResponseError for EncryptionError {
     fn status_code(&self) -> actix_http::StatusCode {
-        actix_http::StatusCode::BAD_REQUEST
+        match self {
+            EncryptionError::EncryptResponseError(_) => {
+                actix_http::StatusCode::INTERNAL_SERVER_ERROR
+            }
+            _ => actix_http::StatusCode::BAD_REQUEST,
+        }
     }
 }
 
@@ -82,20 +94,20 @@ where
         let service = self.service.clone();
 
         Box::pin(async move {
-            let use_encryption;
-            let use_encryption_header = req.headers().get("Use-Encryption");
+            let use_decryption;
+            let use_decryption_header = req.headers().get("Use-Decryption");
 
-            if let Some(use_encryption_header) = use_encryption_header {
-                use_encryption = use_encryption_header
+            if let Some(use_decryption_header) = use_decryption_header {
+                use_decryption = use_decryption_header
                     .to_str()
                     .unwrap_or("true")
                     .parse::<bool>()
                     .unwrap_or(true);
             } else {
-                use_encryption = true;
+                use_decryption = true;
             }
 
-            if use_encryption {
+            if use_decryption {
                 let mut payload = req.take_payload();
                 let mut req_body = Vec::with_capacity(1024);
                 while let Some(chunk) = payload.next().await {
@@ -107,17 +119,33 @@ where
 
                     match body {
                         Ok(body) => {
-                            // todo: parse to EncryptedData struct
+                            // parse to EncryptedData struct
                             match serde_json::from_str::<EncryptedData>(body) {
                                 Ok(encrypted_data) => {
                                     if let Some(data) = encrypted_data.data {
-                                        // todo: decrypt string in EncryptedData::data
+                                        // decrypt data
+                                        let decrypted_string =
+                                            parcel_common::aes::decrypt_json_data(&data);
 
-                                        // todo: set decrypted string as payload
+                                        match decrypted_string {
+                                            Ok(decrypted_string) => {
+                                                // set request payload to decrypted string
+                                                let (_, mut payload) =
+                                                    actix_http::h1::Payload::create(true);
 
-                                        return Ok(req
-                                            .error_response(EncryptionError::InvalidAesData)
-                                            .map_into_right_body());
+                                                let payload_data =
+                                                    BytesMut::from(decrypted_string.as_bytes());
+                                                payload.unread_data(payload_data.into());
+                                                req.set_payload(payload.into());
+                                            }
+                                            Err(err) => {
+                                                return Ok(req
+                                                    .error_response(
+                                                        EncryptionError::InvalidAesData(err),
+                                                    )
+                                                    .map_into_right_body())
+                                            }
+                                        }
                                     }
                                 }
                                 Err(err) => {
@@ -136,19 +164,55 @@ where
                 }
             }
 
-            let res = service.call(req).await?;
+            let use_encryption;
+            let use_encryption_header = req.headers().get("Use-Encryption");
 
-            if use_encryption {
-                // todo: get body from response (if any)
-
-                // todo: encrypt body
-
-                // todo: create EncryptedData and serialize to json
-
-                // todo: set json string as response payload
+            if let Some(use_encryption_header) = use_encryption_header {
+                use_encryption = use_encryption_header
+                    .to_str()
+                    .unwrap_or("true")
+                    .parse::<bool>()
+                    .unwrap_or(true);
+            } else {
+                use_encryption = true;
             }
 
-            Ok(res.map_into_left_body())
+            let service_response = service.call(req).await?;
+
+            if use_encryption {
+                // get body from response (if any)
+                let (req, res) = service_response.into_parts();
+                let (res, body) = res.into_parts();
+                let bytes = actix_http::body::to_bytes(body).await;
+
+                match bytes {
+                    Ok(bytes) => {
+                        if !bytes.is_empty() {
+                            // encrypt body, create EncryptedData and serialize to json
+                            let encrypted_data = parcel_common::aes::encrypt_json_data(&bytes);
+                            let body_json = serde_json::to_vec(&EncryptedData {
+                                data: Some(encrypted_data),
+                            })
+                            .unwrap();
+
+                            // set json string as response payload
+                            let res = res.set_body(BoxBody::new(Bytes::from(body_json)));
+                            let result = ServiceResponse::new(req, res).map_into_right_body();
+                            Ok(result)
+                        } else {
+                            // if body is empty, return empty body response
+                            let res = res.set_body(BoxBody::new(bytes));
+                            let result = ServiceResponse::new(req, res).map_into_right_body();
+                            Ok(result)
+                        }
+                    }
+                    Err(_) => {
+                        unimplemented!("to_bytes should never fail");
+                    }
+                }
+            } else {
+                Ok(service_response.map_into_left_body())
+            }
         })
     }
 }
