@@ -53,7 +53,11 @@ impl ResponseError for EncryptionError {
 }
 
 #[derive(Default)]
-pub struct DataEncryption;
+pub struct DataEncryption {
+    /// If true, then the request/response will only be decrypted/encrypted if Use-Decryption/Use-Encryption headers are true.
+    /// If the headers are not present they will be encrypted/decrypted by default.
+    pub optional_encryption: bool,
+}
 
 impl<S, B> Transform<S, ServiceRequest> for DataEncryption
 where
@@ -70,12 +74,14 @@ where
     fn new_transform(&self, service: S) -> Self::Future {
         ready(Ok(DataEncryptionMiddleware {
             service: Arc::new(service),
+            optional_encryption: self.optional_encryption,
         }))
     }
 }
 
 pub struct DataEncryptionMiddleware<S> {
     service: Arc<S>,
+    optional_encryption: bool,
 }
 
 impl<S, B> Service<ServiceRequest> for DataEncryptionMiddleware<S>
@@ -92,20 +98,25 @@ where
 
     fn call(&self, mut req: ServiceRequest) -> Self::Future {
         let service = self.service.clone();
+        let optional_encryption = self.optional_encryption;
 
         Box::pin(async move {
-            let use_decryption;
-            let use_decryption_header = req.headers().get("Use-Decryption");
+            let use_decryption = match optional_encryption {
+                true => {
+                    let use_decryption_header = req.headers().get("Use-Decryption");
 
-            if let Some(use_decryption_header) = use_decryption_header {
-                use_decryption = use_decryption_header
-                    .to_str()
-                    .unwrap_or("true")
-                    .parse::<bool>()
-                    .unwrap_or(true);
-            } else {
-                use_decryption = true;
-            }
+                    if let Some(use_decryption_header) = use_decryption_header {
+                        use_decryption_header
+                            .to_str()
+                            .unwrap_or("true")
+                            .parse::<bool>()
+                            .unwrap_or(true)
+                    } else {
+                        true
+                    }
+                }
+                false => true,
+            };
 
             if use_decryption {
                 let mut payload = req.take_payload();
@@ -164,18 +175,22 @@ where
                 }
             }
 
-            let use_encryption;
-            let use_encryption_header = req.headers().get("Use-Encryption");
+            let use_encryption = match optional_encryption {
+                true => {
+                    let use_encryption_header = req.headers().get("Use-Encryption");
 
-            if let Some(use_encryption_header) = use_encryption_header {
-                use_encryption = use_encryption_header
-                    .to_str()
-                    .unwrap_or("true")
-                    .parse::<bool>()
-                    .unwrap_or(true);
-            } else {
-                use_encryption = true;
-            }
+                    if let Some(use_encryption_header) = use_encryption_header {
+                        use_encryption_header
+                            .to_str()
+                            .unwrap_or("true")
+                            .parse::<bool>()
+                            .unwrap_or(true)
+                    } else {
+                        true
+                    }
+                }
+                false => true,
+            };
 
             let service_response = service.call(req).await?;
 
