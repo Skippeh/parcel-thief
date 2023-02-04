@@ -1,4 +1,5 @@
 mod add_missions;
+pub mod auth;
 mod create_object;
 mod create_road;
 mod delete_missions;

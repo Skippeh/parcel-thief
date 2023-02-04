@@ -1,12 +1,14 @@
 mod endpoints;
 mod middleware;
+mod steam;
 
-use std::net::IpAddr;
+use std::{io::Write, net::IpAddr};
 
 use actix_web::{middleware as actix_middleware, web::JsonConfig, App, HttpServer};
 use anyhow::Result;
 use clap::Parser;
 use endpoints::configure_endpoints;
+use steam::get_steam_api_key;
 
 #[derive(Parser)]
 struct Options {
@@ -18,7 +20,7 @@ struct Options {
 
     /// If specified encryption will be optional. This means that the client can decide if encryption should be used for responses and decryption for requests.
     ///
-    /// The client decides by setting the Use-Encryption and Use-Decryption headers.
+    /// The client decides by setting the Use-Encryption and Use-Decryption headers to true/false.
     ///
     /// NOTE: Should only be used for debugging/development purposes and not for a production server.
     #[arg(long = "opt_encryption", default_value_t = false)]
@@ -28,6 +30,13 @@ struct Options {
 #[actix_web::main]
 async fn main() -> Result<()> {
     let args = Options::parse();
+
+    if get_steam_api_key().is_err() {
+        eprintln!("STEAM_API_KEY environment variable is not set");
+
+        let _ = std::io::stderr().flush();
+        std::process::exit(1);
+    }
 
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("error,warn,info,debug"));
     HttpServer::new(move || {
@@ -45,6 +54,7 @@ async fn main() -> Result<()> {
                         optional_encryption: args.optional_encryption,
                     }),
             )
+            .service(endpoints::auth::auth)
     })
     .bind((args.bind_address, args.listen_port))?
     .run()
