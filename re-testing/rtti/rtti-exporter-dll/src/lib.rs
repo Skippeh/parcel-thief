@@ -2,7 +2,6 @@ mod libc_util;
 mod rtti;
 
 use std::{
-    io::Write,
     sync::{Arc, RwLock},
     thread::spawn,
     time::Duration,

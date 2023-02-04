@@ -7,13 +7,7 @@ pub mod server;
 
 use clap::Parser;
 use lazy_static::lazy_static;
-use std::{
-    net::IpAddr,
-    path::PathBuf,
-    process::ExitCode,
-    str::FromStr,
-    sync::{Arc, Mutex},
-};
+use std::{net::IpAddr, path::PathBuf, process::ExitCode, str::FromStr, sync::Arc};
 use tokio::{select, sync::RwLock};
 
 use server::start_http_server;

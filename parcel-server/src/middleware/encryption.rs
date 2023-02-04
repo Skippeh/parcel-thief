@@ -9,7 +9,7 @@ use actix_http::body::{BoxBody, EitherBody, MessageBody};
 use actix_web::{
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
     web::{Bytes, BytesMut},
-    Error, HttpMessage, HttpResponse, ResponseError,
+    Error, HttpMessage, ResponseError,
 };
 use futures_util::{future::LocalBoxFuture, StreamExt};
 use parcel_common::api_types::EncryptedData;

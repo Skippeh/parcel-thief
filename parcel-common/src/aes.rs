@@ -1,10 +1,10 @@
 use std::sync::{Arc, RwLock};
 
-use aes_gcm::{aead::Aead, AeadInPlace, Aes256Gcm, KeyInit, Nonce};
+use aes_gcm::{aead::Aead, Aes256Gcm, KeyInit};
 use anyhow::{Context, Result};
 use base64::Engine;
 use lazy_static::lazy_static;
-use rand::{Rng, RngCore, SeedableRng};
+use rand::{RngCore, SeedableRng};
 use rand_chacha::ChaCha12Rng;
 
 use crate::api_types::EncryptedData;
