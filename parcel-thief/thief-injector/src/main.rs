@@ -4,7 +4,7 @@ use dll_syringe::{process::OwnedProcess, Syringe};
 
 fn main() {
     static PROCESS_NAME: &str = "ds";
-    static DLL_PATH: &str = "target/x86_64-pc-windows-msvc/release/parcel_thief.dll";
+    static DLL_PATH: &str = "../../target/x86_64-pc-windows-msvc/release/parcel_thief.dll";
 
     println!("waiting for {PROCESS_NAME}");
 
