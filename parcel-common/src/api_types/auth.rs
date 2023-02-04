@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct UserInfo {
-    pub provider: String,
+    pub provider: Provider,
     pub id: String,
     pub display_name: String,
 }
@@ -25,4 +25,13 @@ pub struct SessionInfo {
 pub struct AuthResponse {
     pub user: UserInfo,
     pub session: SessionInfo,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub enum Provider {
+    #[serde(rename = "steam")]
+    Steam,
+    #[serde(rename = "epic")]
+    Epic,
+    // There's probably more entries here like xbox
 }

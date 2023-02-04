@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::api_types::auth::Provider;
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LookupRequest {
     #[serde(rename = "ids")]
@@ -23,7 +25,7 @@ pub struct LookupUserInfo {
     pub provider_account_id: String,
     #[serde(rename = "d")]
     pub display_name: String,
-    /// The platform this player is on, "steam" or "epic".
+    /// The platform this player is on.
     #[serde(rename = "p")]
-    pub provider: String,
+    pub provider: Provider,
 }
