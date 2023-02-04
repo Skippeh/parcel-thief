@@ -17,6 +17,12 @@ struct LogData<'a> {
     response: &'a Option<BTreeMap<String, Value>>,
 }
 
+#[derive(Serialize)]
+struct AuthLogData<'a> {
+    path: &'a str,
+    response: &'a AuthResponse,
+}
+
 pub async fn log_gateway_request_and_response(
     request: (&Request<String>, Option<Option<&String>>),
     response: (&Response<String>, Option<Option<&String>>),
@@ -31,42 +37,62 @@ pub async fn log_gateway_request_and_response(
     };
 
     println!("{} {}", request.0.method(), request.0.uri().path());
-    {
-        let logs_folder = crate::LOG_DIRECTORY.lock().unwrap().clone();
-        let request_path = request.0.uri().path();
-        let request_path = request_path.split('/').last().unwrap_or(request_path);
-        let file_name = Local::now().format("%Y-%m-%d_%H-%M.%f.json").to_string();
-        let dir_path = logs_folder.join(request_path);
 
-        std::fs::create_dir_all(dir_path.clone()).context("could not create log folder")?;
-        let file = File::create(dir_path.join(file_name))
-            .await
-            .context("failed to create log file")?;
-
-        let mut writer = BufWriter::new(file);
-
-        let file_contents = LogData {
-            request: &deserialized_request,
-            response: &deserialized_response,
-        };
-
-        let file_contents =
-            serde_json::to_string_pretty(&file_contents).context("could not serialize log data")?;
-
-        writer
-            .write_all(file_contents.as_bytes())
-            .await
-            .context("could not write log contents to file")?;
-
-        writer.flush().await?;
-    }
+    let log_data = LogData {
+        request: &deserialized_request,
+        response: &deserialized_response,
+    };
+    save_request_log(&log_data, request.0).await?;
 
     Ok(())
 }
 
-pub async fn log_auth(_request: &Request<String>, mut response: AuthResponse) -> Result<()> {
+pub async fn log_auth(request: &Request<String>, mut response: AuthResponse) -> Result<()> {
     response.session.token = "***".into();
 
+    println!("{} {}", request.method(), request.uri().path());
     println!("AUTH: Authenticated as {:?}", response.user);
+
+    let log_data = AuthLogData {
+        path: &format!(
+            "{}?{}",
+            request.uri().path(),
+            request.uri().query().unwrap_or_default()
+        ),
+        response: &response,
+    };
+
+    save_request_log(&log_data, request).await?;
+
     Ok(())
+}
+
+async fn save_request_log<T>(log_data: &T, request: &Request<String>) -> Result<(), anyhow::Error>
+where
+    T: Serialize,
+{
+    let file_contents =
+        serde_json::to_string_pretty(&log_data).context("could not serialize log data")?;
+    let (dir_path, file_name) = get_paths_for_request(request).await;
+    std::fs::create_dir_all(&dir_path).context("could not create log folder")?;
+    let mut writer = BufWriter::new(
+        File::create(dir_path.join(file_name))
+            .await
+            .context("failed to create log file")?,
+    );
+    writer
+        .write_all(file_contents.as_bytes())
+        .await
+        .context("could not write log contents to file")?;
+    writer.flush().await?;
+    Ok(())
+}
+
+async fn get_paths_for_request(request: &Request<String>) -> (std::path::PathBuf, String) {
+    let logs_folder = crate::LOG_DIRECTORY.read().await.clone();
+    let request_path = request.uri().path();
+    let request_path = request_path.split_once('/').unwrap().1; // skip first / in request path
+    let file_name = Local::now().format("%Y-%m-%d_%H-%M-%S.%f.json").to_string();
+    let dir_path = logs_folder.join(request_path);
+    (dir_path, file_name)
 }

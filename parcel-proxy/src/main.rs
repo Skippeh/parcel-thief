@@ -14,13 +14,13 @@ use std::{
     str::FromStr,
     sync::{Arc, Mutex},
 };
-use tokio::select;
+use tokio::{select, sync::RwLock};
 
 use server::start_http_server;
 
 lazy_static! {
-    pub static ref LOG_DIRECTORY: Arc<Mutex<PathBuf>> =
-        Arc::new(Mutex::new(PathBuf::from_str("./logs").unwrap()));
+    pub static ref LOG_DIRECTORY: Arc<RwLock<PathBuf>> =
+        Arc::new(RwLock::new(PathBuf::from_str("./logs").unwrap()));
 }
 
 #[derive(Debug, Parser)]
@@ -54,7 +54,7 @@ async fn main() -> anyhow::Result<ExitCode> {
     }
 
     {
-        let mut log_directory = LOG_DIRECTORY.lock().unwrap();
+        let mut log_directory = LOG_DIRECTORY.write().await;
         if let Some(logs_dir) = args.logs_dir {
             if !logs_dir.is_dir() {
                 println!("Logs directory does not point to a directory. Does the directory exist?");
