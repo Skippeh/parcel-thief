@@ -1,8 +1,14 @@
 use std::fmt::Display;
 
-use actix_web::{post, web::Query, HttpResponse, Responder, ResponseError};
+use actix_web::{
+    post,
+    web::{Data, Query},
+    HttpResponse, Responder, ResponseError,
+};
 use parcel_common::api_types::auth::Provider;
 use serde::Deserialize;
+
+use crate::data::steam::Steam;
 
 #[derive(Debug, Deserialize)]
 pub struct AuthQuery {
@@ -31,7 +37,7 @@ impl ResponseError for Error {
 }
 
 #[post("auth/ds")]
-pub async fn auth(request: Query<AuthQuery>) -> Result<impl Responder, Error> {
+pub async fn auth(request: Query<AuthQuery>, steam: Data<Steam>) -> Result<impl Responder, Error> {
     match &request.provider {
         Provider::Steam => {
             // todo

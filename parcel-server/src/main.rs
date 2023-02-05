@@ -1,14 +1,18 @@
+mod data;
 mod endpoints;
 mod middleware;
-mod steam;
 
 use std::{io::Write, net::IpAddr};
 
-use actix_web::{middleware as actix_middleware, web::JsonConfig, App, HttpServer};
+use actix_web::{
+    middleware as actix_middleware,
+    web::{self, JsonConfig},
+    App, HttpServer,
+};
 use anyhow::Result;
 use clap::Parser;
+use data::steam::Steam;
 use endpoints::configure_endpoints;
-use steam::get_steam_api_key;
 
 #[derive(Parser)]
 struct Options {
@@ -23,27 +27,28 @@ struct Options {
     /// The client decides by setting the Use-Encryption and Use-Decryption headers to true/false.
     ///
     /// NOTE: Should only be used for debugging/development purposes and not for a production server.
-    #[arg(long = "opt_encryption", default_value_t = false)]
+    #[arg(long = "opt-encryption", default_value_t = false)]
     optional_encryption: bool,
+
+    /// The Steam web api key used for authenticating and getting user info for Steam players. The key can be found here: https://steamcommunity.com/dev/apikey
+    ///
+    /// If unspecified the STEAM_API_KEY environment variable will be used.
+    #[arg(long = "steam-api-key", env = "STEAM_API_KEY")]
+    steam_api_key: String,
 }
 
 #[actix_web::main]
 async fn main() -> Result<()> {
     let args = Options::parse();
-
-    if get_steam_api_key().is_err() {
-        eprintln!("STEAM_API_KEY environment variable is not set");
-
-        let _ = std::io::stderr().flush();
-        std::process::exit(1);
-    }
-
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("error,warn,info,debug"));
-    HttpServer::new(move || {
-        let json_config = JsonConfig::default().content_type_required(false); // don't require Content-Type: application/json header to parse json request body
 
+    // Create potentially mutable data outside of the HttpService factory, otherwise each worker thread will not share the same data globally.
+    let steam_data = web::Data::new(Steam::new(args.steam_api_key.clone()).unwrap());
+
+    HttpServer::new(move || {
         App::new()
-            .app_data(json_config)
+            .app_data(JsonConfig::default().content_type_required(false)) // don't require Content-Type: application/json header to parse json request body
+            .app_data(steam_data.clone())
             .configure(configure_endpoints)
             .wrap(actix_middleware::Logger::default())
             .service(
