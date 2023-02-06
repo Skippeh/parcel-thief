@@ -4,12 +4,15 @@ use actix_http::StatusCode;
 use actix_web::{
     get,
     web::{Data, Query},
-    HttpResponse, Responder, ResponseError,
+    HttpResponse, Responder,
 };
 use parcel_common::api_types::auth::Provider;
 use serde::Deserialize;
 
-use crate::data::steam::{Steam, VerifyUserAuthTicketError};
+use crate::{
+    data::steam::{Steam, VerifyUserAuthTicketError},
+    response_error::{impl_response_error, CommonResponseError},
+};
 
 #[derive(Debug, Deserialize)]
 pub struct AuthQuery {
@@ -19,6 +22,7 @@ pub struct AuthQuery {
     code: String,
 }
 
+#[allow(clippy::enum_variant_names)]
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     UnsupportedPlatform,
@@ -44,13 +48,32 @@ impl Display for Error {
     }
 }
 
-impl ResponseError for Error {
-    fn status_code(&self) -> StatusCode {
+impl_response_error!(Error);
+impl CommonResponseError for Error {
+    fn get_status_code(&self) -> String {
+        match self {
+            Error::UnsupportedPlatform => "AU-UP",
+            Error::ApiResponseError(_) => "AU-AE",
+            Error::InvalidCode => "AU-IC",
+        }
+        .into()
+    }
+
+    fn get_http_status_code(&self) -> StatusCode {
         match self {
             Error::UnsupportedPlatform => StatusCode::BAD_REQUEST,
             Error::ApiResponseError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::InvalidCode => StatusCode::UNAUTHORIZED,
         }
+    }
+
+    fn get_message(&self) -> String {
+        match self {
+            Error::UnsupportedPlatform => "unsupported provider",
+            Error::ApiResponseError(_) => "provider error",
+            Error::InvalidCode => "invalid provider code",
+        }
+        .into()
     }
 }
 

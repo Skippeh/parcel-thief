@@ -1,6 +1,7 @@
 mod data;
 mod endpoints;
 mod middleware;
+mod response_error;
 
 use std::{io::Write, net::IpAddr};
 
