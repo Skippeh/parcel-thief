@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use anyhow::{Context, Result};
 use chrono::Local;
-use http::{Request, Response};
+use http::{header::HeaderName, HeaderValue, Request, Response};
 use parcel_common::api_types::auth::AuthResponse;
 use serde::Serialize;
 use serde_json::Value;
@@ -20,6 +20,7 @@ struct LogData<'a> {
 #[derive(Serialize)]
 struct AuthLogData<'a> {
     path: &'a str,
+    request_headers: BTreeMap<String, String>,
     response: &'a AuthResponse,
 }
 
@@ -53,12 +54,21 @@ pub async fn log_auth(request: &Request<String>, mut response: AuthResponse) -> 
     println!("{} {}", request.method(), request.uri().path());
     println!("AUTH: Authenticated as {:?}", response.user);
 
+    let mut headers = BTreeMap::new();
+    for header in request.headers() {
+        headers.insert(
+            header.0.to_string(),
+            header.1.to_str().unwrap_or("INVALID").to_string(),
+        );
+    }
+
     let log_data = AuthLogData {
         path: &format!(
             "{}?{}",
             request.uri().path(),
             request.uri().query().unwrap_or_default()
         ),
+        request_headers: headers,
         response: &response,
     };
 
