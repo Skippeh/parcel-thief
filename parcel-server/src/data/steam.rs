@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Display};
+use std::{collections::HashMap, error::Error, fmt::Display};
 
 use anyhow::Context;
 use reqwest::{Client, RequestBuilder, StatusCode};
@@ -32,12 +32,22 @@ struct PlayersResponse {
     players: Vec<ReqPlayerSummary>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, thiserror::Error)]
 struct ErrorResponse {
     #[serde(rename = "errorcode")]
     code: i32,
     #[serde(rename = "errordesc")]
     description: String,
+}
+
+impl Display for ErrorResponse {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Steam response was not successful: {} (error code {})",
+            self.description, self.code
+        )
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -105,6 +115,45 @@ pub struct Steam {
     web_client: Client,
 }
 
+pub trait AsHexString {
+    fn as_hex_string(&self) -> String;
+}
+
+impl AsHexString for String {
+    fn as_hex_string(&self) -> String {
+        self.clone()
+    }
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum VerifyUserAuthTicketError {
+    UnexpectedApiResponse(anyhow::Error),
+    InvalidApiResponse(reqwest::Error),
+    InvalidTicket,
+}
+
+impl Display for VerifyUserAuthTicketError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            VerifyUserAuthTicketError::UnexpectedApiResponse(err) => write!(
+                f,
+                "An unexpected response was received from the Steam web api: {}",
+                err
+            ),
+            VerifyUserAuthTicketError::InvalidApiResponse(err) => {
+                write!(
+                    f,
+                    "Invalid response received from the Steam web api: {}",
+                    err
+                )
+            }
+            VerifyUserAuthTicketError::InvalidTicket => {
+                write!(f, "The user ticket could not be verified")
+            }
+        }
+    }
+}
+
 impl Steam {
     pub fn new(api_key: String) -> Result<Self, reqwest::Error> {
         let client = Client::builder().user_agent("DS").build()?;
@@ -115,43 +164,53 @@ impl Steam {
     }
 
     /// Verifies the user auth ticket and if successful returns the user steam id and owner id (owner id is different if the game is family shared)
-    pub async fn verify_user_auth_ticket(
+    pub async fn verify_user_auth_ticket<T>(
         &self,
-        ticket: &[u8],
-    ) -> Result<UserSteamId, anyhow::Error> {
-        let ticket_str: String = hex::encode(ticket);
+        ticket: &T,
+    ) -> Result<UserSteamId, VerifyUserAuthTicketError>
+    where
+        T: AsHexString,
+    {
+        let ticket_str: String = ticket.as_hex_string();
 
         let response = self
-            .create_request(reqwest::Method::GET, URL_AUTH_USER_TICKET)?
+            .create_request(reqwest::Method::GET, URL_AUTH_USER_TICKET)
             .query(&[("appid", APP_ID)])
             .query(&[("ticket", &ticket_str)])
             .send()
-            .await?;
+            .await
+            .map_err(VerifyUserAuthTicketError::InvalidApiResponse)?;
 
         match response.status() {
             StatusCode::OK => {
                 let response = response
                     .json::<ApiResponse<ParamsResponse<AuthenticateUserTicketParams>>>()
                     .await
-                    .context("Unexpected api response from steam api")?;
+                    .map_err(|err| VerifyUserAuthTicketError::UnexpectedApiResponse(err.into()))?;
 
                 match response.response {
                     Response::Ok(data) => {
                         let params = data.params;
-                        let steam_id = params.steam_id.parse::<u64>()?;
-                        let owner_steam_id = params.owner_steam_id.parse::<u64>()?;
+                        let steam_id = params.steam_id.parse::<u64>().map_err(|err| {
+                            VerifyUserAuthTicketError::UnexpectedApiResponse(err.into())
+                        })?;
+                        let owner_steam_id =
+                            params.owner_steam_id.parse::<u64>().map_err(|err| {
+                                VerifyUserAuthTicketError::UnexpectedApiResponse(err.into())
+                            })?;
                         Ok(UserSteamId::new(steam_id, owner_steam_id))
                     }
-                    Response::Error { error } => {
-                        anyhow::bail!(
-                            "Steam response was not successful: {} (error code {})",
-                            error.description,
-                            error.code
-                        );
-                    }
+                    Response::Error { error } => Err(match error.code {
+                        // 3 = invalid ticket format
+                        // 101 = invalid ticket (already used or expired for example)
+                        3 | 101 => VerifyUserAuthTicketError::InvalidTicket,
+                        _ => VerifyUserAuthTicketError::UnexpectedApiResponse(error.into()),
+                    }),
                 }
             }
-            default => anyhow::bail!("Unexpected response: {}", default),
+            default => Err(VerifyUserAuthTicketError::UnexpectedApiResponse(
+                anyhow::anyhow!("Unexpected response status: {}", default),
+            )),
         }
     }
 
@@ -159,11 +218,14 @@ impl Steam {
         &self,
         user_ids: Vec<u64>,
     ) -> Result<HashMap<u64, PlayerSummary>, anyhow::Error> {
-        let mut builder = self.create_request(reqwest::Method::GET, URL_GET_PLAYER_SUMMARIES)?;
+        let mut builder = self.create_request(reqwest::Method::GET, URL_GET_PLAYER_SUMMARIES);
 
-        for user_id in user_ids {
-            builder = builder.query(&[("steamids", user_id.to_string())]);
-        }
+        builder = builder.query(
+            &user_ids
+                .iter()
+                .map(|id| ("steamids", id.to_string()))
+                .collect::<Vec<_>>(),
+        );
 
         let response = builder.send().await?;
 
@@ -199,14 +261,9 @@ impl Steam {
         }
     }
 
-    fn create_request(
-        &self,
-        method: reqwest::Method,
-        url: &str,
-    ) -> Result<RequestBuilder, anyhow::Error> {
-        Ok(self
-            .web_client
+    fn create_request(&self, method: reqwest::Method, url: &str) -> RequestBuilder {
+        self.web_client
             .request(method, url)
-            .query(&[("key", &self.api_key)]))
+            .query(&[("key", &self.api_key)])
     }
 }
