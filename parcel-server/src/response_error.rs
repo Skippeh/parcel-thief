@@ -9,6 +9,7 @@ pub trait CommonResponseError {
 #[derive(Debug, Serialize)]
 pub struct CommonError {
     pub status: String,
+    #[serde(rename = "code")]
     pub status_code: u16,
     pub message: String,
 }
