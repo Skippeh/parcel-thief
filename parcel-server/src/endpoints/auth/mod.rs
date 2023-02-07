@@ -25,7 +25,7 @@ pub struct AuthQuery {
 #[allow(clippy::enum_variant_names)]
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    UnsupportedPlatform,
+    UnsupportedPlatform(Provider),
     ApiResponseError(anyhow::Error),
     InvalidCode,
 }
@@ -33,7 +33,9 @@ pub enum Error {
 impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Error::UnsupportedPlatform => write!(f, "The provided platform is not supported"),
+            Error::UnsupportedPlatform(platform) => {
+                write!(f, "The provided platform is not supported: {:?}", platform)
+            }
             Error::ApiResponseError(err) => {
                 write!(
                     f,
@@ -52,7 +54,7 @@ impl_response_error!(Error);
 impl CommonResponseError for Error {
     fn get_status_code(&self) -> String {
         match self {
-            Error::UnsupportedPlatform => "AU-UP",
+            Error::UnsupportedPlatform(_) => "AU-UP",
             Error::ApiResponseError(_) => "AU-AE",
             Error::InvalidCode => "AU-IC",
         }
@@ -61,7 +63,7 @@ impl CommonResponseError for Error {
 
     fn get_http_status_code(&self) -> StatusCode {
         match self {
-            Error::UnsupportedPlatform => StatusCode::BAD_REQUEST,
+            Error::UnsupportedPlatform(_) => StatusCode::BAD_REQUEST,
             Error::ApiResponseError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::InvalidCode => StatusCode::UNAUTHORIZED,
         }
@@ -69,7 +71,7 @@ impl CommonResponseError for Error {
 
     fn get_message(&self) -> String {
         match self {
-            Error::UnsupportedPlatform => "unsupported provider",
+            Error::UnsupportedPlatform(_) => "unsupported provider",
             Error::ApiResponseError(_) => "provider error",
             Error::InvalidCode => "invalid provider code",
         }
@@ -91,6 +93,6 @@ pub async fn auth(request: Query<AuthQuery>, steam: Data<Steam>) -> Result<impl 
 
             Ok(HttpResponse::InternalServerError().body("not implemented"))
         }
-        _ => Err(Error::UnsupportedPlatform),
+        other => Err(Error::UnsupportedPlatform(other.clone())),
     }
 }
