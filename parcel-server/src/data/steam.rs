@@ -1,4 +1,4 @@
-use std::{collections::HashMap, error::Error, fmt::Display};
+use std::{collections::HashMap, fmt::Display};
 
 use anyhow::Context;
 use reqwest::{Client, RequestBuilder, StatusCode};

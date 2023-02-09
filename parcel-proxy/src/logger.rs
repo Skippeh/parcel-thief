@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use anyhow::{Context, Result};
 use chrono::Local;
-use http::{header::HeaderName, HeaderValue, Request, Response};
+use http::{Request, Response};
 use parcel_common::api_types::auth::AuthResponse;
 use serde::Serialize;
 use serde_json::Value;

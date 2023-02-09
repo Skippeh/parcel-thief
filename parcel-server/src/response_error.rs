@@ -22,9 +22,9 @@ macro_rules! impl_response_error {
                 self.get_http_status_code()
             }
 
-            fn error_response(&self) -> HttpResponse<actix_web::body::BoxBody> {
+            fn error_response(&self) -> actix_web::HttpResponse<actix_web::body::BoxBody> {
                 let status_code = self.status_code();
-                let mut res = HttpResponse::new(status_code);
+                let mut res = actix_web::HttpResponse::new(status_code);
                 let data = $crate::response_error::CommonError {
                     message: self.get_message(),
                     status: self.get_status_code(),
