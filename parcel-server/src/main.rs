@@ -1,4 +1,5 @@
 mod data;
+mod db;
 mod endpoints;
 mod middleware;
 mod response_error;
@@ -14,6 +15,7 @@ use actix_web::{
 use anyhow::{Context, Result};
 use clap::Parser;
 use data::steam::Steam;
+use diesel::{Connection, PgConnection};
 use endpoints::configure_endpoints;
 use session::redis::RedisSessionStore;
 
@@ -39,12 +41,16 @@ struct Options {
     #[arg(long = "steam-api-key", env = "STEAM_API_KEY")]
     steam_api_key: String,
 
-    #[arg(long = "redis_conn_string", env = "REDIS_CONNECTION_STRING")]
+    #[arg(long = "redis-conn-string", env = "REDIS_CONNECTION_STRING")]
     redis_connection_string: String,
+
+    #[arg(long = "database-url", env = "DATABASE_URL")]
+    database_url: String,
 }
 
 #[actix_web::main]
 async fn main() -> Result<()> {
+    dotenv::dotenv().ok();
     let args = Options::parse();
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("error,warn,info,debug"));
 
@@ -52,10 +58,13 @@ async fn main() -> Result<()> {
     let steam_data = web::Data::new(Steam::new(args.steam_api_key.clone()).unwrap());
 
     let session_store = web::Data::new(
-        RedisSessionStore::new(args.redis_connection_string, "ds-server/")
+        RedisSessionStore::new(args.redis_connection_string, "ds-session/")
             .await
             .context("could not connect to redis server")?,
     );
+
+    // Test database connection
+    PgConnection::establish(&args.database_url).context("Could not connect to database")?;
 
     HttpServer::new(move || {
         App::new()
