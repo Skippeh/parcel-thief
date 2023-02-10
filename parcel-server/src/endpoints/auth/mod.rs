@@ -127,6 +127,12 @@ pub async fn auth(
                     other => Error::ApiResponseError(other.into()),
                 })?;
 
+            // todo: expire current session (if any)
+
+            // todo: create account if one doesn't exist
+
+            // todo: create new session
+
             Ok(HttpResponse::InternalServerError().body("not implemented"))
         }
         other => Err(Error::UnsupportedPlatform(other.clone())),

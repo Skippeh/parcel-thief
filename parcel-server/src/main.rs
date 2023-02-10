@@ -1,3 +1,5 @@
+#![allow(dead_code)] // todo: remove this when things are starting to come together
+
 mod data;
 mod db;
 mod endpoints;
@@ -14,7 +16,7 @@ use actix_web::{
 };
 use anyhow::{Context, Result};
 use clap::Parser;
-use data::steam::Steam;
+use data::{accounts::Accounts, database::Database, steam::Steam};
 use diesel::{Connection, PgConnection};
 use endpoints::configure_endpoints;
 use session::redis::RedisSessionStore;
@@ -63,14 +65,22 @@ async fn main() -> Result<()> {
             .context("could not connect to redis server")?,
     );
 
+    let database = web::Data::new(Database::new(&args.database_url));
+    let arc_db = database.clone().into_inner();
+    let accounts = web::Data::new(Accounts::new(arc_db.clone()));
+
     // Test database connection
-    PgConnection::establish(&args.database_url).context("Could not connect to database")?;
+    database
+        .connect()
+        .context("Could not connect to database")?;
 
     HttpServer::new(move || {
         App::new()
             .app_data(JsonConfig::default().content_type_required(false)) // don't require Content-Type: application/json header to parse json request body
             .app_data(steam_data.clone())
             .app_data(session_store.clone())
+            .app_data(database.clone())
+            .app_data(accounts.clone())
             .configure(configure_endpoints)
             .service(
                 actix_web::web::scope("/e")
