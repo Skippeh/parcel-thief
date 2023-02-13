@@ -49,7 +49,7 @@ macro_rules! impl_response_error {
                 let data = $crate::response_error::CommonError {
                     message: self.get_message(),
                     status: self.get_status_code(),
-                    status_code: status_code.into(),
+                    status_code,
                 };
 
                 res.headers_mut().insert(
