@@ -106,6 +106,7 @@ impl Session {
 #[derive(Debug)]
 pub enum FromRequestError {
     UnknownToken,
+    Unauthorized,
     RedisError(RedisError),
 }
 
@@ -114,6 +115,7 @@ impl Display for FromRequestError {
         match self {
             FromRequestError::UnknownToken => write!(f, "Unknown token"),
             FromRequestError::RedisError(err) => write!(f, "A redis error occured: {:?}", err),
+            FromRequestError::Unauthorized => write!(f, "No token specified"),
         }
     }
 }
@@ -124,13 +126,16 @@ impl CommonResponseError for FromRequestError {
         match self {
             FromRequestError::UnknownToken => "AU-UT",
             FromRequestError::RedisError(_) => "SV-IT",
+            FromRequestError::Unauthorized => "AU-UA",
         }
         .into()
     }
 
     fn get_http_status_code(&self) -> actix_http::StatusCode {
         match self {
-            FromRequestError::UnknownToken => StatusCode::UNAUTHORIZED,
+            FromRequestError::UnknownToken | FromRequestError::Unauthorized => {
+                StatusCode::UNAUTHORIZED
+            }
             FromRequestError::RedisError(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
@@ -139,6 +144,7 @@ impl CommonResponseError for FromRequestError {
         match self {
             FromRequestError::UnknownToken => "bad token",
             FromRequestError::RedisError(_) => "internal error",
+            FromRequestError::Unauthorized => "no permission",
         }
         .into()
     }
@@ -155,7 +161,7 @@ impl FromRequest for Session {
         Box::pin(async move {
             let token = match auth {
                 Ok(auth) => auth.into_scheme().token().to_owned(),
-                Err(_) => return Err(FromRequestError::UnknownToken),
+                Err(_) => return Err(FromRequestError::Unauthorized),
             };
 
             let session_store = req.app_data::<Data<RedisSessionStore>>().unwrap();
