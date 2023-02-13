@@ -3,6 +3,9 @@
 diesel::table! {
     accounts (id) {
         id -> Bpchar,
-        steam_id -> Int8,
+        display_name -> Varchar,
+        provider -> Int4,
+        provider_id -> Varchar,
+        last_login_date -> Timestamp,
     }
 }

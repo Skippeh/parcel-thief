@@ -1,50 +1,44 @@
 pub mod redis;
 
-use std::{
-    collections::{BTreeMap, HashMap},
-    fmt::Display,
-    sync::Arc,
-};
+use std::{collections::HashMap, fmt::Display};
 
 use ::redis::RedisError;
+use actix_http::{header::Header, StatusCode};
+use actix_web::{web::Data, FromRequest, ResponseError};
+use actix_web_httpauth::headers::authorization::{Authorization, Bearer};
 use chrono::{DateTime, Utc};
+use futures_util::future::LocalBoxFuture;
+use parcel_common::api_types::auth::Provider;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-#[derive(Debug, thiserror::Error)]
-pub struct SessionNotFound;
+use crate::response_error::{impl_response_error, CommonResponseError};
 
-impl Display for SessionNotFound {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "The session could not be found")
-    }
-}
+use self::redis::RedisSessionStore;
 
-#[derive(Debug, thiserror::Error)]
-pub enum SessionError {
-    RedisError(RedisError),
-    SessionNotFound,
-}
-
-impl Display for SessionError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            SessionError::RedisError(error) => write!(f, "A redis error occured: {}", error),
-            SessionError::SessionNotFound => {
-                write!(f, "Could not find a session from the specified token")
-            }
-        }
-    }
-}
-
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Session {
+    pub provider: Provider,
+    pub provider_id: String,
+    pub account_id: String,
+    #[serde(skip)]
     token: String,
     values: HashMap<String, String>,
+    #[serde(skip)]
     expire_date: DateTime<Utc>,
 }
 
 impl Session {
-    pub fn new(token: String, expire_date: DateTime<Utc>) -> Self {
+    pub fn new(
+        provider: &Provider,
+        provider_id: &str,
+        account_id: &str,
+        token: String,
+        expire_date: DateTime<Utc>,
+    ) -> Self {
         Self {
+            provider: provider.clone(),
+            provider_id: provider_id.into(),
+            account_id: account_id.into(),
             token,
             expire_date,
             values: HashMap::new(),
@@ -52,11 +46,17 @@ impl Session {
     }
 
     pub fn with_values(
+        provider: &Provider,
+        provider_id: &str,
+        account_id: &str,
         values: HashMap<String, String>,
         token: String,
         expire_date: DateTime<Utc>,
     ) -> Session {
         Self {
+            provider: provider.clone(),
+            provider_id: provider_id.into(),
+            account_id: account_id.into(),
             token,
             expire_date,
             values,
@@ -100,5 +100,74 @@ impl Session {
 
     pub fn set_raw(&mut self, key: &str, val: &str) {
         self.values.insert(key.into(), val.into());
+    }
+}
+
+#[derive(Debug)]
+pub enum FromRequestError {
+    UnknownToken,
+    RedisError(RedisError),
+}
+
+impl Display for FromRequestError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            FromRequestError::UnknownToken => write!(f, "Unknown token"),
+            FromRequestError::RedisError(err) => write!(f, "A redis error occured: {:?}", err),
+        }
+    }
+}
+
+impl_response_error!(FromRequestError);
+impl CommonResponseError for FromRequestError {
+    fn get_status_code(&self) -> String {
+        match self {
+            FromRequestError::UnknownToken => "AU-UT",
+            FromRequestError::RedisError(_) => "SV-IT",
+        }
+        .into()
+    }
+
+    fn get_http_status_code(&self) -> actix_http::StatusCode {
+        match self {
+            FromRequestError::UnknownToken => StatusCode::UNAUTHORIZED,
+            FromRequestError::RedisError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+        }
+    }
+
+    fn get_message(&self) -> String {
+        match self {
+            FromRequestError::UnknownToken => "bad token",
+            FromRequestError::RedisError(_) => "internal error",
+        }
+        .into()
+    }
+}
+
+impl FromRequest for Session {
+    type Error = FromRequestError;
+    type Future = LocalBoxFuture<'static, Result<Self, Self::Error>>;
+
+    fn from_request(req: &actix_web::HttpRequest, _: &mut actix_http::Payload) -> Self::Future {
+        let req = req.clone();
+        let auth = Authorization::<Bearer>::parse(&req);
+
+        Box::pin(async move {
+            let token = match auth {
+                Ok(auth) => auth.into_scheme().token().to_owned(),
+                Err(_) => return Err(FromRequestError::UnknownToken),
+            };
+
+            let session_store = req.app_data::<Data<RedisSessionStore>>().unwrap();
+            let session = session_store
+                .load_session(&token)
+                .await
+                .map_err(FromRequestError::RedisError)?;
+
+            match session {
+                Some(session) => Ok(session),
+                None => Err(FromRequestError::UnknownToken),
+            }
+        })
     }
 }

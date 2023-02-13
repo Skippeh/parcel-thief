@@ -48,6 +48,27 @@ struct Options {
 
     #[arg(long = "database-url", env = "DATABASE_URL")]
     database_url: String,
+
+    /// The public url that people can reach this server from. Do not end the url with a '/'.
+    ///
+    /// Example: https://ds.mydomain.com
+    #[arg(long = "gateway-url", env = "GATEWAY_URL")]
+    gateway_url: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct GatewayUrl(String);
+
+impl<'a> From<&'a GatewayUrl> for &'a str {
+    fn from(value: &'a GatewayUrl) -> Self {
+        &value.0
+    }
+}
+
+impl From<GatewayUrl> for String {
+    fn from(value: GatewayUrl) -> Self {
+        value.0
+    }
 }
 
 #[actix_web::main]
@@ -66,13 +87,16 @@ async fn main() -> Result<()> {
     );
 
     let database = web::Data::new(Database::new(&args.database_url));
-    let arc_db = database.clone().into_inner();
-    let accounts = web::Data::new(Accounts::new(arc_db.clone()));
 
     // Test database connection
     database
         .connect()
         .context("Could not connect to database")?;
+
+    log::info!(
+        "Launching server with the public gateway url set to \"{}/e\"",
+        args.gateway_url
+    );
 
     HttpServer::new(move || {
         App::new()
@@ -80,8 +104,10 @@ async fn main() -> Result<()> {
             .app_data(steam_data.clone())
             .app_data(session_store.clone())
             .app_data(database.clone())
-            .app_data(accounts.clone())
-            .configure(configure_endpoints)
+            .app_data(web::Data::new(GatewayUrl(format!(
+                "{}/e",
+                args.gateway_url
+            ))))
             .service(
                 actix_web::web::scope("/e")
                     .configure(configure_endpoints)
@@ -91,6 +117,7 @@ async fn main() -> Result<()> {
                     }),
             )
             .service(endpoints::auth::auth)
+            .service(endpoints::auth::me::me)
             .wrap(actix_middleware::Logger::default())
     })
     .bind((args.bind_address, args.listen_port))?

@@ -10,6 +10,8 @@ const URL_AUTH_USER_TICKET: &str =
 const URL_GET_PLAYER_SUMMARIES: &str =
     "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/";
 
+pub type SteamId = i64;
+
 #[derive(Debug, Deserialize)]
 struct ApiResponse<T> {
     response: Response<T>,
@@ -66,8 +68,8 @@ struct AuthenticateUserTicketParams {
 
 #[derive(Debug)]
 pub struct UserSteamId {
-    pub steam_id: u64,
-    pub owner_steam_id: u64,
+    pub steam_id: SteamId,
+    pub owner_steam_id: SteamId,
 }
 
 impl Display for UserSteamId {
@@ -81,7 +83,7 @@ impl Display for UserSteamId {
 }
 
 impl UserSteamId {
-    pub fn new(steam_id: u64, owner_steam_id: u64) -> Self {
+    pub fn new(steam_id: SteamId, owner_steam_id: SteamId) -> Self {
         Self {
             steam_id,
             owner_steam_id,
@@ -99,12 +101,12 @@ struct ReqPlayerSummary {
 
 #[derive(Debug, Deserialize)]
 pub struct PlayerSummary {
-    pub steam_id: u64,
+    pub steam_id: SteamId,
     pub name: String,
 }
 
 impl PlayerSummary {
-    pub fn new(steam_id: u64, name: String) -> Self {
+    pub fn new(steam_id: SteamId, name: String) -> Self {
         Self { steam_id, name }
     }
 }
@@ -191,11 +193,11 @@ impl Steam {
                 match response.response {
                     Response::Ok(data) => {
                         let params = data.params;
-                        let steam_id = params.steam_id.parse::<u64>().map_err(|err| {
+                        let steam_id = params.steam_id.parse::<SteamId>().map_err(|err| {
                             VerifyUserAuthTicketError::UnexpectedApiResponse(err.into())
                         })?;
                         let owner_steam_id =
-                            params.owner_steam_id.parse::<u64>().map_err(|err| {
+                            params.owner_steam_id.parse::<SteamId>().map_err(|err| {
                                 VerifyUserAuthTicketError::UnexpectedApiResponse(err.into())
                             })?;
                         Ok(UserSteamId::new(steam_id, owner_steam_id))
@@ -216,8 +218,8 @@ impl Steam {
 
     pub async fn get_player_summaries(
         &self,
-        user_ids: Vec<u64>,
-    ) -> Result<HashMap<u64, PlayerSummary>, anyhow::Error> {
+        user_ids: &[&SteamId],
+    ) -> Result<HashMap<SteamId, PlayerSummary>, anyhow::Error> {
         let mut builder = self.create_request(reqwest::Method::GET, URL_GET_PLAYER_SUMMARIES);
 
         builder = builder.query(
@@ -238,10 +240,10 @@ impl Steam {
 
                 match response.response {
                     Response::Ok(data) => {
-                        let mut hashmap = HashMap::<u64, PlayerSummary>::new();
+                        let mut hashmap = HashMap::<SteamId, PlayerSummary>::new();
 
                         for player in data.players {
-                            let steam_id = player.steam_id.parse::<u64>()?;
+                            let steam_id = player.steam_id.parse::<SteamId>()?;
 
                             hashmap.insert(steam_id, PlayerSummary::new(steam_id, player.name));
                         }
