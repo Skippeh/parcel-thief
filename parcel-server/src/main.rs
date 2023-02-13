@@ -16,17 +16,18 @@ use actix_web::{
 };
 use anyhow::{Context, Result};
 use clap::Parser;
-use data::{accounts::Accounts, database::Database, steam::Steam};
-use diesel::{Connection, PgConnection};
+use data::{database::Database, steam::Steam};
 use endpoints::configure_endpoints;
 use session::redis::RedisSessionStore;
 
+use crate::middleware::wrap_errors;
+
 #[derive(Parser)]
 struct Options {
-    #[arg(long = "bind_addr", default_value = "0.0.0.0")]
+    #[arg(long = "bind_addr", default_value = "0.0.0.0", env = "BIND_ADDRESS")]
     bind_address: IpAddr,
 
-    #[arg(long = "port", default_value_t = 8080)]
+    #[arg(long = "port", default_value_t = 8080, env = "LISTEN_PORT")]
     listen_port: u16,
 
     /// If specified encryption will be optional. This means that the client can decide if encryption should be used for responses and decryption for requests.
@@ -118,6 +119,7 @@ async fn main() -> Result<()> {
             )
             .service(endpoints::auth::auth)
             .service(endpoints::auth::me::me)
+            .wrap(wrap_errors::WrapErrors::default())
             .wrap(actix_middleware::Logger::default())
     })
     .bind((args.bind_address, args.listen_port))?

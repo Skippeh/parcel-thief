@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use actix_http::StatusCode;
 
 pub trait CommonResponseError {
@@ -6,12 +8,31 @@ pub trait CommonResponseError {
     fn get_message(&self) -> String;
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct CommonError {
     pub status: String,
-    #[serde(rename = "code")]
-    pub status_code: u16,
+    #[serde(
+        rename = "code",
+        serialize_with = "serialize_status_code",
+        deserialize_with = "deserialize_status_code"
+    )]
+    pub status_code: StatusCode,
     pub message: String,
+}
+
+fn serialize_status_code<S>(val: &StatusCode, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    serializer.serialize_u16(val.as_u16())
+}
+
+fn deserialize_status_code<'de, D>(deserializer: D) -> Result<StatusCode, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let val: u16 = serde::de::Deserialize::deserialize(deserializer)?;
+    StatusCode::from_u16(val).map_err(serde::de::Error::custom)
 }
 
 macro_rules! impl_response_error {
@@ -44,4 +65,4 @@ macro_rules! impl_response_error {
 }
 
 pub(crate) use impl_response_error;
-use serde::Serialize;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
