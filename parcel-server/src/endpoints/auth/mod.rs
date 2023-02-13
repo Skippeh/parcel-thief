@@ -216,7 +216,7 @@ pub async fn auth(
             token: session.get_token().to_owned(),
             gateway: gateway_url.as_ref().clone().into(),
             properties: SessionProperties {
-                last_login: login_date.timestamp_millis(),
+                last_login: login_date.timestamp(),
             },
         },
     };

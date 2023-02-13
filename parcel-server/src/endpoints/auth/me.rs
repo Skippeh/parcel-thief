@@ -84,7 +84,7 @@ pub async fn me(
             gateway: gateway_url.as_ref().clone().into(),
             token: session.get_token().to_owned(),
             properties: SessionProperties {
-                last_login: account.last_login_date.timestamp_millis(),
+                last_login: account.last_login_date.timestamp(),
             },
         },
         user: UserInfo {
