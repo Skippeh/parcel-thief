@@ -42,16 +42,19 @@ impl RedisSessionStore {
 
         let key = self.get_session_key(session.get_token());
         let value = serde_json::to_string(&session).unwrap();
-        connection.set::<_, _, String>(&key, &value).await?;
         connection
-            .expire_at::<_, i32>(&key, session.expire_date.timestamp() as usize)
+            .pset_ex::<_, _, String>(
+                &key,
+                &value,
+                session.expire_date.timestamp_millis() as usize,
+            )
             .await?;
         self.set_reverse_lookup_token(
             connection,
             &session.provider,
             &session.provider_id,
             session.get_token(),
-            session.expire_date.timestamp() as usize,
+            session.expire_date.timestamp_millis() as usize,
         )
         .await?;
 
@@ -142,13 +145,10 @@ impl RedisSessionStore {
         provider: &Provider,
         provider_id: &str,
         token: &str,
-        expire_at_secs: usize,
+        expire_at_millis: usize,
     ) -> Result<(), RedisError> {
         let key = self.get_session_reverse_lookup_key(provider, provider_id);
-        conn.set(&key, token).await?;
-        conn.expire_at(&key, expire_at_secs).await?;
-
-        Ok(())
+        conn.pset_ex(&key, token, expire_at_millis).await
     }
 
     async fn get_reverse_lookup_token(
