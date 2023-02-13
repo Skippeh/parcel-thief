@@ -62,15 +62,10 @@ impl CommonResponseError for Error {
 /// Leaving it in for production is safe since the same info is sent to the client on auth.
 #[get("auth/me")]
 pub async fn me(
-    session: Option<Session>,
+    session: Session,
     database: Data<Database>,
     gateway_url: Data<GatewayUrl>,
 ) -> Result<impl Responder, Error> {
-    if session.is_none() {
-        return Ok(HttpResponse::Unauthorized().finish());
-    }
-
-    let session = session.unwrap();
     let db = database.connect()?;
     let accounts = db.accounts();
     let account = accounts
