@@ -67,7 +67,10 @@ async fn main() -> Result<(), anyhow::Error> {
             let mut should_exit = false;
             let mut should_eject = false;
             select! {
-                _ = wait_for_next_key() => { should_exit = true; }
+                _ = wait_for_next_key() => {
+                    should_eject = true;
+                    should_exit = true;
+                }
                 _ = wait_for_file_change(&args.dll_path) => {
                     println!("File change detected, reloading dll");
                     should_eject = true;
@@ -87,9 +90,9 @@ async fn main() -> Result<(), anyhow::Error> {
                         println!("Failed to eject: {err:?}");
                     }
                 };
-            }
 
-            std::fs::remove_file(&copied_dll_path).context("Failed to delete temporary dll")?;
+                std::fs::remove_file(&copied_dll_path).context("Failed to delete temporary dll")?;
+            }
 
             if should_exit {
                 break;
