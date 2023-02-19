@@ -90,7 +90,9 @@ async fn main() -> Result<(), anyhow::Error> {
                         println!("Failed to eject: {err:?}");
                     }
                 };
+            }
 
+            if should_eject || should_exit {
                 std::fs::remove_file(&copied_dll_path).context("Failed to delete temporary dll")?;
             }
 
