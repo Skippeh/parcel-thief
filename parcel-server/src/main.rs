@@ -7,7 +7,12 @@ mod middleware;
 mod response_error;
 mod session;
 
-use std::net::IpAddr;
+use std::{
+    fs::File,
+    io::BufReader,
+    net::IpAddr,
+    path::{Path, PathBuf},
+};
 
 use actix_web::{
     middleware as actix_middleware,
@@ -18,6 +23,8 @@ use anyhow::{Context, Result};
 use clap::Parser;
 use data::{database::Database, steam::Steam};
 use endpoints::configure_endpoints;
+use rustls::{Certificate, PrivateKey};
+use rustls_pemfile::{certs, pkcs8_private_keys};
 use session::redis::RedisSessionStore;
 
 use crate::middleware::wrap_errors;
@@ -29,6 +36,12 @@ struct Options {
 
     #[arg(long = "port", default_value_t = 8080, env = "LISTEN_PORT")]
     listen_port: u16,
+
+    #[arg(long = "cert-private-key", env = "CERT_PRIVATE_KEY")]
+    cert_private_key: Option<PathBuf>,
+
+    #[arg(long = "cert-public-key", env = "CERT_PUBLIC_KEY")]
+    cert_public_key: Option<PathBuf>,
 
     /// If specified encryption will be optional. This means that the client can decide if encryption should be used for responses and decryption for requests.
     ///
@@ -78,6 +91,10 @@ async fn main() -> Result<()> {
     let args = Options::parse();
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("error,warn,info,debug"));
 
+    if args.cert_private_key.is_some() != args.cert_public_key.is_some() {
+        anyhow::bail!("Both or none of the public and private keys needs to be specified");
+    }
+
     // Create potentially mutable data outside of the HttpService factory, otherwise each worker thread will not share the same data globally.
     let steam_data = web::Data::new(Steam::new(args.steam_api_key.clone()).unwrap());
 
@@ -94,25 +111,23 @@ async fn main() -> Result<()> {
         .connect()
         .context("Could not connect to database")?;
 
+    let gateway_url = format!("{}/ds", args.gateway_url);
+
     log::info!(
-        "Launching server with the public gateway url set to \"{}/e\"",
-        args.gateway_url
+        "Launching server with the public gateway url set to \"{}\"",
+        gateway_url
     );
 
-    HttpServer::new(move || {
+    let mut builder = HttpServer::new(move || {
         App::new()
             .app_data(JsonConfig::default().content_type_required(false)) // don't require Content-Type: application/json header to parse json request body
             .app_data(steam_data.clone())
             .app_data(session_store.clone())
             .app_data(database.clone())
-            .app_data(web::Data::new(GatewayUrl(format!(
-                "{}/e",
-                args.gateway_url
-            ))))
+            .app_data(web::Data::new(GatewayUrl(gateway_url.clone())))
             .service(
-                actix_web::web::scope("/e")
-                    .configure(configure_endpoints)
-                    // Make sure this is last middleware so that the data is decrypted before doing anything else that interacts with the encrypted data
+                actix_web::web::scope("/ds/e")
+                    .configure(configure_endpoints) // Make sure this is last middleware so that the data is decrypted before doing anything else that interacts with the encrypted data
                     .wrap(middleware::encryption::DataEncryption {
                         optional_encryption: args.optional_encryption,
                     }),
@@ -121,9 +136,46 @@ async fn main() -> Result<()> {
             .service(endpoints::auth::me::me)
             .wrap(wrap_errors::WrapErrors::default())
             .wrap(actix_middleware::Logger::default())
-    })
-    .bind((args.bind_address, args.listen_port))?
-    .run()
-    .await
-    .map_err(|err| err.into())
+    });
+
+    if args.cert_public_key.is_some() {
+        let ssl_config = load_rustls_config(
+            args.cert_private_key.as_ref().unwrap(),
+            args.cert_public_key.as_ref().unwrap(),
+        );
+        builder = builder.bind_rustls(
+            (args.bind_address, args.listen_port),
+            ssl_config.context("Could not load ssl config")?,
+        )?;
+    } else {
+        builder = builder.bind((args.bind_address, args.listen_port))?;
+    }
+
+    builder.run().await.map_err(|err| err.into())
+}
+
+fn load_rustls_config(
+    private_key_path: &Path,
+    public_key_path: &Path,
+) -> Result<rustls::ServerConfig> {
+    let config = rustls::ServerConfig::builder()
+        .with_safe_defaults()
+        .with_no_client_auth();
+
+    let key_file = &mut BufReader::new(File::open(private_key_path)?);
+    let cert_file = &mut BufReader::new(File::open(public_key_path)?);
+
+    let cert_chain = certs(cert_file)?.into_iter().map(Certificate).collect();
+    let mut keys: Vec<PrivateKey> = pkcs8_private_keys(key_file)?
+        .into_iter()
+        .map(PrivateKey)
+        .collect();
+
+    if keys.is_empty() {
+        anyhow::bail!(
+            "Could not load private keys from file. Make sure the key is of PKCS8 format."
+        );
+    }
+
+    Ok(config.with_single_cert(cert_chain, keys.remove(0))?)
 }
