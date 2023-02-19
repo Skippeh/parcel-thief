@@ -11,6 +11,10 @@ anyhow = "1.0.57"
 detour = { git = "https://github.com/Hpmason/detour-rs", branch = "fix-nightly1.67.0-changes" }
 lazy_static = "1.4.0"
 libc = "0.2.139"
+parcel-common = { path = "../../parcel-common" }
+memchr = "2.5.0"
+patternscan = "1.2.0"
+thiserror = "1.0.38"
 
 [dependencies.tokio]
 version = "1"
@@ -23,4 +27,6 @@ features = [
     "Win32_Foundation",
     "Win32_System_SystemServices",
     "Win32_System_LibraryLoader",
+    "Win32_System_Diagnostics_Debug",
+    "Win32_System_SystemInformation"
 ]
