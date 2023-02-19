@@ -194,6 +194,11 @@ where
 
             let service_response = service.call(req).await?;
 
+            // Don't encrypt errors. No information will be leaked because errors are caught by the WrapErrors middleware and if necessary, are made opaque
+            if service_response.response().error().is_some() {
+                return Ok(service_response.map_into_left_body());
+            }
+
             if use_encryption {
                 // get body from response (if any)
                 let (req, res) = service_response.into_parts();
