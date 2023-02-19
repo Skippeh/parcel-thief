@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Display};
+use std::{collections::HashMap, fmt::Display, ops::Sub};
 
 use chrono::{TimeZone, Utc};
 use parcel_common::api_types::auth::Provider;
@@ -46,7 +46,7 @@ impl RedisSessionStore {
             .pset_ex::<_, _, String>(
                 &key,
                 &value,
-                session.expire_date.timestamp_millis() as usize,
+                session.expire_date.sub(Utc::now()).num_milliseconds() as usize,
             )
             .await?;
         self.set_reverse_lookup_token(
@@ -54,7 +54,7 @@ impl RedisSessionStore {
             &session.provider,
             &session.provider_id,
             session.get_token(),
-            session.expire_date.timestamp_millis() as usize,
+            session.expire_date.sub(Utc::now()).num_milliseconds() as usize,
         )
         .await?;
 
@@ -145,10 +145,10 @@ impl RedisSessionStore {
         provider: &Provider,
         provider_id: &str,
         token: &str,
-        expire_at_millis: usize,
+        expire_in_millis: usize,
     ) -> Result<(), RedisError> {
         let key = self.get_session_reverse_lookup_key(provider, provider_id);
-        conn.pset_ex(&key, token, expire_at_millis).await
+        conn.pset_ex(&key, token, expire_in_millis).await
     }
 
     async fn get_reverse_lookup_token(
