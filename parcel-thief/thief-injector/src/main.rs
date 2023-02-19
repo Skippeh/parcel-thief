@@ -36,7 +36,8 @@ async fn main() -> Result<(), anyhow::Error> {
         return Ok(());
     }
 
-    println!("Press any key to eject and exit at anytime.");
+    println!("Press any key to eject and exit at any time. The dll will automatically be re-injected when a change is detected.");
+    println!("Waiting for ds.exe...");
 
     loop {
         let target_process = OwnedProcess::find_first_by_name("ds");
