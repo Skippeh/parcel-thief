@@ -35,7 +35,11 @@ impl fmt::Display for EncryptionError {
                 write!(f, "The content body could not be decrypted: {:?}", err)
             }
             EncryptionError::EncryptResponseError(err) => {
-                write!(f, "An internal error occured when encrypting response data")
+                write!(
+                    f,
+                    "An internal error occured when encrypting response data: {}",
+                    err
+                )
             }
         }
     }
