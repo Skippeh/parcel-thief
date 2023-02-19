@@ -1,14 +1,11 @@
 use std::fmt::Display;
 
-use crate::offsets::Offsets;
-
 pub fn find_single(
     start_abs_addr: usize,
     search_length: usize,
     pattern: &str,
-    offsets: &Offsets,
 ) -> Result<Option<usize>, MemoryReaderError> {
-    let reader = MemoryReader::new(start_abs_addr, search_length, offsets)?;
+    let reader = MemoryReader::new(start_abs_addr, search_length)?;
     patternscan::scan_first_match(reader, pattern)
         .map_err(|err| err.into())
         .map(|addr| addr.map(|addr| addr + start_abs_addr))
@@ -18,9 +15,8 @@ pub fn find_many(
     start_abs_addr: usize,
     search_length: usize,
     pattern: &str,
-    offsets: &Offsets,
 ) -> Result<Vec<usize>, MemoryReaderError> {
-    let reader = MemoryReader::new(start_abs_addr, search_length, offsets)?;
+    let reader = MemoryReader::new(start_abs_addr, search_length)?;
     patternscan::scan(reader, pattern)
         .map_err(|err| err.into())
         .map(|res| res.into_iter().map(|val| val + start_abs_addr).collect())
@@ -57,15 +53,7 @@ impl From<patternscan::Error> for MemoryReaderError {
 }
 
 impl MemoryReader {
-    pub fn new(
-        start_addr: usize,
-        len: usize,
-        offsets: &Offsets,
-    ) -> Result<Self, MemoryReaderError> {
-        if !offsets.range_in_module(start_addr, len) {
-            return Err(MemoryReaderError::RangeOutOfBounds);
-        }
-
+    pub fn new(start_addr: usize, len: usize) -> Result<Self, MemoryReaderError> {
         Ok(Self {
             start_addr,
             len,

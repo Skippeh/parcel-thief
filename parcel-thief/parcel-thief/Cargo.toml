@@ -15,6 +15,7 @@ parcel-common = { path = "../../parcel-common" }
 memchr = "2.5.0"
 patternscan = "1.2.0"
 thiserror = "1.0.38"
+enum-display-derive = "0.1.1"
 
 [dependencies.tokio]
 version = "1"

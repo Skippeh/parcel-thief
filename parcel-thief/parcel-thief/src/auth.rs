@@ -1,4 +1,7 @@
-use crate::{ds_string::DsString, offsets::OFFSETS};
+use crate::{
+    ds_string::DsString,
+    offsets::{LocationOffset, OFFSETS},
+};
 
 pub unsafe fn load() {
     set_auth_url("http://localhost/auth/ds");
@@ -12,7 +15,7 @@ unsafe fn set_auth_url(url: &str) {
     let auth_url_ptr = *OFFSETS
         .read()
         .unwrap()
-        .cast_mapped_offset::<*mut *mut DsString>("auth_url")
+        .cast_mapped_offset::<*mut *mut DsString>(LocationOffset::DataAuthUrlPtr)
         .unwrap();
 
     // Technically this creates a memory leak since the string is never free'd.

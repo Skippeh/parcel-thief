@@ -1,7 +1,10 @@
 use detour::static_detour;
 use parcel_common::aes;
 
-use crate::{ds_string::DsString, offsets::OFFSETS};
+use crate::{
+    ds_string::DsString,
+    offsets::{LocationOffset, OFFSETS},
+};
 
 static_detour! {
     static WRITE_OUTGOING_DATA_HOOK: unsafe extern "fastcall" fn(i32, *const *const DsString, *mut *mut DsString);
@@ -13,7 +16,7 @@ pub unsafe fn hook() -> Result<(), anyhow::Error> {
             *OFFSETS
                 .read()
                 .unwrap()
-                .cast_mapped_offset("write_outgoing_data")
+                .cast_mapped_offset(LocationOffset::FnWriteOutgoingData)
                 .unwrap(),
             write_outgoing_data_detour,
         )?

@@ -12,8 +12,6 @@ use windows::Win32::{
     },
 };
 
-use crate::offsets::OFFSETS;
-
 mod auth;
 mod detours;
 mod ds_string;
@@ -28,7 +26,7 @@ impl ParcelThief {
         AllocConsole();
         println!("ParcelThief::start");
 
-        map_offsets().context("Failed to map offsets")?;
+        offsets::map_offsets().context("Failed to map offsets")?;
 
         println!("mapped offsets");
 
@@ -55,41 +53,6 @@ impl ParcelThief {
 
         Ok(())
     }
-}
-
-fn map_offsets() -> Result<(), anyhow::Error> {
-    let offsets = &mut OFFSETS.write().unwrap();
-
-    offsets
-        .map_pattern_offset(
-            "String::ctor",
-            "40 53 48 83 EC 20 48 8B D9 48 C7 01 00 00 00 00 49 C7 C0 FF FF FF FF",
-        )
-        .context("Failed to find String::ctor offset")?;
-
-    offsets
-        .map_pattern_offset(
-            "String::dtor",
-            "40 53 48 83 EC 20 48 8B 19 48 8D 05 ? ? ? ? 48 83 EB 10",
-        )
-        .context("Failed to find String::dtor offset")?;
-
-    offsets
-        .map_pattern_offset(
-            "read_incoming_data",
-            "48 89 5C 24 08 55 56 57 41 56 41 57 48 83 EC 50 48 8B 05 D9 50 58 03 48 33 C4 48 89",
-        )
-        .context("Failed to find read_incoming_data offset")?;
-    offsets
-        .map_pattern_offset(
-            "write_outgoing_data",
-            "48 89 5C 24 08 48 89 74 24 20 55 57 41 56 48 8B EC 48 81 EC 80 00 00 00 48 8B 05 11",
-        )
-        .context("Failed to find write_outgoing_data offset")?;
-
-    offsets.map_offset("auth_url", 0x4DF8130)?;
-
-    Ok(())
 }
 
 lazy_static! {

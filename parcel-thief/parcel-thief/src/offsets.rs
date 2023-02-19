@@ -1,9 +1,11 @@
 use std::{
     collections::HashMap,
     fmt::Display,
+    hash::Hash,
     sync::{Arc, RwLock},
 };
 
+use anyhow::Context;
 use lazy_static::lazy_static;
 use windows::{
     w,
@@ -16,8 +18,55 @@ use windows::{
 
 use crate::pattern::MemoryReaderError;
 
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, enum_display_derive::Display)]
+pub enum LocationOffset {
+    FnStringCtor,
+    FnStringDtor,
+
+    FnReadIncomingData,
+    FnWriteOutgoingData,
+
+    DataAuthUrlPtr,
+}
+
+pub fn map_offsets() -> Result<(), anyhow::Error> {
+    let offsets = &mut OFFSETS.write().unwrap();
+
+    offsets
+        .map_pattern_offset(
+            LocationOffset::FnStringCtor,
+            "40 53 48 83 EC 20 48 8B D9 48 C7 01 00 00 00 00 49 C7 C0 FF FF FF FF",
+        )
+        .context("Failed to find String::ctor offset")?;
+
+    offsets
+        .map_pattern_offset(
+            LocationOffset::FnStringDtor,
+            "40 53 48 83 EC 20 48 8B 19 48 8D 05 ? ? ? ? 48 83 EB 10",
+        )
+        .context("Failed to find String::dtor offset")?;
+
+    offsets
+        .map_pattern_offset(
+            LocationOffset::FnReadIncomingData,
+            "48 89 5C 24 08 55 56 57 41 56 41 57 48 83 EC 50 48 8B 05 D9 50 58 03 48 33 C4 48 89",
+        )
+        .context("Failed to find read_incoming_data offset")?;
+    offsets
+        .map_pattern_offset(
+            LocationOffset::FnWriteOutgoingData,
+            "48 89 5C 24 08 48 89 74 24 20 55 57 41 56 48 8B EC 48 81 EC 80 00 00 00 48 8B 05 11",
+        )
+        .context("Failed to find write_outgoing_data offset")?;
+
+    offsets.map_offset(LocationOffset::DataAuthUrlPtr, 0x4DF8130)?;
+
+    Ok(())
+}
+
 lazy_static! {
-    pub static ref OFFSETS: Arc<RwLock<Offsets>> = Arc::new(RwLock::new(Offsets::new()));
+    pub static ref OFFSETS: Arc<RwLock<Offsets<LocationOffset>>> =
+        Arc::new(RwLock::new(Offsets::new()));
 }
 
 /// Get field offset in struct
@@ -64,14 +113,20 @@ impl Display for OffsetsError {
 }
 
 #[derive(Debug)]
-pub struct Offsets {
+pub struct Offsets<MapKey>
+where
+    MapKey: Copy + Eq + PartialEq + Hash + Display,
+{
     module_base: usize,
     module_size: usize,
     section_ranges: HashMap<String, (usize, usize)>,
-    mapped_offsets: HashMap<String, usize>,
+    mapped_offsets: HashMap<MapKey, usize>,
 }
 
-impl Offsets {
+impl<MapKey> Offsets<MapKey>
+where
+    MapKey: Copy + Eq + PartialEq + Hash + Display,
+{
     pub fn new() -> Self {
         unsafe {
             let module = GetModuleHandleW(w!("ds.exe")).unwrap();
@@ -183,8 +238,8 @@ impl Offsets {
     }
 
     /// Maps a relative offset with a given name. When retrieved later with get_mapped_offset the absolute address will be returned.
-    pub fn map_offset(&mut self, name: &str, relative_addr: usize) -> Result<(), OffsetsError> {
-        if self.mapped_offsets.contains_key(name) {
+    pub fn map_offset(&mut self, name: MapKey, relative_addr: usize) -> Result<(), OffsetsError> {
+        if self.mapped_offsets.contains_key(&name) {
             return Err(OffsetsError::KeyAlreadyMapped);
         }
 
@@ -198,15 +253,15 @@ impl Offsets {
         Ok(())
     }
 
-    pub fn map_pattern_offset(&mut self, name: &str, pattern: &str) -> Result<(), OffsetsError> {
+    pub fn map_pattern_offset(&mut self, name: MapKey, pattern: &str) -> Result<(), OffsetsError> {
         let (start, end) = self.get_module_range();
         let len = end - start;
 
-        if self.mapped_offsets.contains_key(name) {
+        if self.mapped_offsets.contains_key(&name) {
             return Err(OffsetsError::KeyAlreadyMapped);
         }
 
-        let offset = crate::pattern::find_single(start, len, pattern, self)?;
+        let offset = crate::pattern::find_single(start, len, pattern)?;
 
         match offset {
             Some(offset) => {
@@ -218,13 +273,13 @@ impl Offsets {
         }
     }
 
-    pub fn get_mapped_offset(&self, name: &str) -> Option<usize> {
-        self.mapped_offsets.get(name).copied()
+    pub fn get_mapped_offset(&self, name: MapKey) -> Option<usize> {
+        self.mapped_offsets.get(&name).copied()
     }
 
-    pub unsafe fn cast_mapped_offset<T>(&self, name: &str) -> Option<&'static T> {
+    pub unsafe fn cast_mapped_offset<T>(&self, name: MapKey) -> Option<&'static T> {
         self.mapped_offsets
-            .get(name)
+            .get(&name)
             .map(|addr| &*(addr as *const usize).cast::<T>())
     }
 

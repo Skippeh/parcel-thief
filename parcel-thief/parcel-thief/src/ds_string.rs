@@ -1,6 +1,6 @@
 use std::{ffi::CStr, marker::PhantomData};
 
-use crate::offsets::OFFSETS;
+use crate::offsets::{LocationOffset, OFFSETS};
 
 #[repr(C)]
 struct InternalData {
@@ -40,7 +40,7 @@ impl DsString {
         let ctor_fn = OFFSETS
             .read()
             .unwrap()
-            .cast_mapped_offset::<StringCtor>("String::ctor")
+            .cast_mapped_offset::<StringCtor>(LocationOffset::FnStringCtor)
             .unwrap();
 
         let mut val_bytes_with_nul = vec![0u8; val.len() + 1];
@@ -60,7 +60,7 @@ impl DsString {
         let dtor_fn = OFFSETS
             .read()
             .unwrap()
-            .cast_mapped_offset::<StringDtor>("String::dtor")
+            .cast_mapped_offset::<StringDtor>(LocationOffset::FnStringDtor)
             .unwrap();
 
         let addr = &*std::pin::pin!(ds_str as *const DsString) as _;
