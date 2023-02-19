@@ -14,6 +14,7 @@ use windows::Win32::{
 
 use crate::offsets::OFFSETS;
 
+mod auth;
 mod detours;
 mod ds_string;
 mod offsets;
@@ -33,6 +34,10 @@ impl ParcelThief {
 
         detours::load().context("Could not load detours")?;
 
+        println!("setting auth url");
+
+        auth::load();
+
         println!("gaming");
 
         Ok(())
@@ -42,6 +47,7 @@ impl ParcelThief {
         println!("ParcelThief::stop");
 
         detours::unload().context("Could not unload detours")?;
+        auth::unload();
 
         println!("no longer gaming");
 
@@ -80,6 +86,8 @@ fn map_offsets() -> Result<(), anyhow::Error> {
             "48 89 5C 24 08 48 89 74 24 20 55 57 41 56 48 8B EC 48 81 EC 80 00 00 00 48 8B 05 11",
         )
         .context("Failed to find write_outgoing_data offset")?;
+
+    offsets.map_offset("auth_url", 0x4DF8130)?;
 
     Ok(())
 }
