@@ -40,8 +40,7 @@ impl DsString {
         let ctor_fn = OFFSETS
             .read()
             .unwrap()
-            .cast_mapped_offset::<StringCtor>(LocationOffset::FnStringCtor)
-            .unwrap();
+            .cast_mapped_offset::<StringCtor>(LocationOffset::FnStringCtor);
 
         let mut val_bytes_with_nul = vec![0u8; val.len() + 1];
         if !val.is_empty() {
@@ -60,8 +59,7 @@ impl DsString {
         let dtor_fn = OFFSETS
             .read()
             .unwrap()
-            .cast_mapped_offset::<StringDtor>(LocationOffset::FnStringDtor)
-            .unwrap();
+            .cast_mapped_offset::<StringDtor>(LocationOffset::FnStringDtor);
 
         let addr = &*std::pin::pin!(ds_str as *const DsString) as _;
         dtor_fn(addr);

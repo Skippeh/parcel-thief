@@ -273,14 +273,18 @@ where
         }
     }
 
-    pub fn get_mapped_offset(&self, name: MapKey) -> Option<usize> {
-        self.mapped_offsets.get(&name).copied()
+    pub fn get_mapped_offset(&self, name: MapKey) -> usize {
+        self.mapped_offsets
+            .get(&name)
+            .copied()
+            .expect("Expected known MapKey variant")
     }
 
-    pub unsafe fn cast_mapped_offset<T>(&self, name: MapKey) -> Option<&'static T> {
+    pub unsafe fn cast_mapped_offset<T>(&self, name: MapKey) -> &'static T {
         self.mapped_offsets
             .get(&name)
             .map(|addr| &*(addr as *const usize).cast::<T>())
+            .expect("Expected known MapKey variant")
     }
 
     /// Gets the name of the section the given address resides in, if any.

@@ -16,8 +16,7 @@ pub unsafe fn hook() -> Result<(), anyhow::Error> {
             *OFFSETS
                 .read()
                 .unwrap()
-                .cast_mapped_offset(LocationOffset::FnWriteOutgoingData)
-                .unwrap(),
+                .cast_mapped_offset(LocationOffset::FnWriteOutgoingData),
             write_outgoing_data_detour,
         )?
         .enable()?)

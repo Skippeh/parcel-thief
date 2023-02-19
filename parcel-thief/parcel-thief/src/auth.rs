@@ -15,8 +15,7 @@ unsafe fn set_auth_url(url: &str) {
     let auth_url_ptr = *OFFSETS
         .read()
         .unwrap()
-        .cast_mapped_offset::<*mut *mut DsString>(LocationOffset::DataAuthUrlPtr)
-        .unwrap();
+        .cast_mapped_offset::<*mut *mut DsString>(LocationOffset::DataAuthUrlPtr);
 
     // Technically this creates a memory leak since the string is never free'd.
     // Realistically however this function is only called once, so complicating things doesn't do any favors.
