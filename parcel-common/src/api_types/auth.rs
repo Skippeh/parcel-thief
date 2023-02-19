@@ -2,7 +2,7 @@ use diesel::{
     backend::Backend, deserialize::FromSql, serialize::ToSql, sql_types::Integer, AsExpression,
     FromSqlRow,
 };
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct UserInfo {
@@ -14,8 +14,17 @@ pub struct UserInfo {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct SessionProperties {
     /// The epoch time in seconds of the last login (seems to always be same as the current time)
-    #[serde(rename = "ll")]
+    #[serde(rename = "ll", deserialize_with = "deserialize_i64_from_string")]
     pub last_login: i64,
+}
+
+fn deserialize_i64_from_string<'de, D>(deserializer: D) -> Result<i64, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let str = String::deserialize(deserializer)?;
+    str.parse::<i64>()
+        .map_err(|_| serde::de::Error::custom("unexpected value, not i64"))
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
