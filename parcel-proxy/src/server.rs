@@ -69,7 +69,7 @@ pub async fn start_http_server(
         .await
         .with_context(|| format!("Could not bind tcp listener to {addr}"))?;
 
-    println!("Listening on {}", addr);
+    log::info!("Listening on {}", addr);
 
     {
         let mut public_url = PUBLIC_URL.lock().await;
@@ -88,7 +88,7 @@ pub async fn start_http_server(
             false => format!("http://{}:{}/ds", gateway_domain, listen_port),
         };
 
-        println!("Gateway address set to {}", public_url);
+        log::info!("Gateway address set to {}", public_url);
     }
 
     loop {
@@ -104,7 +104,7 @@ pub async fn start_http_server(
         }
 
         if let Err(err) = result {
-            eprintln!("unhandled critical error: {:?}", err);
+            log::error!("unhandled critical error: {:?}", err);
         }
     }
 }
@@ -122,7 +122,7 @@ where
                     .await?;
             }
             Err(err) => {
-                eprintln!("error occured while proxying request: {}", err);
+                log::error!("error occured while proxying request: {}", err);
                 stream
                     .write_all(
                         Response::builder()
@@ -136,7 +136,7 @@ where
             }
         },
         Err(err) => {
-            eprintln!("invalid request received: {}", err);
+            log::error!("invalid request received: {}", err);
             stream
                 .write_all(
                     Response::builder()

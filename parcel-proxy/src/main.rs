@@ -41,9 +41,10 @@ struct Options {
 #[tokio::main]
 async fn main() -> anyhow::Result<ExitCode> {
     let args = Options::parse();
+    env_logger::init_from_env(env_logger::Env::new().default_filter_or("error,warn,info,debug"));
 
     if args.cert.is_some() != args.key.is_some() {
-        println!("Both certificate and private key paths need to be specified");
+        log::error!("Both certificate and private key paths need to be specified");
         return Ok(ExitCode::from(1));
     }
 
@@ -51,11 +52,13 @@ async fn main() -> anyhow::Result<ExitCode> {
         let mut log_directory = LOG_DIRECTORY.write().await;
         if let Some(logs_dir) = args.logs_dir {
             if !logs_dir.is_dir() {
-                println!("Logs directory does not point to a directory. Does the directory exist?");
+                log::error!(
+                    "Logs directory does not point to a directory. Does the directory exist?"
+                );
                 return Ok(ExitCode::from(1));
             } else {
                 let abs_path = std::fs::canonicalize(&logs_dir)?;
-                println!("Logs will be saved in \"{}\"", abs_path.display());
+                log::info!("Logs will be saved in \"{}\"", abs_path.display());
                 *log_directory = abs_path;
             }
         }
@@ -69,7 +72,7 @@ async fn main() -> anyhow::Result<ExitCode> {
     select! {
         result = start_http_server(secure_options, args.listen_port, args.bind_interface, args.gateway_domain.as_deref()) => {
             if let Err(err) = result {
-                eprintln!("{:?}", err);
+                log::error!("{:?}", err);
             }
         }
         _ = tokio::signal::ctrl_c() => {}

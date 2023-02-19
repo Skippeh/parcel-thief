@@ -21,3 +21,5 @@ chrono = { version = "0.4.23", features = ["serde"] }
 base64 = "0.21.0"
 aes-gcm = "0.10.1"
 parcel-common = { path = "../parcel-common" }
+env_logger = "0.10.0"
+log = "0.4.17"

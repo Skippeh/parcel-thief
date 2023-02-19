@@ -1,6 +1,9 @@
 use anyhow::{Context, Result};
 use http::{Request, Response};
-use parcel_common::{aes, api_types::auth::AuthResponse};
+use parcel_common::{
+    aes,
+    api_types::{auth::AuthResponse, EncryptedData},
+};
 
 use crate::logger::{log_auth, log_gateway_request_and_response};
 
@@ -18,8 +21,8 @@ pub async fn handle_proxy_response(
         match handle_gateway_action(original_request, response).await {
             Ok(_) => {}
             Err(err) => {
-                println!("failed to record gateway action: {:?}", err);
-                println!("{}\n{}", original_request.body(), response.body());
+                log::error!("failed to record gateway action: {:?}", err);
+                log::error!("{}\n{}", original_request.body(), response.body());
             }
         }
     }

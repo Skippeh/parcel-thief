@@ -37,7 +37,7 @@ pub async fn log_gateway_request_and_response(
         _ => None,
     };
 
-    println!("{} {}", request.0.method(), request.0.uri().path());
+    log::info!("{} {}", request.0.method(), request.0.uri().path());
 
     let log_data = LogData {
         request: &deserialized_request,
@@ -51,8 +51,8 @@ pub async fn log_gateway_request_and_response(
 pub async fn log_auth(request: &Request<String>, mut response: AuthResponse) -> Result<()> {
     response.session.token = "***".into();
 
-    println!("{} {}", request.method(), request.uri().path());
-    println!("AUTH: Authenticated as {:?}", response.user);
+    log::info!("{} {}", request.method(), request.uri().path());
+    log::info!("AUTH: Authenticated as {:?}", response.user);
 
     let mut headers = BTreeMap::new();
     for header in request.headers() {
