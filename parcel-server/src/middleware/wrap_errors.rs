@@ -2,15 +2,15 @@ use std::future::{ready, Ready};
 
 use actix_http::{
     body::{BoxBody, EitherBody, MessageBody},
-    StatusCode,
+    HttpMessage, StatusCode,
 };
 use actix_web::{
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
-    web, Error, HttpResponse, ResponseError,
+    web, Error,
 };
 use futures_util::future::LocalBoxFuture;
 
-use crate::response_error::{CommonError, CommonResponseError};
+use crate::response_error::CommonError;
 
 // There are two steps in middleware processing.
 // 1. Middleware initialization, middleware factory gets called with
@@ -61,38 +61,41 @@ where
         Box::pin(async move {
             let res = fut.await?;
 
-            match res.response().error() {
-                Some(_) => {
-                    let (req, res) = res.into_parts();
-                    let (res, body) = res.into_parts();
-                    let bytes = body.try_into_bytes();
+            if res.response().error().is_some() || res.response().status() != StatusCode::OK {
+                let (req, res) = res.into_parts();
+                let (res, body) = res.into_parts();
+                let bytes = body.try_into_bytes();
 
-                    let new_response = match bytes {
-                        Ok(bytes) => {
-                            // try parse as CommonError, if it fails we should replace the original error as it might contain sensitive information
-                            if serde_json::from_slice::<CommonError>(&bytes).is_err() {
-                                log::debug!("Wrapping error response");
+                let new_response = match bytes {
+                    Ok(bytes) => {
+                        // try parse as CommonError, if it fails we should replace the original error as it might contain sensitive information
+                        if serde_json::from_slice::<CommonError>(&bytes).is_err() {
+                            log::debug!(
+                                "Wrapping error response. Status = {}, Error = {:#?}",
+                                res.status(),
+                                res.error()
+                            );
 
-                                let res_error = CommonError {
-                                    message: "internal error".into(),
-                                    status: "SV-IE".into(),
-                                    status_code: StatusCode::INTERNAL_SERVER_ERROR,
-                                };
+                            let res_error = CommonError {
+                                message: "internal error".into(),
+                                status: "SV-IE".into(),
+                                status_code: StatusCode::INTERNAL_SERVER_ERROR,
+                            };
 
-                                let bytes =
-                                    web::Bytes::from(serde_json::to_string(&res_error).unwrap());
+                            let bytes =
+                                web::Bytes::from(serde_json::to_string(&res_error).unwrap());
 
-                                res.set_body(BoxBody::new(bytes)).map_into_right_body()
-                            } else {
-                                res.set_body(BoxBody::new(bytes)).map_into_right_body()
-                            }
+                            res.set_body(BoxBody::new(bytes)).map_into_right_body()
+                        } else {
+                            res.set_body(BoxBody::new(bytes)).map_into_right_body()
                         }
-                        Err(body) => res.set_body(body).map_into_left_body(),
-                    };
+                    }
+                    Err(body) => res.set_body(body).map_into_left_body(),
+                };
 
-                    Ok(ServiceResponse::new(req, new_response))
-                }
-                None => Ok(res.map_into_left_body()),
+                Ok(ServiceResponse::new(req, new_response))
+            } else {
+                Ok(res.map_into_left_body())
             }
         })
     }
