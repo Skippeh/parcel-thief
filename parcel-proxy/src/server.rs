@@ -12,7 +12,7 @@ use lazy_static::lazy_static;
 use rustls_pemfile::{certs, pkcs8_private_keys};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
-    net::{TcpListener, TcpStream},
+    net::TcpListener,
     sync::Mutex,
 };
 use tokio_rustls::{

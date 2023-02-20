@@ -2,7 +2,7 @@ use std::{collections::HashMap, fmt::Display};
 
 use ::redis::RedisError;
 use actix_http::{header::Header, StatusCode};
-use actix_web::{web::Data, FromRequest, ResponseError};
+use actix_web::{web::Data, FromRequest};
 use actix_web_httpauth::headers::authorization::{Authorization, Bearer};
 use chrono::{DateTime, Utc};
 use futures_util::future::LocalBoxFuture;
@@ -28,14 +28,14 @@ pub struct Session {
 
 impl Session {
     pub fn new(
-        provider: &Provider,
+        provider: Provider,
         provider_id: &str,
         account_id: &str,
         token: String,
         expire_date: DateTime<Utc>,
     ) -> Self {
         Self {
-            provider: provider.clone(),
+            provider,
             provider_id: provider_id.into(),
             account_id: account_id.into(),
             token,
@@ -45,7 +45,7 @@ impl Session {
     }
 
     pub fn with_values(
-        provider: &Provider,
+        provider: Provider,
         provider_id: &str,
         account_id: &str,
         values: HashMap<String, String>,
@@ -53,7 +53,7 @@ impl Session {
         expire_date: DateTime<Utc>,
     ) -> Session {
         Self {
-            provider: provider.clone(),
+            provider,
             provider_id: provider_id.into(),
             account_id: account_id.into(),
             token,

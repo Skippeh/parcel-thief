@@ -1,4 +1,4 @@
-use actix_web::{post, web::Json, HttpRequest, HttpResponse, Responder};
+use actix_web::{post, web::Json, HttpResponse, Responder};
 use parcel_common::api_types::requests::set_construction_materials::SetConstructionMaterialsRequest;
 
 #[post("setConstructionMaterials")]

@@ -1,4 +1,4 @@
-use actix_web::{post, web::Json, HttpResponse, Responder};
+use actix_web::{post, web::Json, Responder};
 use parcel_common::api_types::requests::get_player_ranking_records::{
     GetPlayerRankingRecordsRequest, GetPlayerRankingRecordsResponse,
 };

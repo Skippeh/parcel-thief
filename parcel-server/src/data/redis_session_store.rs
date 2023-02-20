@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Display, ops::Sub, sync::Arc};
+use std::{fmt::Display, ops::Sub, sync::Arc};
 
 use chrono::{TimeZone, Utc};
 use parcel_common::api_types::auth::Provider;
@@ -43,7 +43,7 @@ impl RedisSessionStore {
             .await?;
         self.set_reverse_lookup_token(
             connection,
-            &session.provider,
+            session.provider,
             &session.provider_id,
             session.get_token(),
             session.expire_date.sub(Utc::now()).num_milliseconds() as usize,
@@ -111,7 +111,7 @@ impl RedisSessionStore {
             .await?;
         connection
             .del::<_, i32>(
-                self.get_session_reverse_lookup_key(&session.provider, &session.provider_id),
+                self.get_session_reverse_lookup_key(session.provider, &session.provider_id),
             )
             .await?;
 
@@ -120,11 +120,10 @@ impl RedisSessionStore {
 
     pub async fn find_active_session_token(
         &self,
-        provider: &Provider,
+        provider: Provider,
         provider_id: &str,
     ) -> RedisResult<Option<String>> {
         let connection = &mut self.client.lock().await;
-        let key = self.get_session_reverse_lookup_key(provider, provider_id);
 
         self.get_reverse_lookup_token(connection, provider, provider_id)
             .await
@@ -133,7 +132,7 @@ impl RedisSessionStore {
     async fn set_reverse_lookup_token(
         &self,
         conn: &mut Connection,
-        provider: &Provider,
+        provider: Provider,
         provider_id: &str,
         token: &str,
         expire_in_millis: usize,
@@ -145,7 +144,7 @@ impl RedisSessionStore {
     async fn get_reverse_lookup_token(
         &self,
         conn: &mut Connection,
-        provider: &Provider,
+        provider: Provider,
         provider_id: &str,
     ) -> RedisResult<Option<String>> {
         let key = self.get_session_reverse_lookup_key(provider, provider_id);
@@ -158,7 +157,7 @@ impl RedisSessionStore {
         format!("{}session/{}", self.prefix, token)
     }
 
-    fn get_session_reverse_lookup_key(&self, provider: &Provider, provider_id: &str) -> String {
+    fn get_session_reverse_lookup_key(&self, provider: Provider, provider_id: &str) -> String {
         format!(
             "{}session-reverse-lookup/{:?}_{}",
             self.prefix, provider, provider_id

@@ -9,7 +9,7 @@ use anyhow::Context;
 use clap::Parser;
 use lazy_static::lazy_static;
 use std::{
-    net::{IpAddr, SocketAddr, ToSocketAddrs},
+    net::{IpAddr, ToSocketAddrs},
     num::NonZeroU16,
     path::PathBuf,
     process::ExitCode,

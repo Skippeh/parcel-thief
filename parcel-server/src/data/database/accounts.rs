@@ -22,7 +22,7 @@ impl<'db> Accounts<'db> {
     /// Creates a new account with a randomized id and saves it to the database.
     pub async fn create(
         &self,
-        provider: &Provider,
+        provider: Provider,
         provider_id: &str,
         display_name: &str,
         last_login_date: &NaiveDateTime,
@@ -32,7 +32,7 @@ impl<'db> Accounts<'db> {
             .values(&NewAccount {
                 id: &generate_account_id(),
                 display_name,
-                provider,
+                provider: &provider,
                 provider_id,
                 last_login_date,
             })
@@ -43,7 +43,7 @@ impl<'db> Accounts<'db> {
 
     pub async fn get_by_provider_id(
         &self,
-        provider: &Provider,
+        provider: Provider,
         provider_id: &str,
     ) -> Result<Option<Account>, QueryError> {
         let conn = &mut *self.connection.get_pg_connection().await;

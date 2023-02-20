@@ -15,7 +15,6 @@ use std::{
 };
 
 use actix_web::{
-    middleware as actix_middleware,
     web::{self, JsonConfig},
     App, HttpServer,
 };

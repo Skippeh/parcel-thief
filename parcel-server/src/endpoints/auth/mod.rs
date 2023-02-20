@@ -154,13 +154,13 @@ pub async fn auth(
             provider_id = user_info.steam_id.to_string();
             display_name = user_info.name;
         }
-        other => return Err(Error::UnsupportedPlatform(other.clone())),
+        other => return Err(Error::UnsupportedPlatform(*other)),
     }
 
     let login_date = Utc::now().naive_utc();
 
     if let Some(token) = session_store
-        .find_active_session_token(&provider, &provider_id)
+        .find_active_session_token(provider, &provider_id)
         .await?
     {
         session_store.delete_session(&token).await?;
@@ -173,7 +173,7 @@ pub async fn auth(
     let accounts = db.accounts();
 
     // find account for provider id, or create it if it doesn't exist yet, and also update display name
-    let account = match accounts.get_by_provider_id(&provider, &provider_id).await? {
+    let account = match accounts.get_by_provider_id(provider, &provider_id).await? {
         Some(account) => {
             // update display name
             accounts
@@ -192,14 +192,14 @@ pub async fn auth(
             );
 
             accounts
-                .create(&provider, &provider_id, &display_name, &login_date)
+                .create(provider, &provider_id, &display_name, &login_date)
                 .await?
         }
     };
 
     // create session
     let session = Session::new(
-        &provider,
+        provider,
         &provider_id,
         &account.id,
         generate_session_token(),

@@ -1,9 +1,6 @@
 use anyhow::{Context, Result};
 use http::{Request, Response};
-use parcel_common::{
-    aes,
-    api_types::{auth::AuthResponse, EncryptedData},
-};
+use parcel_common::{aes, api_types::auth::AuthResponse};
 
 use crate::logger::{log_auth, log_gateway_request_and_response};
 

@@ -1,5 +1,3 @@
-use std::fmt::Display;
-
 use actix_http::StatusCode;
 
 pub trait CommonResponseError {

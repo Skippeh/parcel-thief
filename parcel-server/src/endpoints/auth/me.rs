@@ -2,11 +2,8 @@ use std::fmt::Display;
 
 use actix_http::StatusCode;
 use actix_web::{get, web::Data, HttpResponse, Responder};
-use parcel_common::api_types::auth::{
-    AuthResponse, Provider, SessionInfo, SessionProperties, UserInfo,
-};
+use parcel_common::api_types::auth::{AuthResponse, SessionInfo, SessionProperties, UserInfo};
 use redis::RedisError;
-use serde::Serialize;
 
 use crate::{
     data::database::Database,
@@ -69,7 +66,7 @@ pub async fn me(
     let db = database.connect()?;
     let accounts = db.accounts();
     let account = accounts
-        .get_by_provider_id(&session.provider, &session.provider_id)
+        .get_by_provider_id(session.provider, &session.provider_id)
         .await
         .map_err(|err| Error(err.into()))?
         .unwrap(); // This is safe since a session can't exist without an account
