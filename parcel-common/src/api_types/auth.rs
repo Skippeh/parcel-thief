@@ -3,6 +3,7 @@ use diesel::{
     FromSqlRow,
 };
 use serde::{Deserialize, Deserializer, Serialize};
+use serde_json::Value;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct UserInfo {
@@ -14,17 +15,28 @@ pub struct UserInfo {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct SessionProperties {
     /// The epoch time in seconds of the last login (seems to always be same as the current time)
-    #[serde(rename = "ll", deserialize_with = "deserialize_i64_from_string")]
+    #[serde(rename = "ll", deserialize_with = "deserialize_i64_from_string_or_i64")]
     pub last_login: i64,
 }
 
-fn deserialize_i64_from_string<'de, D>(deserializer: D) -> Result<i64, D::Error>
+fn deserialize_i64_from_string_or_i64<'de, D>(deserializer: D) -> Result<i64, D::Error>
 where
     D: Deserializer<'de>,
 {
-    let str = String::deserialize(deserializer)?;
-    str.parse::<i64>()
-        .map_err(|_| serde::de::Error::custom("unexpected value, not i64"))
+    let value = Value::deserialize(deserializer)?;
+
+    if value.is_string() {
+        let val = value.as_str().unwrap().parse().map_err(|_| {
+            serde::de::Error::custom(
+                "unexpected value, string does not contain a well formatted i64",
+            )
+        })?;
+        Ok(val)
+    } else {
+        Ok(value
+            .as_i64()
+            .ok_or_else(|| serde::de::Error::custom("unexpected value, not i64 or string"))?)
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
