@@ -100,7 +100,7 @@ pub async fn start_http_server(
             let stream = acceptor.unwrap().accept(stream).await?;
             result = handle_stream(stream).await;
         } else {
-            result = handle_stream::<TcpStream>(stream).await;
+            result = handle_stream(stream).await;
         }
 
         if let Err(err) = result {
@@ -117,6 +117,7 @@ where
         Ok(request) => match outgoing::proxy_request(&request).await {
             Ok(mut response) => {
                 handle_proxy_response(&request, &mut response).await?;
+
                 stream
                     .write_all(response.to_raw_http(None).as_bytes())
                     .await?;
@@ -152,7 +153,7 @@ where
 
     stream.shutdown().await?;
 
-    Ok(()) as Result<()>
+    Ok(())
 }
 
 fn load_certs(path: &Path) -> Result<Vec<Certificate>> {
