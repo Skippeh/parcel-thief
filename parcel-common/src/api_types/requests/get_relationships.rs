@@ -9,10 +9,10 @@ pub struct GetRelationshipsResponse {
     ///
     /// The official server returns 10 players.
     #[serde(rename = "history")]
-    history: Vec<RelationshipHistory>,
+    pub history: Vec<RelationshipHistory>,
     /// Players that we have a strand contract with.
     #[serde(rename = "strand")]
-    strand_contracts: Vec<StrandContract>,
+    pub strand_contracts: Vec<StrandContract>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

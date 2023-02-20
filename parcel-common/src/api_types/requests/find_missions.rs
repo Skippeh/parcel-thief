@@ -4,11 +4,11 @@ use crate::api_types::{area::AreaHash, mission::Mission};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct FindMissionsRequest {
-    #[serde(rename = "aid")]
+    #[serde(rename = "areaId")]
     pub area_hash: AreaHash,
     #[serde(rename = "limit")]
     pub limit: u32,
-    #[serde(rename = "lbp")]
+    #[serde(rename = "lpb")]
     pub limit_pot_baggages: u32,
     #[serde(rename = "mlpp")]
     pub mission_limit_per_pot: u32,
@@ -20,7 +20,7 @@ pub struct FindMissionsRequest {
     /// Player account ids that should be prioritized.
     /// These are the account ids of the strand contracts the player has.
     #[serde(rename = "targetIds")]
-    pub target_ids: Vec<String>,
+    pub target_ids: Option<Vec<String>>,
     /// No clue what this is for, but the value is seemingly always 60.
     #[serde(rename = "targetRate")]
     pub target_rate: i32,

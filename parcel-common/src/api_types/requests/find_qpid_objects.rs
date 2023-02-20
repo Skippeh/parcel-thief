@@ -12,7 +12,7 @@ pub struct FindQpidObjectsRequest {
     pub qpid_id: i32,
     /// Account ids of people we want to prioritize finding objects from
     #[serde(rename = "u")]
-    pub account_ids: Vec<String>,
+    pub account_ids: Option<Vec<String>>,
     #[serde(rename = "o")]
     pub object: Option<ObjectRequest>,
     #[serde(rename = "ro")]
