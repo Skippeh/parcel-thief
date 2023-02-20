@@ -68,6 +68,11 @@ struct Options {
     /// Example: https://ds.mydomain.com
     #[arg(long = "gateway-url", env = "GATEWAY_URL")]
     gateway_url: String,
+
+    /// If set, request logs will also include decrypted request body and response.
+    /// This is a lot slower than the normal logging, so don't use this in production.
+    #[arg(long, default_value_t = false)]
+    deep_logging: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -127,7 +132,11 @@ async fn main() -> Result<()> {
             .app_data(web::Data::new(GatewayUrl(gateway_url.clone())))
             .service(
                 actix_web::web::scope("/ds/e")
-                    .configure(configure_endpoints) // Make sure this is last middleware so that the data is decrypted before doing anything else that interacts with the encrypted data
+                    .configure(configure_endpoints)
+                    .wrap(middleware::deep_logger::DeepLogger {
+                        enabled: args.deep_logging,
+                    })
+                    // Make sure this is last middleware so that the data is decrypted before doing anything else that interacts with the encrypted data
                     .wrap(middleware::encryption::DataEncryption {
                         optional_encryption: args.optional_encryption,
                     }),
@@ -135,18 +144,16 @@ async fn main() -> Result<()> {
             .service(endpoints::auth::auth)
             .service(endpoints::auth::me::me)
             .wrap(wrap_errors::WrapErrors::default())
-            .wrap(actix_middleware::Logger::default())
+            .wrap(actix_web::middleware::Logger::default())
     });
 
     if args.cert_public_key.is_some() {
         let ssl_config = load_rustls_config(
             args.cert_private_key.as_ref().unwrap(),
             args.cert_public_key.as_ref().unwrap(),
-        );
-        builder = builder.bind_rustls(
-            (args.bind_address, args.listen_port),
-            ssl_config.context("Could not load ssl config")?,
-        )?;
+        )
+        .context("Could not load ssl config")?;
+        builder = builder.bind_rustls((args.bind_address, args.listen_port), ssl_config)?;
     } else {
         builder = builder.bind((args.bind_address, args.listen_port))?;
     }
