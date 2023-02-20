@@ -21,13 +21,12 @@ use actix_web::{
 };
 use anyhow::{Context, Result};
 use clap::Parser;
-use data::{database::Database, steam::Steam};
+use data::{database::Database, redis_client::RedisClient, steam::Steam};
 use endpoints::configure_endpoints;
 use rustls::{Certificate, PrivateKey};
 use rustls_pemfile::{certs, pkcs8_private_keys};
-use session::redis::RedisSessionStore;
 
-use crate::middleware::wrap_errors;
+use crate::{data::redis_session_store::RedisSessionStore, middleware::wrap_errors};
 
 #[derive(Parser)]
 struct Options {
@@ -101,14 +100,18 @@ async fn main() -> Result<()> {
     }
 
     // Create potentially mutable data outside of the HttpService factory, otherwise each worker thread will not share the same data globally.
-    let steam_data = web::Data::new(Steam::new(args.steam_api_key.clone()).unwrap());
-
-    let session_store = web::Data::new(
-        RedisSessionStore::new(args.redis_connection_string, "ds-session/")
+    let redis_connection = web::Data::new(
+        RedisClient::connect(args.redis_connection_string)
             .await
-            .context("could not connect to redis server")?,
+            .context("Could not connect to redis server")?,
     );
 
+    let redis_client = redis_connection.clone().into_inner();
+    let steam_data = web::Data::new(
+        Steam::new(args.steam_api_key.clone(), redis_client.clone(), "steam/")
+            .context("Could not create steam web api client")?,
+    );
+    let session_store = web::Data::new(RedisSessionStore::new(redis_client.clone(), "ds-session/"));
     let database = web::Data::new(Database::new(&args.database_url));
 
     // Test database connection
@@ -126,6 +129,7 @@ async fn main() -> Result<()> {
     let mut builder = HttpServer::new(move || {
         App::new()
             .app_data(JsonConfig::default().content_type_required(false)) // don't require Content-Type: application/json header to parse json request body
+            .app_data(redis_client.clone())
             .app_data(steam_data.clone())
             .app_data(session_store.clone())
             .app_data(database.clone())

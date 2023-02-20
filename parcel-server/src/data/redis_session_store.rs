@@ -1,13 +1,15 @@
-use std::{collections::HashMap, fmt::Display, ops::Sub};
+use std::{collections::HashMap, fmt::Display, ops::Sub, sync::Arc};
 
 use chrono::{TimeZone, Utc};
 use parcel_common::api_types::auth::Provider;
-use redis::{aio::Connection, AsyncCommands, Client, IntoConnectionInfo, RedisResult};
+use redis::{aio::Connection, AsyncCommands, RedisResult};
 
-use super::{RedisError, Session};
+use crate::session::Session;
+
+use super::redis_client::RedisClient;
 
 pub struct RedisSessionStore {
-    client: Client,
+    client: Arc<RedisClient>,
     prefix: String,
 }
 
@@ -21,25 +23,15 @@ impl Display for InvalidTokenError {
 }
 
 impl RedisSessionStore {
-    pub async fn new<T>(connection_string: T, prefix: &str) -> RedisResult<Self>
-    where
-        T: IntoConnectionInfo,
-    {
-        let client = Client::open(connection_string)?;
-        let res = Self {
+    pub fn new(client: Arc<RedisClient>, prefix: &str) -> Self {
+        Self {
             client,
             prefix: prefix.into(),
-        };
-
-        // fail early if connection doesn't work
-        res.connect().await?;
-
-        Ok(res)
+        }
     }
 
-    pub async fn save_session(&self, session: &Session) -> Result<(), RedisError> {
-        let connection = &mut self.connect().await?;
-
+    pub async fn save_session(&self, session: &Session) -> RedisResult<()> {
+        let connection = &mut self.client.lock().await;
         let key = self.get_session_key(session.get_token());
         let value = serde_json::to_string(&session).unwrap();
         connection
@@ -61,9 +53,8 @@ impl RedisSessionStore {
         Ok(())
     }
 
-    pub async fn load_session(&self, token: &str) -> Result<Option<Session>, RedisError> {
-        let connection = &mut self.connect().await?;
-
+    pub async fn load_session(&self, token: &str) -> RedisResult<Option<Session>> {
+        let connection = &mut self.client.lock().await;
         let key = self.get_session_key(token);
         let value = connection.get::<_, Option<String>>(&key).await;
 
@@ -105,8 +96,8 @@ impl RedisSessionStore {
         }
     }
 
-    pub async fn delete_session(&self, token: &str) -> Result<(), RedisError> {
-        let connection = &mut self.connect().await?;
+    pub async fn delete_session(&self, token: &str) -> RedisResult<()> {
+        let connection = &mut self.client.lock().await;
         let session = self.load_session(token).await?;
 
         if session.is_none() {
@@ -131,8 +122,8 @@ impl RedisSessionStore {
         &self,
         provider: &Provider,
         provider_id: &str,
-    ) -> Result<Option<String>, RedisError> {
-        let connection = &mut self.connect().await?;
+    ) -> RedisResult<Option<String>> {
+        let connection = &mut self.client.lock().await;
         let key = self.get_session_reverse_lookup_key(provider, provider_id);
 
         self.get_reverse_lookup_token(connection, provider, provider_id)
@@ -146,7 +137,7 @@ impl RedisSessionStore {
         provider_id: &str,
         token: &str,
         expire_in_millis: usize,
-    ) -> Result<(), RedisError> {
+    ) -> RedisResult<()> {
         let key = self.get_session_reverse_lookup_key(provider, provider_id);
         conn.pset_ex(&key, token, expire_in_millis).await
     }
@@ -156,15 +147,11 @@ impl RedisSessionStore {
         conn: &mut Connection,
         provider: &Provider,
         provider_id: &str,
-    ) -> Result<Option<String>, RedisError> {
+    ) -> RedisResult<Option<String>> {
         let key = self.get_session_reverse_lookup_key(provider, provider_id);
         let token = conn.get::<_, Option<String>>(&key).await?;
 
         Ok(token)
-    }
-
-    async fn connect(&self) -> RedisResult<Connection> {
-        self.client.get_async_connection().await
     }
 
     fn get_session_key(&self, token: &str) -> String {

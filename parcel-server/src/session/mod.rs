@@ -1,5 +1,3 @@
-pub mod redis;
-
 use std::{collections::HashMap, fmt::Display};
 
 use ::redis::RedisError;
@@ -11,9 +9,10 @@ use futures_util::future::LocalBoxFuture;
 use parcel_common::api_types::auth::Provider;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-use crate::response_error::{impl_response_error, CommonResponseError};
-
-use self::redis::RedisSessionStore;
+use crate::{
+    data::redis_session_store::RedisSessionStore,
+    response_error::{impl_response_error, CommonResponseError},
+};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Session {
@@ -21,10 +20,10 @@ pub struct Session {
     pub provider_id: String,
     pub account_id: String,
     #[serde(skip)]
-    token: String,
+    pub token: String,
     values: HashMap<String, String>,
     #[serde(skip)]
-    expire_date: DateTime<Utc>,
+    pub expire_date: DateTime<Utc>,
 }
 
 impl Session {

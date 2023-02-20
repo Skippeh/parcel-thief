@@ -19,10 +19,11 @@ use serde::Deserialize;
 use crate::{
     data::{
         database::Database,
+        redis_session_store::RedisSessionStore,
         steam::{Steam, VerifyUserAuthTicketError},
     },
     response_error::{impl_response_error, CommonResponseError},
-    session::{redis::RedisSessionStore, Session},
+    session::Session,
     GatewayUrl,
 };
 

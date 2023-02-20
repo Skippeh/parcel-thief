@@ -1,8 +1,10 @@
-use std::{collections::HashMap, fmt::Display};
+use std::{collections::HashMap, fmt::Display, sync::Arc};
 
 use anyhow::Context;
 use reqwest::{Client, RequestBuilder, StatusCode};
 use serde::Deserialize;
+
+use super::redis_client::RedisClient;
 
 const APP_ID: u32 = 1850570;
 const URL_AUTH_USER_TICKET: &str =
@@ -115,6 +117,8 @@ impl PlayerSummary {
 pub struct Steam {
     api_key: String,
     web_client: Client,
+    redis_client: Arc<RedisClient>,
+    redis_prefix: String,
 }
 
 pub trait AsHexString {
@@ -157,11 +161,17 @@ impl Display for VerifyUserAuthTicketError {
 }
 
 impl Steam {
-    pub fn new(api_key: String) -> Result<Self, reqwest::Error> {
-        let client = Client::builder().user_agent("DS").build()?;
+    pub fn new(
+        api_key: String,
+        redis_client: Arc<RedisClient>,
+        redis_prefix: &str,
+    ) -> Result<Self, reqwest::Error> {
+        let web_client = Client::builder().user_agent("DS").build()?;
         Ok(Self {
             api_key,
-            web_client: client,
+            web_client,
+            redis_client,
+            redis_prefix: redis_prefix.into(),
         })
     }
 
