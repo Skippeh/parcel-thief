@@ -42,7 +42,6 @@ fn read_incoming_data_detour(
 
         match aes::decrypt_json_data(encrypted_data_str.as_ref().to_str().unwrap()) {
             Ok(data) => {
-                // todo: create string and set pointer at out_decrypted_data
                 let str = *std::pin::pin!(DsString::from_str(&data));
                 *out_decrypted_data = str;
                 1
