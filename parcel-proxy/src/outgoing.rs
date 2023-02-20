@@ -1,30 +1,51 @@
-use std::net::ToSocketAddrs;
+use std::{fmt::Display, net::SocketAddr, sync::Arc};
 
 use anyhow::{Context, Result};
 use http::{header::HeaderName, HeaderValue, Request, Response, StatusCode, Version};
 use httparse::EMPTY_HEADER;
+use lazy_static::lazy_static;
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::TcpStream,
+    sync::RwLock,
 };
 use tokio_native_tls::TlsConnector;
 
 use crate::http_utility::{read_headers, ToHttp};
 
-const REMOTE_SERVER: &str = "prod-pc-15.wws-gs2.com";
+#[derive(Debug, Clone)]
+pub struct ForwardEndpoint {
+    pub domain: String,
+    pub addr: SocketAddr,
+}
+
+impl Display for ForwardEndpoint {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}:{} (ip {})",
+            self.domain,
+            self.addr.port(),
+            self.addr.ip()
+        )
+    }
+}
+
+lazy_static! {
+    pub static ref REMOTE_SERVER: Arc<RwLock<Option<ForwardEndpoint>>> =
+        Arc::new(RwLock::new(None));
+}
 
 pub async fn proxy_request(request: &Request<String>) -> Result<Response<String>> {
-    let addr = format!("{}:443", REMOTE_SERVER)
-        .to_socket_addrs()?
-        .next()
-        .ok_or_else(|| anyhow::format_err!("failed to resolve {}", REMOTE_SERVER))?;
+    let remote_server_guard = REMOTE_SERVER.read().await;
+    let remote_server = remote_server_guard.as_ref().unwrap();
 
-    let socket = TcpStream::connect(&addr).await?;
+    let socket = TcpStream::connect(&remote_server.addr).await?;
     let connector = tokio_native_tls::native_tls::TlsConnector::builder().build()?;
     let connector = TlsConnector::from(connector);
-    let mut socket = connector.connect(REMOTE_SERVER, socket).await?;
+    let mut socket = connector.connect(&remote_server.domain, socket).await?;
 
-    let http = request.to_raw_http(Some(REMOTE_SERVER));
+    let http = request.to_raw_http(Some(&remote_server.domain));
 
     socket.write_all(http.as_bytes()).await?;
 

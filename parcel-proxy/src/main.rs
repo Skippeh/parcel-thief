@@ -5,12 +5,22 @@ mod outgoing;
 mod proxy_response_handler;
 pub mod server;
 
+use anyhow::Context;
 use clap::Parser;
 use lazy_static::lazy_static;
-use std::{net::IpAddr, path::PathBuf, process::ExitCode, str::FromStr, sync::Arc};
+use std::{
+    net::{IpAddr, SocketAddr, ToSocketAddrs},
+    num::NonZeroU16,
+    path::PathBuf,
+    process::ExitCode,
+    str::FromStr,
+    sync::Arc,
+};
 use tokio::{select, sync::RwLock};
 
 use server::start_http_server;
+
+use crate::outgoing::ForwardEndpoint;
 
 lazy_static! {
     pub static ref LOG_DIRECTORY: Arc<RwLock<PathBuf>> =
@@ -36,12 +46,19 @@ struct Options {
     /// The path to the directory where logs should be saved. Default is a subfolder in current working directory called "logs"
     #[arg(long)]
     logs_dir: Option<PathBuf>,
+
+    /// The endpoint to forward requests to.
+    #[arg(long, default_value = "prod-pc-15.wws-gs2.com:443")]
+    forward_server: String,
 }
 
 #[tokio::main]
 async fn main() -> anyhow::Result<ExitCode> {
     let args = Options::parse();
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("error,warn,info,debug"));
+
+    *outgoing::REMOTE_SERVER.write().await =
+        Some(parse_endpoint(&args.forward_server).context("Could not parse forward endpoint")?);
 
     if args.cert.is_some() != args.key.is_some() {
         log::error!("Both certificate and private key paths need to be specified");
@@ -69,6 +86,11 @@ async fn main() -> anyhow::Result<ExitCode> {
         false => None,
     };
 
+    log::info!(
+        "Proxy remote endpoint set to {}",
+        outgoing::REMOTE_SERVER.read().await.as_ref().unwrap()
+    );
+
     select! {
         result = start_http_server(secure_options, args.listen_port, args.bind_interface, args.gateway_domain.as_deref()) => {
             if let Err(err) = result {
@@ -79,4 +101,28 @@ async fn main() -> anyhow::Result<ExitCode> {
     };
 
     Ok(ExitCode::from(0))
+}
+
+fn parse_endpoint(forward_server: &str) -> Result<ForwardEndpoint, anyhow::Error> {
+    let domain: String;
+    let port: NonZeroU16;
+
+    match forward_server.split_once(':') {
+        Some((domain_str, port_str)) => {
+            domain = domain_str.to_owned();
+            port = port_str.parse()?;
+        }
+        None => {
+            domain = forward_server.to_owned();
+            port = NonZeroU16::new(443).unwrap();
+        }
+    }
+
+    //let addr = SocketAddr::from_str(&format!("{}:{}", domain, port))?;
+    let addr = format!("{}:{}", domain, port)
+        .to_socket_addrs()?
+        .next()
+        .context("No socket address defined")?;
+
+    Ok(ForwardEndpoint { domain, addr })
 }
