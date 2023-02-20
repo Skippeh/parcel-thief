@@ -41,7 +41,20 @@ pub struct AuthResponse {
 }
 
 #[repr(i32)]
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, FromSqlRow, AsExpression)]
+#[derive(
+    Debug,
+    Deserialize,
+    Serialize,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    FromSqlRow,
+    AsExpression,
+)]
 #[diesel(sql_type = Integer)]
 pub enum Provider {
     #[serde(rename = "steam")]

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use super::area::AreaHash;
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub enum OnlineMissionType {
     #[serde(rename = "Unknown_online_type")]
     UnknownOnlineType = 0,
@@ -18,7 +18,7 @@ pub enum OnlineMissionType {
     SharedLastStranding = 5,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub enum MissionType {
     #[serde(rename = "Delivery")]
     Delivery = 0,
@@ -34,7 +34,7 @@ pub enum MissionType {
     Free = 5,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub enum ProgressState {
     #[serde(rename = "Invalid")]
     Invalid = 0,

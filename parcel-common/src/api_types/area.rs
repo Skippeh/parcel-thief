@@ -1,6 +1,9 @@
-use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+#[derive(
+    Debug, Serialize_repr, Deserialize_repr, Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash,
+)]
+#[repr(u32)]
 pub enum AreaHash {
     #[serde(rename = "5319")]
     EasternRegion = 5319,
