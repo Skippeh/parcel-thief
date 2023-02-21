@@ -5,7 +5,7 @@ use std::fmt::Display;
 use actix_http::StatusCode;
 use actix_web::{
     get,
-    web::{Data, Query},
+    web::{Data, Json, Query},
     HttpResponse, Responder,
 };
 
@@ -124,7 +124,7 @@ pub async fn auth(
     session_store: Data<RedisSessionStore>,
     db: Data<Database>,
     gateway_url: Data<GatewayUrl>,
-) -> Result<impl Responder, Error> {
+) -> Result<Json<AuthResponse>, Error> {
     let provider;
     let provider_id;
     let display_name;
@@ -207,7 +207,7 @@ pub async fn auth(
     );
     session_store.save_session(&session).await?;
 
-    let response = AuthResponse {
+    Ok(Json(AuthResponse {
         user: UserInfo {
             id: account.id.clone(),
             display_name: account.display_name.clone(),
@@ -220,9 +220,7 @@ pub async fn auth(
                 last_login: login_date.timestamp(),
             },
         },
-    };
-
-    Ok(HttpResponse::Ok().json(response))
+    }))
 }
 
 fn generate_session_token() -> String {
