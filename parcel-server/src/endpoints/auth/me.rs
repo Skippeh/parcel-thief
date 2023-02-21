@@ -1,4 +1,7 @@
-use actix_web::{get, web::Data, HttpResponse, Responder};
+use actix_web::{
+    get,
+    web::{Data, Json},
+};
 use parcel_common::api_types::auth::{AuthResponse, SessionInfo, SessionProperties, UserInfo};
 
 use crate::{data::database::Database, endpoints::InternalError, session::Session, GatewayUrl};
@@ -11,7 +14,7 @@ pub async fn me(
     session: Session,
     database: Data<Database>,
     gateway_url: Data<GatewayUrl>,
-) -> Result<impl Responder, InternalError> {
+) -> Result<Json<AuthResponse>, InternalError> {
     let db = database.connect()?;
     let accounts = db.accounts();
     let account = accounts
@@ -19,7 +22,7 @@ pub async fn me(
         .await?
         .unwrap(); // This is safe since a session can't exist without an account
 
-    let response = AuthResponse {
+    Ok(Json(AuthResponse {
         session: SessionInfo {
             gateway: gateway_url.as_ref().clone().into(),
             token: session.get_token().to_owned(),
@@ -32,7 +35,5 @@ pub async fn me(
             id: account.id,
             provider: account.provider,
         },
-    };
-
-    Ok(HttpResponse::Ok().json(response))
+    }))
 }
