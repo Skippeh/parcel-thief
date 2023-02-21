@@ -26,7 +26,15 @@ mod set_mission_progress;
 mod set_player_profile;
 mod set_strand;
 
+use std::fmt::Display;
+
 use actix_web::web::ServiceConfig;
+use diesel::ConnectionError;
+
+use crate::{
+    db::QueryError,
+    response_error::{impl_response_error, CommonResponseError},
+};
 
 pub fn configure_endpoints(cfg: &mut ServiceConfig) {
     cfg.service(devote_highway_resources::devote_highway_resources)
@@ -55,4 +63,49 @@ pub fn configure_endpoints(cfg: &mut ServiceConfig) {
         .service(find_qpid_objects::find_qpid_objects)
         .service(get_wasted_baggages::get_wasted_baggages)
         .service(get_player_ranking_records::get_player_ranking_records);
+}
+
+/// An error that implements CommonResponseError that should be used when an endpoint can only fail by an internal error.
+///
+/// It should not be used for bad requests.
+#[derive(Debug, thiserror::Error)]
+pub struct InternalError(anyhow::Error);
+
+impl From<ConnectionError> for InternalError {
+    fn from(value: ConnectionError) -> Self {
+        Self(value.into())
+    }
+}
+
+impl From<QueryError> for InternalError {
+    fn from(value: QueryError) -> Self {
+        Self(value.into())
+    }
+}
+
+impl From<anyhow::Error> for InternalError {
+    fn from(value: anyhow::Error) -> Self {
+        Self(value)
+    }
+}
+
+impl Display for InternalError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "An internal error occurred: {}", self.0)
+    }
+}
+
+impl_response_error!(InternalError);
+impl CommonResponseError for InternalError {
+    fn get_status_code(&self) -> String {
+        "SV-IE".into()
+    }
+
+    fn get_http_status_code(&self) -> actix_http::StatusCode {
+        actix_http::StatusCode::INTERNAL_SERVER_ERROR
+    }
+
+    fn get_message(&self) -> String {
+        "internal error".into()
+    }
 }
