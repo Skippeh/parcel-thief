@@ -56,6 +56,48 @@ impl<'db> Accounts<'db> {
         Ok(account)
     }
 
+    pub async fn get_by_provider_ids(
+        &self,
+        provider: Provider,
+        provider_ids: &[impl AsRef<str>],
+    ) -> Result<Vec<Account>, QueryError> {
+        let conn = &mut *self.connection.get_pg_connection().await;
+        let provider_ids: Vec<&str> = provider_ids.iter().map(|id| id.as_ref()).collect();
+        let accounts = accounts::table
+            .filter(accounts::provider.eq(&provider))
+            .filter(accounts::provider_id.eq_any(provider_ids))
+            .get_results::<Account>(conn)?;
+
+        Ok(accounts)
+    }
+
+    pub async fn get_by_id(&self, account_id: &str) -> Result<Option<Account>, QueryError> {
+        let conn = &mut *self.connection.get_pg_connection().await;
+        let account = accounts::table
+            .filter(accounts::id.eq(account_id))
+            .first(conn)
+            .optional()?;
+
+        Ok(account)
+    }
+
+    pub async fn get_by_ids(
+        &self,
+        account_ids: &[impl AsRef<str>],
+    ) -> Result<Vec<Account>, QueryError> {
+        if account_ids.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        let conn = &mut *self.connection.get_pg_connection().await;
+        let account_ids: Vec<&str> = account_ids.iter().map(|id| id.as_ref()).collect();
+        let accounts = accounts::table
+            .filter(accounts::id.eq_any(account_ids))
+            .get_results::<Account>(conn)?;
+
+        Ok(accounts)
+    }
+
     pub async fn update_display_name_and_last_login(
         &self,
         account_id: &str,
