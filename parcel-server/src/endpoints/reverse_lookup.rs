@@ -11,7 +11,7 @@ use crate::{data::database::Database, endpoints::InternalError, session::Session
 
 /// This request takes a list of provider account ids and returns the account id.
 ///
-/// If an account id does not have an account it's not added to the response.
+/// If an account id doesn't have an account it's not added to the response.
 #[post("reverseLookup")]
 pub async fn reverse_lookup(
     request: Json<ReverseLookupRequest>,

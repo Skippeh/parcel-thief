@@ -8,7 +8,7 @@ use crate::{data::database::Database, endpoints::InternalError, session::Session
 
 /// This request takes a list of account ids and returns the account info for them.
 ///
-/// If one of the provided ids don't have an account it's not added to the response.
+/// If one of the provided ids doesn't have an account it's not added to the response.
 #[post("lookup")]
 pub async fn lookup(
     request: Json<LookupRequest>,
