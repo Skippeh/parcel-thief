@@ -27,6 +27,8 @@ use crate::{
     GatewayUrl,
 };
 
+use super::InternalError;
+
 #[derive(Debug, Deserialize)]
 pub struct AuthQuery {
     provider: Provider,
@@ -41,7 +43,7 @@ pub enum Error {
     UnsupportedPlatform(Provider),
     ApiResponseError(anyhow::Error),
     InvalidCode,
-    InternalError(anyhow::Error),
+    InternalError(InternalError),
     AlreadyAuthenticated,
 }
 
@@ -53,7 +55,7 @@ impl From<crate::db::QueryError> for Error {
 
 impl From<redis::RedisError> for Error {
     fn from(value: redis::RedisError) -> Self {
-        Self::InternalError(value.into())
+        Self::InternalError(InternalError(value.into()))
     }
 }
 
@@ -74,7 +76,7 @@ impl Display for Error {
                 write!(f, "Could not authenticate user from code")
             }
             Error::InternalError(err) => {
-                write!(f, "An internal error occured: {:?}", err)
+                write!(f, "{}", err)
             }
             Error::AlreadyAuthenticated => write!(f, "The user is already authenticated"),
         }
@@ -85,21 +87,19 @@ impl_response_error!(Error);
 impl CommonResponseError for Error {
     fn get_status_code(&self) -> String {
         match self {
-            Error::UnsupportedPlatform(_) => "AU-UP",
-            Error::ApiResponseError(_) => "AU-AE",
-            Error::InvalidCode => "AU-IC",
-            Error::InternalError(_) => "AU_IE",
-            Error::AlreadyAuthenticated => "AU_AA",
+            Error::UnsupportedPlatform(_) => "AU-UP".into(),
+            Error::ApiResponseError(_) => "AU-AE".into(),
+            Error::InvalidCode => "AU-IC".into(),
+            Error::InternalError(err) => err.get_status_code(),
+            Error::AlreadyAuthenticated => "AU_AA".into(),
         }
-        .into()
     }
 
     fn get_http_status_code(&self) -> StatusCode {
         match self {
             Error::UnsupportedPlatform(_) => StatusCode::BAD_REQUEST,
-            Error::ApiResponseError(_) | Error::InternalError(_) => {
-                StatusCode::INTERNAL_SERVER_ERROR
-            }
+            Error::ApiResponseError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::InternalError(err) => err.get_http_status_code(),
             Error::InvalidCode => StatusCode::UNAUTHORIZED,
             Error::AlreadyAuthenticated => StatusCode::BAD_REQUEST,
         }
@@ -107,13 +107,12 @@ impl CommonResponseError for Error {
 
     fn get_message(&self) -> String {
         match self {
-            Error::UnsupportedPlatform(_) => "unsupported provider",
-            Error::ApiResponseError(_) => "provider error",
-            Error::InvalidCode => "invalid provider code",
-            Error::InternalError(_) => "internal error",
-            Error::AlreadyAuthenticated => "already authenticated",
+            Error::UnsupportedPlatform(_) => "unsupported provider".into(),
+            Error::ApiResponseError(_) => "provider error".into(),
+            Error::InvalidCode => "invalid provider code".into(),
+            Error::InternalError(err) => err.get_message(),
+            Error::AlreadyAuthenticated => "already authenticated".into(),
         }
-        .into()
     }
 }
 
@@ -142,12 +141,12 @@ pub async fn auth(
             let user_info = steam
                 .get_player_summaries(&[&user_id.steam_id])
                 .await
-                .map_err(Error::InternalError)?
+                .map_err(|err| Error::InternalError(err.into()))?
                 .remove(&user_id.steam_id)
                 .ok_or_else(|| {
-                    Error::InternalError(anyhow::anyhow!(
-                        "PlayerSummary not found for provided steam id"
-                    ))
+                    Error::InternalError(
+                        anyhow::anyhow!("PlayerSummary not found for provided steam id").into(),
+                    )
                 })?;
 
             provider = Provider::Steam;
