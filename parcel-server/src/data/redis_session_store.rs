@@ -97,8 +97,8 @@ impl RedisSessionStore {
     }
 
     pub async fn delete_session(&self, token: &str) -> RedisResult<()> {
-        let connection = &mut self.client.lock().await;
         let session = self.load_session(token).await?;
+        let connection = &mut self.client.lock().await;
 
         if session.is_none() {
             return Ok(());
