@@ -99,13 +99,13 @@ async fn main() -> Result<()> {
     }
 
     // Create potentially mutable data outside of the HttpService factory, otherwise each worker thread will not share the same data globally.
-    let redis_connection = web::Data::new(
+    let redis_client_data = web::Data::new(
         RedisClient::connect(args.redis_connection_string)
             .await
             .context("Could not connect to redis server")?,
     );
 
-    let redis_client = redis_connection.clone().into_inner();
+    let redis_client = redis_client_data.clone().into_inner();
     let steam_data = web::Data::new(
         Steam::new(args.steam_api_key.clone(), redis_client.clone(), "steam/")
             .context("Could not create steam web api client")?,
@@ -128,7 +128,7 @@ async fn main() -> Result<()> {
     let mut builder = HttpServer::new(move || {
         App::new()
             .app_data(JsonConfig::default().content_type_required(false)) // don't require Content-Type: application/json header to parse json request body
-            .app_data(redis_client.clone())
+            .app_data(redis_client_data.clone())
             .app_data(steam_data.clone())
             .app_data(session_store.clone())
             .app_data(database.clone())
