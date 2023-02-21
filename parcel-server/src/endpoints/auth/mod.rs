@@ -6,7 +6,6 @@ use actix_http::StatusCode;
 use actix_web::{
     get,
     web::{Data, Json, Query},
-    HttpResponse, Responder,
 };
 
 use chrono::{DateTime, Days, Utc};
