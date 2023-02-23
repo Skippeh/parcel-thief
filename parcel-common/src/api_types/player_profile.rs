@@ -60,7 +60,7 @@ pub struct BasicPlayerProfile {
     #[serde(rename = "smd")]
     pub num_silver_medals: i32,
     #[serde(rename = "smdl")]
-    pub num_large_silver_medals: i32,
+    pub num_silver_medals_large: i32,
     /// legend of legends of legends stars
     #[serde(rename = "sslc")]
     pub ss_legend_count: i32,
