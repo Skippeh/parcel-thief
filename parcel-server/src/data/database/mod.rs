@@ -1,11 +1,12 @@
 pub mod accounts;
+pub mod player_profiles;
 
 use std::sync::Arc;
 
 use diesel::{Connection, ConnectionResult, PgConnection};
 use futures_util::lock::{Mutex, MutexLockFuture};
 
-use self::accounts::Accounts;
+use self::{accounts::Accounts, player_profiles::PlayerProfiles};
 
 pub struct Database {
     database_url: String,
@@ -41,6 +42,10 @@ impl<'db> DatabaseConnection<'db> {
 
     pub fn accounts(&self) -> Accounts {
         Accounts::new(self)
+    }
+
+    pub fn player_profiles(&self) -> PlayerProfiles {
+        PlayerProfiles::new(self)
     }
 
     fn get_pg_connection(&self) -> MutexLockFuture<PgConnection> {
