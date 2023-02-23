@@ -29,7 +29,7 @@ pub struct ObjectRequest {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct RoadRequest {
-    #[serde(rename = "c")]
+    #[serde(rename = "ct")]
     pub count: i32,
     #[serde(rename = "plid")]
     pub prioritized_location_id: i32,
