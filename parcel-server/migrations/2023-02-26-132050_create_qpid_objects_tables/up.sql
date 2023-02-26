@@ -39,6 +39,8 @@ CREATE TABLE qpid_object_construction_materials (
     contribute_time TIMESTAMP NOT NULL
 );
 
+CREATE INDEX qpid_object_construction_materials_object_id_idx ON qpid_object_construction_materials (object_id);
+
 CREATE TABLE qpid_object_recycle_materials (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     object_id VARCHAR NOT NULL REFERENCES qpid_objects(id) ON DELETE CASCADE,
@@ -52,6 +54,8 @@ CREATE TABLE qpid_object_recycle_materials (
     recycle_time TIMESTAMP NOT NULL
 );
 
+CREATE INDEX qpid_object_recycle_materials_object_id_idx ON qpid_object_recycle_materials (object_id);
+
 CREATE TABLE qpid_object_baggages (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     object_id VARCHAR NOT NULL REFERENCES qpid_objects(id) ON DELETE CASCADE,
@@ -63,6 +67,8 @@ CREATE TABLE qpid_object_baggages (
     handle INTEGER NOT NULL
 );
 
+CREATE INDEX qpid_object_baggages_object_id_idx ON qpid_object_baggages (object_id);
+
 CREATE TABLE qpid_object_comments (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     object_id VARCHAR NOT NULL REFERENCES qpid_objects(id) ON DELETE CASCADE,
@@ -73,6 +79,8 @@ CREATE TABLE qpid_object_comments (
     is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
     reference_object VARCHAR NOT NULL
 );
+
+CREATE INDEX qpid_object_comments_object_id_idx ON qpid_object_comments (object_id);
 
 CREATE TABLE qpid_object_rope_infos (
     object_id VARCHAR PRIMARY KEY REFERENCES qpid_objects(id) ON DELETE CASCADE,
