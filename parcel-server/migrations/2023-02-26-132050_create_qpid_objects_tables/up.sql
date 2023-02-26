@@ -129,3 +129,11 @@ CREATE TABLE qpid_object_customize_infos (
     customize_param BIGINT NOT NULL,
     customize_color BIGINT NOT NULL
 );
+
+CREATE TABLE qpid_object_tags (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    object_id VARCHAR NOT NULL REFERENCES qpid_objects(id) ON DELETE CASCADE,
+    tag VARCHAR NOT NULL
+);
+
+CREATE INDEX qpid_object_tags_object_id_idx ON qpid_object_tags (object_id);

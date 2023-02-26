@@ -10,4 +10,5 @@ qpid_object_bridge_infos,
 qpid_object_parking_infos,
 qpid_object_vehicle_infos,
 qpid_object_extra_infos,
-qpid_object_customize_infos;
+qpid_object_customize_infos,
+qpid_object_tags;

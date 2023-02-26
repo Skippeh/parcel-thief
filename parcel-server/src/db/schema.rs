@@ -154,6 +154,14 @@ diesel::table! {
 }
 
 diesel::table! {
+    qpid_object_tags (id) {
+        id -> Int8,
+        object_id -> Varchar,
+        tag -> Varchar,
+    }
+}
+
+diesel::table! {
     qpid_object_vehicle_infos (object_id) {
         object_id -> Varchar,
         location_id -> Int4,
@@ -211,6 +219,7 @@ diesel::joinable!(qpid_object_recycle_materials -> accounts (contributor));
 diesel::joinable!(qpid_object_recycle_materials -> qpid_objects (object_id));
 diesel::joinable!(qpid_object_rope_infos -> qpid_objects (object_id));
 diesel::joinable!(qpid_object_stone_infos -> qpid_objects (object_id));
+diesel::joinable!(qpid_object_tags -> qpid_objects (object_id));
 diesel::joinable!(qpid_object_vehicle_infos -> qpid_objects (object_id));
 diesel::joinable!(qpid_objects -> accounts (creator_id));
 
@@ -227,6 +236,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     qpid_object_recycle_materials,
     qpid_object_rope_infos,
     qpid_object_stone_infos,
+    qpid_object_tags,
     qpid_object_vehicle_infos,
     qpid_objects,
 );
