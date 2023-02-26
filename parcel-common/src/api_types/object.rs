@@ -1,6 +1,10 @@
+use diesel::{
+    backend::Backend, deserialize::FromSql, serialize::ToSql, sql_types::Integer, AsExpression,
+    FromSqlRow,
+};
 use serde::{Deserialize, Serialize};
 
-use super::{area::AreaHash, baggage::ObjectBaggage, mission::Mission, road::Road};
+use super::{area::AreaHash, mission::Mission, road::Road};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ConstructionMaterials {
@@ -133,6 +137,131 @@ pub struct CustomizeInfo {
     pub customize_color: u32,
 }
 
+#[derive(
+    Debug,
+    Deserialize,
+    Serialize,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    FromSqlRow,
+    AsExpression,
+)]
+#[diesel(sql_type = Integer)]
+#[repr(i32)]
+pub enum ObjectType {
+    #[serde(rename = "m")]
+    M = 0,
+    #[serde(rename = "z")]
+    Z = 1,
+    #[serde(rename = "c")]
+    C = 2,
+    #[serde(rename = "p")]
+    P = 3,
+    #[serde(rename = "a")]
+    A = 4,
+    #[serde(rename = "r")]
+    R = 5,
+    #[serde(rename = "l")]
+    L = 6,
+    #[serde(rename = "s")]
+    S = 7,
+    #[serde(rename = "w")]
+    W = 8,
+    #[serde(rename = "b")]
+    B = 9,
+    #[serde(rename = "t")]
+    T = 10,
+    #[serde(rename = "v")]
+    V = 11,
+    #[serde(rename = "k")]
+    K = 12,
+    #[serde(rename = "n")]
+    N = 13,
+    #[serde(rename = "h")]
+    H = 14,
+    #[serde(rename = "e")]
+    E = 15,
+    #[serde(rename = "u")]
+    U = 16,
+    #[serde(rename = "i")]
+    I = 17,
+    #[serde(rename = "o")]
+    O = 18,
+    #[serde(rename = "x")]
+    X = 19,
+}
+
+impl<DB> ToSql<Integer, DB> for ObjectType
+where
+    DB: Backend,
+    i32: ToSql<Integer, DB>,
+{
+    fn to_sql<'b>(
+        &'b self,
+        out: &mut diesel::serialize::Output<'b, '_, DB>,
+    ) -> diesel::serialize::Result {
+        match self {
+            ObjectType::M => 0.to_sql(out),
+            ObjectType::Z => 1.to_sql(out),
+            ObjectType::C => 2.to_sql(out),
+            ObjectType::P => 3.to_sql(out),
+            ObjectType::A => 4.to_sql(out),
+            ObjectType::R => 5.to_sql(out),
+            ObjectType::L => 6.to_sql(out),
+            ObjectType::S => 7.to_sql(out),
+            ObjectType::W => 8.to_sql(out),
+            ObjectType::B => 9.to_sql(out),
+            ObjectType::T => 10.to_sql(out),
+            ObjectType::V => 11.to_sql(out),
+            ObjectType::K => 12.to_sql(out),
+            ObjectType::N => 13.to_sql(out),
+            ObjectType::H => 14.to_sql(out),
+            ObjectType::E => 15.to_sql(out),
+            ObjectType::U => 16.to_sql(out),
+            ObjectType::I => 17.to_sql(out),
+            ObjectType::O => 18.to_sql(out),
+            ObjectType::X => 19.to_sql(out),
+        }
+    }
+}
+
+impl<DB> FromSql<Integer, DB> for ObjectType
+where
+    DB: Backend,
+    i32: FromSql<Integer, DB>,
+{
+    fn from_sql(bytes: diesel::backend::RawValue<'_, DB>) -> diesel::deserialize::Result<Self> {
+        match i32::from_sql(bytes)? {
+            0 => Ok(ObjectType::M),
+            1 => Ok(ObjectType::Z),
+            2 => Ok(ObjectType::C),
+            3 => Ok(ObjectType::P),
+            4 => Ok(ObjectType::A),
+            5 => Ok(ObjectType::R),
+            6 => Ok(ObjectType::L),
+            7 => Ok(ObjectType::S),
+            8 => Ok(ObjectType::W),
+            9 => Ok(ObjectType::B),
+            10 => Ok(ObjectType::T),
+            11 => Ok(ObjectType::V),
+            12 => Ok(ObjectType::K),
+            13 => Ok(ObjectType::N),
+            14 => Ok(ObjectType::H),
+            15 => Ok(ObjectType::E),
+            16 => Ok(ObjectType::U),
+            17 => Ok(ObjectType::I),
+            18 => Ok(ObjectType::O),
+            19 => Ok(ObjectType::X),
+            other => Err(format!("Unknown ObjectType variant: {}", other).into()),
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Object {
     #[serde(rename = "c")]
@@ -155,7 +284,7 @@ pub struct Object {
     #[serde(rename = "st")]
     pub sub_type: String,
     #[serde(rename = "t")]
-    pub object_type: String,
+    pub object_type: ObjectType,
     #[serde(rename = "ut")]
     pub updated_time: i64,
     #[serde(rename = "mt")]

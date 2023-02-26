@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::api_types::{
     area::AreaHash,
     object::{
-        BridgeInfo, Comment, CustomizeInfo, ExtraInfo, Object, ParkingInfo, RopeInfo, StoneInfo,
-        VehicleInfo,
+        BridgeInfo, Comment, CustomizeInfo, ExtraInfo, Object, ObjectType, ParkingInfo, RopeInfo,
+        StoneInfo, VehicleInfo,
     },
 };
 
@@ -39,7 +39,7 @@ pub struct CreateObjectRequest {
     #[serde(rename = "st")]
     pub sub_type: String,
     #[serde(rename = "t")]
-    pub object_type: String,
+    pub object_type: ObjectType,
     #[serde(rename = "c")]
     pub comment: Option<Comment>,
     #[serde(rename = "ri")]
