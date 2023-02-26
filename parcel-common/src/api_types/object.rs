@@ -24,7 +24,23 @@ pub struct RecycleMaterials {
     #[serde(rename = "mat")]
     pub materials: [i32; 6],
     #[serde(rename = "t")]
-    pub time: i64,
+    pub recycle_time: i64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Baggage {
+    #[serde(rename = "hs")]
+    pub item_name_hash: i32,
+    #[serde(rename = "mid")]
+    pub mission_id: i32,
+    #[serde(rename = "cr")]
+    pub creator_account_id: String,
+    #[serde(rename = "lf")]
+    pub life: i32,
+    #[serde(rename = "en")]
+    pub endurance: i32,
+    #[serde(rename = "hn")]
+    pub handle: i32,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -147,7 +163,7 @@ pub struct Object {
     #[serde(rename = "rmt")]
     pub recycle_materials: Option<Vec<RecycleMaterials>>,
     #[serde(rename = "bgs")]
-    pub baggages: Option<Vec<ObjectBaggage>>,
+    pub baggages: Option<Vec<Baggage>>,
     #[serde(rename = "cm")]
     pub comments: Option<Vec<Comment>>,
     #[serde(rename = "ri")]
