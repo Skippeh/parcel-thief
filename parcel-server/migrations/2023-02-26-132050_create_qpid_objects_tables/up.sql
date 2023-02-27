@@ -133,9 +133,9 @@ CREATE TABLE qpid_object_extra_infos (
 
 CREATE TABLE qpid_object_customize_infos (
     object_id VARCHAR PRIMARY KEY REFERENCES qpid_objects(id) ON DELETE CASCADE,
-    -- the following two columns are u32 but are stored as i64 since postgres does not have unsigned types
-    customize_param BIGINT NOT NULL,
-    customize_color BIGINT NOT NULL
+    -- the following two columns are u32 but are stored as i32 since postgres does not have unsigned types
+    customize_param INTEGER NOT NULL,
+    customize_color INTEGER NOT NULL
 );
 
 CREATE TABLE qpid_object_tags (

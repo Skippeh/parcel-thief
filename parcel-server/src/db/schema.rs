@@ -100,8 +100,8 @@ diesel::table! {
 diesel::table! {
     qpid_object_customize_infos (object_id) {
         object_id -> Varchar,
-        customize_param -> Int8,
-        customize_color -> Int8,
+        customize_param -> Int4,
+        customize_color -> Int4,
     }
 }
 
