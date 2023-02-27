@@ -1,4 +1,10 @@
+pub mod bridge_info;
+pub mod customize_info;
+pub mod extra_info;
+pub mod parking_info;
 pub mod rope_info;
+pub mod stone_info;
+pub mod vehicle_info;
 
 use chrono::NaiveDateTime;
 use diesel::{Insertable, Queryable};
