@@ -1,3 +1,5 @@
+pub mod rope_info;
+
 use chrono::NaiveDateTime;
 use diesel::{Insertable, Queryable};
 use parcel_common::api_types::{self, area::AreaHash, object::ObjectType};

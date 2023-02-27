@@ -4,7 +4,10 @@ use diesel::prelude::*;
 use parcel_common::api_types::requests::create_object::CreateObjectRequest;
 
 use crate::db::{
-    models::qpid_object::{NewQpidObject, QpidObject},
+    models::qpid_object::{
+        rope_info::{NewRopeInfo, RopeInfo},
+        NewQpidObject, QpidObject,
+    },
     QueryError,
 };
 
@@ -53,14 +56,28 @@ impl<'db> QpidObjects<'db> {
         let db_object = diesel::insert_into(dsl::qpid_objects)
             .values(qpid_object)
             .get_result::<QpidObject>(conn)?;
+        let mut db_rope_info = None;
 
         // todo: insert relational data if any
         if let Some(comment) = &request.comment {
-            todo!()
+            // As far as i can tell comments are some unfinished or unused feature.
+            // (Signs use object_type and sub_type to define their type)
+            log::warn!("Ignoring comment data on new object: {:#?}", comment);
+            panic!("Expected comment to be None"); // todo: replace by returning error
         }
 
         if let Some(rope_info) = &request.rope_info {
-            todo!()
+            use crate::db::schema::qpid_object_rope_infos::table;
+            db_rope_info = Some(
+                diesel::insert_into(table)
+                    .values(NewRopeInfo {
+                        object_id: &id,
+                        pitch: rope_info.pitch,
+                        heading: rope_info.heading,
+                        len: rope_info.length,
+                    })
+                    .get_result::<RopeInfo>(conn)?,
+            );
         }
 
         if let Some(stone_info) = &request.stone_info {
