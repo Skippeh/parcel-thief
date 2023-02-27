@@ -9,6 +9,7 @@ use crate::api_types::{
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(deny_unknown_fields)]
 pub struct CreateObjectRequest {
     #[serde(rename = "exp")]
     pub exponent: i32,
