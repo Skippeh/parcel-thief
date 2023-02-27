@@ -1,7 +1,7 @@
 use chrono::Utc;
 use diesel::prelude::*;
 
-use parcel_common::api_types::requests::create_object::CreateObjectRequest;
+use parcel_common::api_types::{self, requests::create_object::CreateObjectRequest};
 
 use crate::db::{
     models::qpid_object::{
@@ -29,6 +29,22 @@ pub struct AddedQpidObject {
     pub extra_info: Option<ExtraInfo>,
     pub customize_info: Option<CustomizeInfo>,
     _phantom: std::marker::PhantomData<()>, // prevent other modules from creating this struct
+}
+
+impl AddedQpidObject {
+    pub fn try_into_api_type(self) -> Result<api_types::object::Object, anyhow::Error> {
+        let mut result = self.object.try_into_api_type()?;
+
+        result.rope_info = self.rope_info.map(|i| i.into_api_type());
+        result.stone_info = self.stone_info.map(|i| i.into_api_type());
+        result.bridge_info = self.bridge_info.map(|i| i.into_api_type());
+        result.parking_info = self.parking_info.map(|i| i.into_api_type());
+        result.vehicle_info = self.vehicle_info.map(|i| i.into_api_type());
+        result.extra_info = self.extra_info.map(|i| i.into_api_type());
+        result.customize_info = self.customize_info.map(|i| i.into_api_type());
+
+        Ok(result)
+    }
 }
 
 pub struct QpidObjects<'db> {
