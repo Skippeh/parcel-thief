@@ -20,3 +20,18 @@ where
             .ok_or_else(|| serde::de::Error::custom("unexpected value, not i64 or string"))?)
     }
 }
+
+pub fn deserialize_bool_from_number<'de, D>(deserializer: D) -> Result<bool, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let num = i8::deserialize(deserializer)?;
+
+    match num {
+        1 => Ok(true),
+        0 => Ok(false),
+        _ => Err(serde::de::Error::custom(
+            "unexpected value, expected 0 or 1.",
+        )),
+    }
+}

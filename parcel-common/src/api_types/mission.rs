@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::serde_util::deserialize_bool_from_number;
+
 use super::area::AreaHash;
 
 #[derive(Debug, Serialize, Deserialize, Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash)]
@@ -24,7 +26,7 @@ pub enum MissionType {
     Delivery = 0,
     #[serde(rename = "Collect")]
     Collect = 1,
-    #[serde(rename = "Lost_object")]
+    #[serde(rename = "LostObject")]
     LostObject = 2,
     #[serde(rename = "Supply")]
     Supply = 3,
@@ -116,7 +118,11 @@ pub struct Baggage {
     pub y: i32,
     #[serde(rename = "z")]
     pub z: i32,
-    #[serde(rename = "ret", skip_serializing)]
+    #[serde(
+        rename = "ret",
+        skip_serializing,
+        deserialize_with = "deserialize_bool_from_number"
+    )]
     pub is_returned: bool,
     #[serde(rename = "am")]
     pub ammo_info: Option<AmmoInfo>,

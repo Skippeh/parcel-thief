@@ -9,7 +9,7 @@ use crate::api_types::{
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct AddMissionsRequest {
+pub struct NewMission {
     #[serde(rename = "aid")]
     pub area_hash: AreaHash,
     #[serde(rename = "qid")]
@@ -34,6 +34,12 @@ pub struct AddMissionsRequest {
     pub dynamic_mission_info: Option<DynamicMissionInfo>,
     #[serde(rename = "b")]
     pub baggages: Vec<Baggage>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AddMissionsRequest {
+    #[serde(rename = "ms")]
+    pub missions: Vec<NewMission>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
