@@ -1,7 +1,9 @@
 use chrono::Utc;
 use diesel::prelude::*;
 
-use parcel_common::api_types::{self, requests::create_object::CreateObjectRequest};
+use parcel_common::api_types::{
+    self, object::ObjectType, requests::create_object::CreateObjectRequest,
+};
 
 use crate::db::{
     models::qpid_object::{
@@ -14,6 +16,7 @@ use crate::db::{
         vehicle_info::{NewVehicleInfo, VehicleInfo},
         NewQpidObject, QpidObject,
     },
+    schema::qpid_objects::object_type,
     QueryError,
 };
 
@@ -64,7 +67,7 @@ impl<'db> QpidObjects<'db> {
         use crate::db::schema::qpid_objects::dsl;
 
         let conn = &mut *self.connection.get_pg_connection().await;
-        let id = generate_object_id();
+        let id = generate_object_id(request.object_type);
         let now = Utc::now().naive_utc();
 
         let qpid_object = NewQpidObject {
@@ -225,7 +228,13 @@ impl<'db> QpidObjects<'db> {
 }
 
 /// Generates a random 13 character long object id
-fn generate_object_id() -> String {
+/// The first character will always match the object type.
+fn generate_object_id(obj_type: ObjectType) -> String {
     const CHARS: &[u8] = b"aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ0123456789";
-    parcel_common::rand::generate_string(13, CHARS)
+    let mut result = String::with_capacity(13);
+    let object_tag = serde_json::to_string(&obj_type).unwrap();
+    result.push_str(object_tag.trim_matches('\"'));
+
+    parcel_common::rand::append_generate_string(&mut result, 12, CHARS);
+    result
 }
