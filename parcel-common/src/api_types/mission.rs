@@ -1,10 +1,29 @@
+use diesel::{
+    backend::Backend, deserialize::FromSql, serialize::ToSql, sql_types::Integer, AsExpression,
+    FromSqlRow,
+};
 use serde::{Deserialize, Serialize};
 
 use crate::serde_util::deserialize_bool_from_number;
 
 use super::area::AreaHash;
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug,
+    Serialize,
+    Deserialize,
+    Clone,
+    Copy,
+    Eq,
+    PartialEq,
+    PartialOrd,
+    Ord,
+    Hash,
+    FromSqlRow,
+    AsExpression,
+)]
+#[diesel(sql_type = Integer)]
+#[repr(i32)]
 pub enum OnlineMissionType {
     #[serde(rename = "Unknown_online_type")]
     UnknownOnlineType = 0,
@@ -20,7 +39,60 @@ pub enum OnlineMissionType {
     SharedLastStranding = 5,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash)]
+impl<DB> ToSql<Integer, DB> for OnlineMissionType
+where
+    DB: Backend,
+    i32: ToSql<Integer, DB>,
+{
+    fn to_sql<'b>(
+        &'b self,
+        out: &mut diesel::serialize::Output<'b, '_, DB>,
+    ) -> diesel::serialize::Result {
+        match self {
+            Self::UnknownOnlineType => 0.to_sql(out),
+            Self::OnlineSupply => 1.to_sql(out),
+            Self::Private => 2.to_sql(out),
+            Self::Dynamic => 3.to_sql(out),
+            Self::Static => 4.to_sql(out),
+            Self::SharedLastStranding => 5.to_sql(out),
+        }
+    }
+}
+
+impl<DB> FromSql<Integer, DB> for OnlineMissionType
+where
+    DB: Backend,
+    i32: FromSql<Integer, DB>,
+{
+    fn from_sql(bytes: diesel::backend::RawValue<'_, DB>) -> diesel::deserialize::Result<Self> {
+        match i32::from_sql(bytes)? {
+            0 => Ok(Self::UnknownOnlineType),
+            1 => Ok(Self::OnlineSupply),
+            2 => Ok(Self::Private),
+            3 => Ok(Self::Dynamic),
+            4 => Ok(Self::Static),
+            5 => Ok(Self::SharedLastStranding),
+            other => Err(format!("Unknown OnlineMissionType variant: {}", other).into()),
+        }
+    }
+}
+
+#[derive(
+    Debug,
+    Serialize,
+    Deserialize,
+    Clone,
+    Copy,
+    Eq,
+    PartialEq,
+    PartialOrd,
+    Ord,
+    Hash,
+    FromSqlRow,
+    AsExpression,
+)]
+#[diesel(sql_type = Integer)]
+#[repr(i32)]
 pub enum MissionType {
     #[serde(rename = "Delivery")]
     Delivery = 0,
@@ -36,7 +108,60 @@ pub enum MissionType {
     Free = 5,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash)]
+impl<DB> ToSql<Integer, DB> for MissionType
+where
+    DB: Backend,
+    i32: ToSql<Integer, DB>,
+{
+    fn to_sql<'b>(
+        &'b self,
+        out: &mut diesel::serialize::Output<'b, '_, DB>,
+    ) -> diesel::serialize::Result {
+        match self {
+            Self::Delivery => 0.to_sql(out),
+            Self::Collect => 1.to_sql(out),
+            Self::LostObject => 2.to_sql(out),
+            Self::Supply => 3.to_sql(out),
+            Self::Special => 4.to_sql(out),
+            Self::Free => 5.to_sql(out),
+        }
+    }
+}
+
+impl<DB> FromSql<Integer, DB> for MissionType
+where
+    DB: Backend,
+    i32: FromSql<Integer, DB>,
+{
+    fn from_sql(bytes: diesel::backend::RawValue<'_, DB>) -> diesel::deserialize::Result<Self> {
+        match i32::from_sql(bytes)? {
+            0 => Ok(Self::Delivery),
+            1 => Ok(Self::Collect),
+            2 => Ok(Self::LostObject),
+            3 => Ok(Self::Supply),
+            4 => Ok(Self::Special),
+            5 => Ok(Self::Free),
+            other => Err(format!("Unknown MissionType variant: {}", other).into()),
+        }
+    }
+}
+
+#[derive(
+    Debug,
+    Serialize,
+    Deserialize,
+    Clone,
+    Copy,
+    Eq,
+    PartialEq,
+    PartialOrd,
+    Ord,
+    Hash,
+    FromSqlRow,
+    AsExpression,
+)]
+#[diesel(sql_type = Integer)]
+#[repr(i32)]
 pub enum ProgressState {
     #[serde(rename = "Invalid")]
     Invalid = 0,
@@ -64,6 +189,58 @@ pub enum ProgressState {
     Consign = 1024,
     #[serde(rename = "Complete_automation")]
     CompleteAutomation = 2048,
+}
+
+impl<DB> ToSql<Integer, DB> for ProgressState
+where
+    DB: Backend,
+    i32: ToSql<Integer, DB>,
+{
+    fn to_sql<'b>(
+        &'b self,
+        out: &mut diesel::serialize::Output<'b, '_, DB>,
+    ) -> diesel::serialize::Result {
+        match self {
+            Self::Invalid => 0.to_sql(out),
+            Self::Available => 1.to_sql(out),
+            Self::Ready => 2.to_sql(out),
+            Self::Progress => 3.to_sql(out),
+            Self::Failed => 4.to_sql(out),
+            Self::Success => 5.to_sql(out),
+            Self::Cancel => 6.to_sql(out),
+            Self::NotAvailable => 7.to_sql(out),
+            Self::Returned => 8.to_sql(out),
+            Self::Used => 9.to_sql(out),
+            Self::Missing => 10.to_sql(out),
+            Self::Consign => 11.to_sql(out),
+            Self::CompleteAutomation => 12.to_sql(out),
+        }
+    }
+}
+
+impl<DB> FromSql<Integer, DB> for ProgressState
+where
+    DB: Backend,
+    i32: FromSql<Integer, DB>,
+{
+    fn from_sql(bytes: diesel::backend::RawValue<'_, DB>) -> diesel::deserialize::Result<Self> {
+        match i32::from_sql(bytes)? {
+            0 => Ok(Self::Invalid),
+            1 => Ok(Self::Available),
+            2 => Ok(Self::Ready),
+            3 => Ok(Self::Progress),
+            4 => Ok(Self::Failed),
+            5 => Ok(Self::Success),
+            6 => Ok(Self::Cancel),
+            7 => Ok(Self::NotAvailable),
+            8 => Ok(Self::Returned),
+            9 => Ok(Self::Used),
+            10 => Ok(Self::Missing),
+            11 => Ok(Self::Consign),
+            12 => Ok(Self::CompleteAutomation),
+            other => Err(format!("Unknown ProgressState variant: {}", other).into()),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
