@@ -69,3 +69,5 @@ CREATE TABLE mission_relations (
     mission_id VARCHAR NOT NULL REFERENCES missions(id) ON DELETE CASCADE,
     account_id CHAR(32) NOT NULL REFERENCES accounts(id) ON DELETE CASCADE
 );
+
+CREATE INDEX mission_relations_mission_id_idx ON mission_relations (mission_id);
