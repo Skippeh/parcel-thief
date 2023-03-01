@@ -1,6 +1,6 @@
 CREATE TABLE missions (
     id VARCHAR PRIMARY KEY,
-    area_hash INTEGER NOT NULL,
+    area_id INTEGER NOT NULL,
     creator_id CHAR(32) NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
     worker_id CHAR(32) REFERENCES accounts(id) ON DELETE CASCADE,
     qpid_id INTEGER NOT NULL,

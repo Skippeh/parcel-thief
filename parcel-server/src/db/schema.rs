@@ -73,7 +73,7 @@ diesel::table! {
 diesel::table! {
     missions (id) {
         id -> Varchar,
-        area_hash -> Int4,
+        area_id -> Int4,
         creator_id -> Bpchar,
         worker_id -> Nullable<Bpchar>,
         qpid_id -> Int4,
