@@ -11,6 +11,85 @@ diesel::table! {
 }
 
 diesel::table! {
+    mission_baggage (id) {
+        id -> Int8,
+        mission_id -> Varchar,
+        amount -> Int4,
+        name_hash -> Int4,
+        user_index -> Int4,
+        x -> Int4,
+        y -> Int4,
+        z -> Int4,
+        is_returned -> Bool,
+    }
+}
+
+diesel::table! {
+    mission_baggage_ammo_info (baggage_id) {
+        baggage_id -> Int8,
+        ammo_id -> Varchar,
+        clip_count -> Int2,
+        count -> Int2,
+    }
+}
+
+diesel::table! {
+    mission_dynamic_location_infos (id) {
+        id -> Int8,
+        mission_id -> Varchar,
+        #[sql_name = "type"]
+        type_ -> Int4,
+        location_id -> Varchar,
+        x -> Int4,
+        y -> Int4,
+        z -> Int4,
+    }
+}
+
+diesel::table! {
+    mission_dynamic_mission_infos (mission_id) {
+        mission_id -> Varchar,
+        client_name_hash -> Int4,
+        reward_name_hash -> Int4,
+    }
+}
+
+diesel::table! {
+    mission_relations (id) {
+        id -> Int8,
+        mission_id -> Varchar,
+        account_id -> Bpchar,
+    }
+}
+
+diesel::table! {
+    mission_supply_infos (mission_id) {
+        mission_id -> Varchar,
+        item_hash -> Int8,
+        amount -> Int4,
+    }
+}
+
+diesel::table! {
+    missions (id) {
+        id -> Varchar,
+        area_hash -> Int4,
+        creator_id -> Bpchar,
+        worker_id -> Nullable<Bpchar>,
+        qpid_id -> Int4,
+        qpid_start_location -> Int4,
+        qpid_end_location -> Int4,
+        qpid_delivered_location -> Int4,
+        mission_static_id -> Int8,
+        mission_type -> Int4,
+        online_mission_type -> Int4,
+        progress_state -> Int4,
+        registered_time -> Timestamp,
+        expiration_time -> Timestamp,
+    }
+}
+
+diesel::table! {
     player_profiles (account_id) {
         account_id -> Bpchar,
         banner_id -> Int4,
@@ -204,6 +283,13 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(mission_baggage -> missions (mission_id));
+diesel::joinable!(mission_baggage_ammo_info -> mission_baggage (baggage_id));
+diesel::joinable!(mission_dynamic_location_infos -> missions (mission_id));
+diesel::joinable!(mission_dynamic_mission_infos -> missions (mission_id));
+diesel::joinable!(mission_relations -> accounts (account_id));
+diesel::joinable!(mission_relations -> missions (mission_id));
+diesel::joinable!(mission_supply_infos -> missions (mission_id));
 diesel::joinable!(player_profiles -> accounts (account_id));
 diesel::joinable!(qpid_object_baggages -> accounts (creator));
 diesel::joinable!(qpid_object_baggages -> qpid_objects (object_id));
@@ -225,6 +311,13 @@ diesel::joinable!(qpid_objects -> accounts (creator_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     accounts,
+    mission_baggage,
+    mission_baggage_ammo_info,
+    mission_dynamic_location_infos,
+    mission_dynamic_mission_infos,
+    mission_relations,
+    mission_supply_infos,
+    missions,
     player_profiles,
     qpid_object_baggages,
     qpid_object_bridge_infos,
