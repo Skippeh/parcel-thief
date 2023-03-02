@@ -244,6 +244,7 @@ where
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(deny_unknown_fields)]
 pub struct SupplyInfo {
     #[serde(rename = "h")]
     pub item_hash: i64,
@@ -252,6 +253,7 @@ pub struct SupplyInfo {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(deny_unknown_fields)]
 pub struct DynamicMissionInfo {
     #[serde(rename = "ch")]
     pub client_name_hash: i32,
@@ -260,6 +262,7 @@ pub struct DynamicMissionInfo {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(deny_unknown_fields)]
 pub struct DynamicLocationInfo {
     #[serde(rename = "id")]
     pub location_id: String,
@@ -272,6 +275,7 @@ pub struct DynamicLocationInfo {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(deny_unknown_fields)]
 pub struct AmmoInfo {
     #[serde(rename = "aid")]
     pub ammo_id: String,
@@ -282,6 +286,7 @@ pub struct AmmoInfo {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(deny_unknown_fields)]
 pub struct Baggage {
     #[serde(rename = "a")]
     pub amount: i32,
@@ -306,6 +311,7 @@ pub struct Baggage {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(deny_unknown_fields)]
 pub struct Mission {
     #[serde(rename = "aid")]
     pub area_hash: AreaHash,
