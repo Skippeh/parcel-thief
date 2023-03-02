@@ -1,3 +1,9 @@
+pub mod baggage;
+pub mod dynamic_location_info;
+pub mod dynamic_mission_info;
+pub mod relation;
+pub mod supply_info;
+
 use chrono::NaiveDateTime;
 use diesel::{Insertable, Queryable};
 use parcel_common::api_types::{
