@@ -34,7 +34,7 @@ CREATE TABLE mission_dynamic_location_infos (
     -- 1. start info
     -- 2. end info
     -- 3. delivered info
-    type INTEGER NOT NULL,
+    type SMALLINT NOT NULL,
     location_id VARCHAR NOT NULL,
     x INTEGER NOT NULL,
     y INTEGER NOT NULL,
@@ -43,7 +43,7 @@ CREATE TABLE mission_dynamic_location_infos (
 
 CREATE UNIQUE INDEX mission_dynamic_location_infos_mission_id_type_idx ON mission_dynamic_location_infos (mission_id, type);
 
-CREATE TABLE mission_baggage (
+CREATE TABLE mission_baggages (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     mission_id VARCHAR NOT NULL REFERENCES missions(id) ON DELETE CASCADE,
     amount INTEGER NOT NULL,
@@ -55,10 +55,10 @@ CREATE TABLE mission_baggage (
     is_returned BOOLEAN NOT NULL DEFAULT false
 );
 
-CREATE INDEX mission_baggage_mission_id ON mission_baggage (mission_id);
+CREATE INDEX mission_baggage_mission_id ON mission_baggages (mission_id);
 
-CREATE TABLE mission_baggage_ammo_info (
-    baggage_id BIGINT PRIMARY KEY REFERENCES mission_baggage(id) ON DELETE CASCADE,
+CREATE TABLE mission_baggage_ammo_infos (
+    baggage_id BIGINT PRIMARY KEY REFERENCES mission_baggages(id) ON DELETE CASCADE,
     ammo_id VARCHAR NOT NULL,
     clip_count SMALLINT NOT NULL,
     count SMALLINT NOT NULL

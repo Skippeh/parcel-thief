@@ -11,7 +11,16 @@ diesel::table! {
 }
 
 diesel::table! {
-    mission_baggage (id) {
+    mission_baggage_ammo_infos (baggage_id) {
+        baggage_id -> Int8,
+        ammo_id -> Varchar,
+        clip_count -> Int2,
+        count -> Int2,
+    }
+}
+
+diesel::table! {
+    mission_baggages (id) {
         id -> Int8,
         mission_id -> Varchar,
         amount -> Int4,
@@ -25,20 +34,11 @@ diesel::table! {
 }
 
 diesel::table! {
-    mission_baggage_ammo_info (baggage_id) {
-        baggage_id -> Int8,
-        ammo_id -> Varchar,
-        clip_count -> Int2,
-        count -> Int2,
-    }
-}
-
-diesel::table! {
     mission_dynamic_location_infos (id) {
         id -> Int8,
         mission_id -> Varchar,
         #[sql_name = "type"]
-        type_ -> Int4,
+        type_ -> Int2,
         location_id -> Varchar,
         x -> Int4,
         y -> Int4,
@@ -283,8 +283,8 @@ diesel::table! {
     }
 }
 
-diesel::joinable!(mission_baggage -> missions (mission_id));
-diesel::joinable!(mission_baggage_ammo_info -> mission_baggage (baggage_id));
+diesel::joinable!(mission_baggage_ammo_infos -> mission_baggages (baggage_id));
+diesel::joinable!(mission_baggages -> missions (mission_id));
 diesel::joinable!(mission_dynamic_location_infos -> missions (mission_id));
 diesel::joinable!(mission_dynamic_mission_infos -> missions (mission_id));
 diesel::joinable!(mission_relations -> accounts (account_id));
@@ -311,8 +311,8 @@ diesel::joinable!(qpid_objects -> accounts (creator_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     accounts,
-    mission_baggage,
-    mission_baggage_ammo_info,
+    mission_baggage_ammo_infos,
+    mission_baggages,
     mission_dynamic_location_infos,
     mission_dynamic_mission_infos,
     mission_relations,
