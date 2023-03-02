@@ -16,7 +16,6 @@ use crate::db::{
         vehicle_info::{NewVehicleInfo, VehicleInfo},
         NewQpidObject, QpidObject,
     },
-    schema::qpid_objects::object_type,
     QueryError,
 };
 

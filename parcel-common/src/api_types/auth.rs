@@ -2,8 +2,7 @@ use diesel::{
     backend::Backend, deserialize::FromSql, serialize::ToSql, sql_types::Integer, AsExpression,
     FromSqlRow,
 };
-use serde::{Deserialize, Deserializer, Serialize};
-use serde_json::Value;
+use serde::{Deserialize, Serialize};
 
 use crate::serde_util::deserialize_i64_from_string_or_i64;
 

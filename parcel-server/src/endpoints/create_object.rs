@@ -2,7 +2,7 @@ use actix_web::{
     post,
     web::{Data, Json},
 };
-use anyhow::anyhow;
+
 use parcel_common::api_types::requests::create_object::{
     CreateObjectRequest, CreateObjectResponse,
 };
