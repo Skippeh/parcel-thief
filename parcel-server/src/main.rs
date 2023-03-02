@@ -21,11 +21,15 @@ use actix_web::{
 use anyhow::{Context, Result};
 use clap::Parser;
 use data::{database::Database, redis_client::RedisClient, steam::Steam};
+use diesel::{backend::Backend, pg::Pg, Connection, PgConnection};
+use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use endpoints::configure_endpoints;
 use rustls::{Certificate, PrivateKey};
 use rustls_pemfile::{certs, pkcs8_private_keys};
 
 use crate::{data::redis_session_store::RedisSessionStore, middleware::wrap_errors};
+
+pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
 
 #[derive(Parser)]
 struct Options {
@@ -113,10 +117,9 @@ async fn main() -> Result<()> {
     let session_store = web::Data::new(RedisSessionStore::new(redis_client.clone(), "ds-session/"));
     let database = web::Data::new(Database::new(&args.database_url));
 
-    // Test database connection
-    database
-        .connect()
-        .context("Could not connect to database")?;
+    migrate_database(&args.database_url)
+        .await
+        .context("Could not apply pending database migrations")?;
 
     let gateway_url = format!("{}/ds", args.gateway_url);
 
@@ -188,4 +191,24 @@ fn load_rustls_config(
     }
 
     Ok(config.with_single_cert(cert_chain, keys.remove(0))?)
+}
+
+async fn migrate_database(database_url: &str) -> Result<(), anyhow::Error> {
+    let mut pg_conn =
+        PgConnection::establish(database_url).context("Could not connect to database")?;
+
+    let pending_migrations =
+        MigrationHarness::<Pg>::pending_migrations(&mut pg_conn, MIGRATIONS)
+            .map_err(|err| anyhow::anyhow!("Could not get pending migrations: {}", err))?;
+
+    log::info!("Pending database migrations: {}", pending_migrations.len());
+
+    MigrationHarness::<Pg>::run_pending_migrations(&mut pg_conn, MIGRATIONS)
+        .map_err(|err| anyhow::anyhow!("Could not run migrations: {}", err))?;
+
+    if !pending_migrations.is_empty() {
+        log::info!("Applied pending database migrations successfully");
+    }
+
+    Ok(())
 }
