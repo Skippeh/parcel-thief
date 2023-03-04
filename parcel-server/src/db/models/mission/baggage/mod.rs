@@ -36,9 +36,8 @@ impl Baggage {
 }
 
 #[derive(Debug, Insertable)]
-#[diesel(table_name = mission_baggages, primary_key(id))]
+#[diesel(table_name = mission_baggages)]
 pub struct NewBaggage<'a> {
-    pub id: Option<i64>,
     pub mission_id: &'a str,
     pub amount: i32,
     pub name_hash: i32,

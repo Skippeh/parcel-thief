@@ -139,7 +139,6 @@ impl<'db> Missions<'db> {
                 for baggage in baggages {
                     let db_baggage = diesel::insert_into(table)
                         .values(&NewBaggage {
-                            id: None,
                             mission_id: &id,
                             amount: baggage.amount,
                             name_hash: baggage.name_hash,
