@@ -34,7 +34,7 @@ pub struct NewMission {
     #[serde(rename = "dmi")]
     pub dynamic_mission_info: Option<DynamicMissionInfo>,
     #[serde(rename = "b")]
-    pub baggages: Vec<Baggage>,
+    pub baggages: Option<Vec<Baggage>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

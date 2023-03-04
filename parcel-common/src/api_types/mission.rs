@@ -358,5 +358,5 @@ pub struct Mission {
     #[serde(rename = "dmi")]
     pub dynamic_mission_info: Option<DynamicMissionInfo>,
     #[serde(rename = "b")]
-    pub baggages: Option<Vec<Baggage>>,
+    pub baggages: Vec<Baggage>,
 }

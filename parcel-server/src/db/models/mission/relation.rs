@@ -10,9 +10,8 @@ pub struct Relation {
 }
 
 #[derive(Debug, Insertable)]
-#[diesel(table_name = mission_relations, primary_key(id))]
+#[diesel(table_name = mission_relations)]
 pub struct NewRelation<'a> {
-    pub id: i64,
     pub mission_id: &'a str,
     pub account_id: &'a str,
 }
