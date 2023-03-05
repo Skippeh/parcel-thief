@@ -82,6 +82,15 @@ CREATE TABLE qpid_object_comments (
 
 CREATE INDEX qpid_object_comments_object_id_idx ON qpid_object_comments (object_id);
 
+CREATE TABLE qpid_object_comment_phrases (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    comment_id BIGINT NOT NULL REFERENCES qpid_object_comments(id) ON DELETE CASCADE,
+    phrase INTEGER NOT NULL,
+    sort_order SMALLINT NOT NULL
+);
+
+CREATE INDEX qpid_object_comment_phrases_comment_id_idx ON qpid_object_comment_phrases(comment_id);
+
 CREATE TABLE qpid_object_rope_infos (
     object_id VARCHAR PRIMARY KEY REFERENCES qpid_objects(id) ON DELETE CASCADE,
     pitch INTEGER NOT NULL,

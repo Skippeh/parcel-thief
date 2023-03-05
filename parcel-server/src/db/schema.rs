@@ -144,6 +144,15 @@ diesel::table! {
 }
 
 diesel::table! {
+    qpid_object_comment_phrases (id) {
+        id -> Int8,
+        comment_id -> Int8,
+        phrase -> Int4,
+        sort_order -> Int2,
+    }
+}
+
+diesel::table! {
     qpid_object_comments (id) {
         id -> Int8,
         object_id -> Varchar,
@@ -294,6 +303,7 @@ diesel::joinable!(player_profiles -> accounts (account_id));
 diesel::joinable!(qpid_object_baggages -> accounts (creator));
 diesel::joinable!(qpid_object_baggages -> qpid_objects (object_id));
 diesel::joinable!(qpid_object_bridge_infos -> qpid_objects (object_id));
+diesel::joinable!(qpid_object_comment_phrases -> qpid_object_comments (comment_id));
 diesel::joinable!(qpid_object_comments -> accounts (writer));
 diesel::joinable!(qpid_object_comments -> qpid_objects (object_id));
 diesel::joinable!(qpid_object_construction_materials -> accounts (contributor));
@@ -321,6 +331,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     player_profiles,
     qpid_object_baggages,
     qpid_object_bridge_infos,
+    qpid_object_comment_phrases,
     qpid_object_comments,
     qpid_object_construction_materials,
     qpid_object_customize_infos,
