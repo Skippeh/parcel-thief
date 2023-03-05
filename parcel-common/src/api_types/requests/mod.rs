@@ -24,3 +24,4 @@ pub mod set_construction_materials;
 pub mod set_mission_progress;
 pub mod set_player_profile;
 pub mod set_strand;
+pub mod update_object;
