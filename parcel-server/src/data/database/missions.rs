@@ -32,7 +32,7 @@ impl<'db> Missions<'db> {
         &self,
         mission: &requests::add_missions::NewMission,
         owner_id: &str,
-    ) -> Result<SavedMission, QueryError> {
+    ) -> Result<DbMission, QueryError> {
         let conn = &mut *self.connection.get_pg_connection().await;
 
         conn.transaction(|conn| {
@@ -59,7 +59,7 @@ impl<'db> Missions<'db> {
                 })
                 .get_result(conn)?;
 
-            let mut result = SavedMission {
+            let mut result = DbMission {
                 mission: db_mission,
                 supply_info: None,
                 dynamic_start_info: None,
@@ -177,7 +177,7 @@ impl<'db> Missions<'db> {
     }
 }
 
-pub struct SavedMission {
+pub struct DbMission {
     pub mission: Mission,
     pub supply_info: Option<SupplyInfo>,
     pub dynamic_start_info: Option<DynamicLocationInfo>,
@@ -187,7 +187,7 @@ pub struct SavedMission {
     pub baggages: Vec<Baggage>,
 }
 
-impl SavedMission {
+impl DbMission {
     pub fn into_api_type(self) -> api_types::mission::Mission {
         let mut api_mission = self.mission.into_api_type();
 
