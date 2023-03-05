@@ -174,9 +174,9 @@ pub enum ObjectType {
     Watchtower = 8,
     #[serde(rename = "b")]
     B = 9,
-    /// Subtype holds the type of the object
+    /// Subtype holds the type of the sign.
     #[serde(rename = "t")]
-    Type = 10,
+    Sign = 10,
     #[serde(rename = "v")]
     V = 11,
     #[serde(rename = "k")]
@@ -185,16 +185,18 @@ pub enum ObjectType {
     N = 13,
     #[serde(rename = "h")]
     H = 14,
+    /// A stone created from a player sleeping.
     #[serde(rename = "e")]
-    E = 15,
+    RestingStone = 15,
     #[serde(rename = "u")]
     U = 16,
     #[serde(rename = "i")]
     I = 17,
     #[serde(rename = "o")]
     O = 18,
+    /// A mushroom created from a player peeing.
     #[serde(rename = "x")]
-    X = 19,
+    PeeMushroom = 19,
 }
 
 impl<DB> ToSql<Integer, DB> for ObjectType
@@ -217,16 +219,16 @@ where
             ObjectType::S => 7.to_sql(out),
             ObjectType::Watchtower => 8.to_sql(out),
             ObjectType::B => 9.to_sql(out),
-            ObjectType::Type => 10.to_sql(out),
+            ObjectType::Sign => 10.to_sql(out),
             ObjectType::V => 11.to_sql(out),
             ObjectType::K => 12.to_sql(out),
             ObjectType::N => 13.to_sql(out),
             ObjectType::H => 14.to_sql(out),
-            ObjectType::E => 15.to_sql(out),
+            ObjectType::RestingStone => 15.to_sql(out),
             ObjectType::U => 16.to_sql(out),
             ObjectType::I => 17.to_sql(out),
             ObjectType::O => 18.to_sql(out),
-            ObjectType::X => 19.to_sql(out),
+            ObjectType::PeeMushroom => 19.to_sql(out),
         }
     }
 }
@@ -248,16 +250,16 @@ where
             7 => Ok(ObjectType::S),
             8 => Ok(ObjectType::Watchtower),
             9 => Ok(ObjectType::B),
-            10 => Ok(ObjectType::Type),
+            10 => Ok(ObjectType::Sign),
             11 => Ok(ObjectType::V),
             12 => Ok(ObjectType::K),
             13 => Ok(ObjectType::N),
             14 => Ok(ObjectType::H),
-            15 => Ok(ObjectType::E),
+            15 => Ok(ObjectType::RestingStone),
             16 => Ok(ObjectType::U),
             17 => Ok(ObjectType::I),
             18 => Ok(ObjectType::O),
-            19 => Ok(ObjectType::X),
+            19 => Ok(ObjectType::PeeMushroom),
             other => Err(format!("Unknown ObjectType variant: {}", other).into()),
         }
     }
