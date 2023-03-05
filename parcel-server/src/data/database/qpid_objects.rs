@@ -8,6 +8,7 @@ use parcel_common::api_types::{
 use crate::db::{
     models::qpid_object::{
         bridge_info::{BridgeInfo, NewBridgeInfo},
+        comment::{Comment, NewComment, NewPhrase, Phrase},
         customize_info::{CustomizeInfo, NewCustomizeInfo},
         extra_info::{ExtraInfo, NewExtraInfo},
         parking_info::{NewParkingInfo, ParkingInfo},
@@ -21,7 +22,7 @@ use crate::db::{
 
 use super::DatabaseConnection;
 
-pub struct AddedQpidObject {
+pub struct DbQpidObject {
     pub object: QpidObject,
     pub rope_info: Option<RopeInfo>,
     pub stone_info: Option<StoneInfo>,
@@ -30,10 +31,12 @@ pub struct AddedQpidObject {
     pub vehicle_info: Option<VehicleInfo>,
     pub extra_info: Option<ExtraInfo>,
     pub customize_info: Option<CustomizeInfo>,
+    pub comment: Option<Comment>,
+    pub comment_phrases: Option<Vec<Phrase>>,
     _phantom: std::marker::PhantomData<()>, // prevent other modules from creating this struct
 }
 
-impl AddedQpidObject {
+impl DbQpidObject {
     pub fn try_into_api_type(self) -> Result<api_types::object::Object, anyhow::Error> {
         let mut result = self.object.try_into_api_type()?;
 
@@ -44,6 +47,21 @@ impl AddedQpidObject {
         result.vehicle_info = self.vehicle_info.map(|i| i.into_api_type());
         result.extra_info = self.extra_info.map(|i| i.into_api_type());
         result.customize_info = self.customize_info.map(|i| i.into_api_type());
+
+        if let Some(comment) = self.comment {
+            let mut comments = Vec::with_capacity(1);
+            let mut comment = comment.try_into_api_type()?;
+
+            if let Some(mut phrases) = self.comment_phrases {
+                phrases.sort_unstable_by(|a, b| a.sort_order.cmp(&b.sort_order));
+                comment.phrases = phrases.into_iter().map(|p| p.into_api_type()).collect();
+            } else {
+                anyhow::bail!("No phrases specified in comment");
+            }
+
+            comments.push(comment);
+            result.comments = Some(comments);
+        }
 
         Ok(result)
     }
@@ -62,7 +80,7 @@ impl<'db> QpidObjects<'db> {
         &self,
         request: &CreateObjectRequest,
         creator_id: &str,
-    ) -> Result<AddedQpidObject, QueryError> {
+    ) -> Result<DbQpidObject, QueryError> {
         use crate::db::schema::qpid_objects::dsl;
         let conn = &mut *self.connection.get_pg_connection().await;
 
@@ -100,13 +118,41 @@ impl<'db> QpidObjects<'db> {
             let mut db_vehicle_info = None;
             let mut db_extra_info = None;
             let mut db_customize_info = None;
+            let mut db_comment = None;
+            let mut db_comment_phrases = None;
 
-            // todo: insert relational data if any
             if let Some(comment) = &request.comment {
-                // As far as i can tell comments are some unfinished or unused feature.
-                // (Signs use object_type and sub_type to define their type)
-                log::warn!("Ignoring comment data on new object: {:#?}", comment);
-                panic!("Expected comment to be None"); // todo: replace by returning error
+                use crate::db::schema::qpid_object_comments::table;
+                db_comment = Some(
+                    diesel::insert_into(table)
+                        .values(NewComment {
+                            object_id: &id,
+                            writer: creator_id,
+                            likes: comment.likes as i64,
+                            parent_index: comment.parent_index as i16,
+                            is_deleted: comment.is_deleted,
+                            reference_object: &comment.reference_object,
+                        })
+                        .get_result::<Comment>(conn)?,
+                );
+
+                let comment_id = db_comment.as_ref().unwrap().id;
+                let mut phrases = Vec::new();
+
+                for (index, phrase) in comment.phrases.iter().enumerate() {
+                    use crate::db::schema::qpid_object_comment_phrases::table;
+                    let db_phrase = diesel::insert_into(table)
+                        .values(NewPhrase {
+                            comment_id,
+                            phrase: *phrase,
+                            sort_order: index as i16,
+                        })
+                        .get_result::<Phrase>(conn)?;
+
+                    phrases.push(db_phrase);
+                }
+
+                db_comment_phrases = Some(phrases);
             }
 
             if let Some(rope_info) = &request.rope_info {
@@ -213,7 +259,7 @@ impl<'db> QpidObjects<'db> {
                 )
             }
 
-            Ok(AddedQpidObject {
+            Ok(DbQpidObject {
                 object: db_object,
                 rope_info: db_rope_info,
                 stone_info: db_stone_info,
@@ -222,6 +268,8 @@ impl<'db> QpidObjects<'db> {
                 vehicle_info: db_vehicle_info,
                 extra_info: db_extra_info,
                 customize_info: db_customize_info,
+                comment: db_comment,
+                comment_phrases: db_comment_phrases,
                 _phantom: std::marker::PhantomData,
             })
         })

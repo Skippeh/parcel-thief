@@ -1,10 +1,13 @@
 pub mod bridge_info;
+pub mod comment;
 pub mod customize_info;
 pub mod extra_info;
 pub mod parking_info;
 pub mod rope_info;
 pub mod stone_info;
 pub mod vehicle_info;
+
+use std::num::TryFromIntError;
 
 use chrono::NaiveDateTime;
 use diesel::{Insertable, Queryable};
@@ -59,7 +62,7 @@ impl QpidObject {
     /// Converts self to api equivalent type. Note that all relational columns are set to None.
     ///
     /// Fails if likes is >u32::MAX (db value is stored as i64 due to postgres lacking unsigned types)
-    pub fn try_into_api_type(self) -> Result<api_types::object::Object, crate::db::QueryError> {
+    pub fn try_into_api_type(self) -> Result<api_types::object::Object, TryFromIntError> {
         Ok(api_types::object::Object {
             creator_account_id: self.creator_id,
             exponent: self.exponent,
