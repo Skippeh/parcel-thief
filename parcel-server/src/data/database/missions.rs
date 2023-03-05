@@ -94,7 +94,7 @@ impl<'db> Missions<'db> {
                         .values(&NewDynamicLocationInfo {
                             mission_id,
                             ty,
-                            location_id: &info_type.location_id,
+                            location_id: &info_type.location_object_id,
                             x: info_type.x,
                             y: info_type.y,
                             z: info_type.z,

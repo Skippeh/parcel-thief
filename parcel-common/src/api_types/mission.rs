@@ -265,7 +265,7 @@ pub struct DynamicMissionInfo {
 #[serde(deny_unknown_fields)]
 pub struct DynamicLocationInfo {
     #[serde(rename = "id")]
-    pub location_id: String,
+    pub location_object_id: String,
     #[serde(rename = "x")]
     pub x: i32,
     #[serde(rename = "y")]

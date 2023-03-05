@@ -61,7 +61,7 @@ pub struct DynamicLocationInfo {
 impl DynamicLocationInfo {
     pub fn into_api_type(self) -> api_types::mission::DynamicLocationInfo {
         api_types::mission::DynamicLocationInfo {
-            location_id: self.location_id,
+            location_object_id: self.location_id,
             x: self.x,
             y: self.y,
             z: self.z,
