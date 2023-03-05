@@ -3,6 +3,7 @@ pub mod dynamic_location_info;
 pub mod dynamic_mission_info;
 pub mod relation;
 pub mod supply_info;
+pub mod tag;
 
 use chrono::NaiveDateTime;
 use diesel::{Insertable, Queryable};

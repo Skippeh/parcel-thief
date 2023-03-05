@@ -28,7 +28,8 @@ mod set_strand;
 
 use std::fmt::Display;
 
-use actix_web::web::ServiceConfig;
+use actix_http::{body::BoxBody, StatusCode};
+use actix_web::{web::ServiceConfig, HttpResponse, Responder};
 use diesel::ConnectionError;
 
 use crate::{
@@ -107,5 +108,16 @@ impl CommonResponseError for InternalError {
 
     fn get_message(&self) -> String {
         "internal error".into()
+    }
+}
+
+/// Returns an empty body with StatusCode::OK
+pub struct EmptyResponse;
+
+impl Responder for EmptyResponse {
+    type Body = BoxBody;
+
+    fn respond_to(self, _req: &actix_web::HttpRequest) -> actix_web::HttpResponse<Self::Body> {
+        HttpResponse::build(StatusCode::OK).body(Vec::<u8>::new())
     }
 }

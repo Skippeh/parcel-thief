@@ -6,16 +6,19 @@ use parcel_common::api_types::{
 };
 
 use crate::db::{
-    models::qpid_object::{
-        bridge_info::{BridgeInfo, NewBridgeInfo},
-        comment::{Comment, NewComment, NewPhrase, Phrase},
-        customize_info::{CustomizeInfo, NewCustomizeInfo},
-        extra_info::{ExtraInfo, NewExtraInfo},
-        parking_info::{NewParkingInfo, ParkingInfo},
-        rope_info::{NewRopeInfo, RopeInfo},
-        stone_info::{NewStoneInfo, StoneInfo},
-        vehicle_info::{NewVehicleInfo, VehicleInfo},
-        NewQpidObject, QpidObject,
+    models::{
+        mission::tag::NewTag,
+        qpid_object::{
+            bridge_info::{BridgeInfo, NewBridgeInfo},
+            comment::{Comment, NewComment, NewPhrase, Phrase},
+            customize_info::{CustomizeInfo, NewCustomizeInfo},
+            extra_info::{ExtraInfo, NewExtraInfo},
+            parking_info::{NewParkingInfo, ParkingInfo},
+            rope_info::{NewRopeInfo, RopeInfo},
+            stone_info::{NewStoneInfo, StoneInfo},
+            vehicle_info::{NewVehicleInfo, VehicleInfo},
+            NewQpidObject, QpidObject,
+        },
     },
     QueryError,
 };
@@ -273,6 +276,61 @@ impl<'db> QpidObjects<'db> {
                 _phantom: std::marker::PhantomData,
             })
         })
+    }
+
+    pub async fn get_by_id(&self, object_id: &str) -> Result<Option<QpidObject>, QueryError> {
+        use crate::db::schema::qpid_objects::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        dsl::qpid_objects
+            .find(object_id)
+            .get_result(conn)
+            .optional()
+            .map_err(|err| err.into())
+    }
+
+    pub async fn mark_deleted_for(
+        &self,
+        object_id: &str,
+        account_id: &str,
+    ) -> Result<(), QueryError> {
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        conn.transaction(|conn| {
+            use crate::db::schema::qpid_objects::dsl;
+            let object = dsl::qpid_objects
+                .filter(dsl::id.eq(object_id))
+                .first::<QpidObject>(conn)?;
+            self.add_tag(conn, object_id, &format!("del_{}", account_id))?;
+
+            if object.object_type == ObjectType::Sign {
+                use crate::db::schema::qpid_object_comments::dsl;
+
+                // set is_deleted on related comments to true
+                diesel::update(dsl::qpid_object_comments)
+                    .filter(dsl::object_id.eq(object_id))
+                    .filter(dsl::writer.eq(account_id))
+                    .filter(dsl::is_deleted.eq(false))
+                    .set(dsl::is_deleted.eq(true))
+                    .execute(conn)?;
+            }
+
+            Ok(())
+        })
+    }
+
+    fn add_tag(
+        &self,
+        conn: &mut PgConnection,
+        object_id: &str,
+        tag: &str,
+    ) -> Result<(), QueryError> {
+        use crate::db::schema::qpid_object_tags::table;
+        diesel::insert_into(table)
+            .values(NewTag { object_id, tag })
+            .execute(conn)?;
+
+        Ok(())
     }
 }
 
