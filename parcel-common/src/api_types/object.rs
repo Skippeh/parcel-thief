@@ -174,8 +174,9 @@ pub enum ObjectType {
     Watchtower = 8,
     #[serde(rename = "b")]
     B = 9,
+    /// Subtype holds the type of the object
     #[serde(rename = "t")]
-    T = 10,
+    Type = 10,
     #[serde(rename = "v")]
     V = 11,
     #[serde(rename = "k")]
@@ -216,7 +217,7 @@ where
             ObjectType::S => 7.to_sql(out),
             ObjectType::Watchtower => 8.to_sql(out),
             ObjectType::B => 9.to_sql(out),
-            ObjectType::T => 10.to_sql(out),
+            ObjectType::Type => 10.to_sql(out),
             ObjectType::V => 11.to_sql(out),
             ObjectType::K => 12.to_sql(out),
             ObjectType::N => 13.to_sql(out),
@@ -247,7 +248,7 @@ where
             7 => Ok(ObjectType::S),
             8 => Ok(ObjectType::Watchtower),
             9 => Ok(ObjectType::B),
-            10 => Ok(ObjectType::T),
+            10 => Ok(ObjectType::Type),
             11 => Ok(ObjectType::V),
             12 => Ok(ObjectType::K),
             13 => Ok(ObjectType::N),
