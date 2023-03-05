@@ -79,7 +79,7 @@ diesel::table! {
         qpid_id -> Int4,
         qpid_start_location -> Int4,
         qpid_end_location -> Int4,
-        qpid_delivered_location -> Int4,
+        qpid_delivered_location -> Nullable<Int4>,
         mission_static_id -> Int8,
         mission_type -> Int4,
         online_mission_type -> Int4,

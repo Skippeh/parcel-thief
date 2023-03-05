@@ -49,6 +49,7 @@ impl<'db> Missions<'db> {
                     qpid_id: mission.qpid_id,
                     qpid_start_location: mission.qpid_start_location,
                     qpid_end_location: mission.qpid_end_location,
+                    qpid_delivered_location: None,
                     mission_static_id: mission.mission_static_id,
                     mission_type: mission.mission_type,
                     online_mission_type: mission.online_mission_type,

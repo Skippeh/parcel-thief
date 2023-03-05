@@ -6,7 +6,7 @@ CREATE TABLE missions (
     qpid_id INTEGER NOT NULL,
     qpid_start_location INTEGER NOT NULL,
     qpid_end_location INTEGER NOT NULL,
-    qpid_delivered_location INTEGER NOT NULL,
+    qpid_delivered_location INTEGER,
     mission_static_id BIGINT NOT NULL,
     mission_type INTEGER NOT NULL,
     online_mission_type INTEGER NOT NULL,
