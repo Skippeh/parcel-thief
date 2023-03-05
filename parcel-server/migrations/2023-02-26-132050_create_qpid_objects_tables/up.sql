@@ -154,3 +154,5 @@ CREATE TABLE qpid_object_tags (
 );
 
 CREATE INDEX qpid_object_tags_object_id_idx ON qpid_object_tags (object_id);
+
+CREATE UNIQUE INDEX qpid_object_tags_object_id_tag_idx ON qpid_object_tags (object_id, tag)
