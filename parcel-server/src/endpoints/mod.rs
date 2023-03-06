@@ -25,6 +25,7 @@ mod set_construction_materials;
 mod set_mission_progress;
 mod set_player_profile;
 mod set_strand;
+pub mod update_object;
 
 use std::fmt::Display;
 
@@ -58,6 +59,7 @@ pub fn configure_endpoints(cfg: &mut ServiceConfig) {
         .service(set_mission_progress::set_mission_progress)
         .service(set_strand::set_strand)
         .service(create_object::create_object)
+        .service(update_object::update_object)
         .service(set_construction_materials::set_construction_materials)
         .service(create_road::create_road)
         .service(get_qpid_objects::get_qpid_objects)

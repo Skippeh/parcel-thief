@@ -1,4 +1,4 @@
-use diesel::{Insertable, Queryable};
+use diesel::{AsChangeset, Insertable, Queryable};
 use parcel_common::api_types;
 
 use crate::db::schema::qpid_object_parking_infos;
@@ -29,6 +29,26 @@ impl ParkingInfo {
             dynamic_location_id: self.dynamic_location_id,
             current_qpid_id: self.current_qpid_id,
             is_parking: self.is_parking,
+        }
+    }
+}
+
+#[derive(Debug, AsChangeset)]
+#[diesel(table_name = qpid_object_parking_infos)]
+pub struct ChangeParkingInfo<'a> {
+    pub location_id: Option<i32>,
+    pub dynamic_location_id: Option<&'a str>,
+    pub current_qpid_id: Option<i32>,
+    pub is_parking: Option<bool>,
+}
+
+impl<'a> From<&'a api_types::object::ParkingInfo> for ChangeParkingInfo<'a> {
+    fn from(value: &'a api_types::object::ParkingInfo) -> Self {
+        Self {
+            location_id: Some(value.location_id),
+            dynamic_location_id: Some(&value.dynamic_location_id),
+            current_qpid_id: Some(value.current_qpid_id),
+            is_parking: Some(value.is_parking),
         }
     }
 }

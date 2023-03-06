@@ -16,6 +16,7 @@ pub struct UpdateObjectRequest {
     pub customize_info: Option<CustomizeInfo>,
     #[serde(rename = "ei")]
     pub extra_info: Option<ExtraInfo>,
+    // bridge_info and comment is intentionally excluded
 }
 
 pub struct UpdateObjectResponse;

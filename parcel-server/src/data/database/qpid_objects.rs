@@ -11,12 +11,12 @@ use crate::db::{
         qpid_object::{
             bridge_info::{BridgeInfo, NewBridgeInfo},
             comment::{Comment, NewComment, NewPhrase, Phrase},
-            customize_info::{CustomizeInfo, NewCustomizeInfo},
-            extra_info::{ExtraInfo, NewExtraInfo},
-            parking_info::{NewParkingInfo, ParkingInfo},
+            customize_info::{ChangeCustomizeInfo, CustomizeInfo, NewCustomizeInfo},
+            extra_info::{ChangeExtraInfo, ExtraInfo, NewExtraInfo},
+            parking_info::{ChangeParkingInfo, NewParkingInfo, ParkingInfo},
             rope_info::{NewRopeInfo, RopeInfo},
-            stone_info::{NewStoneInfo, StoneInfo},
-            vehicle_info::{NewVehicleInfo, VehicleInfo},
+            stone_info::{ChangeStoneInfo, NewStoneInfo, StoneInfo},
+            vehicle_info::{ChangeVehicleInfo, NewVehicleInfo, VehicleInfo},
             NewQpidObject, QpidObject,
         },
     },
@@ -68,6 +68,15 @@ impl DbQpidObject {
 
         Ok(result)
     }
+}
+
+pub enum ChangeInfo<'a> {
+    Stone(&'a ChangeStoneInfo),
+    Parking(&'a ChangeParkingInfo<'a>),
+    Vehicle(&'a ChangeVehicleInfo<'a>),
+    Customize(&'a ChangeCustomizeInfo),
+    Extra(&'a ChangeExtraInfo),
+    // bridge and comment is intentionally excluded
 }
 
 pub struct QpidObjects<'db> {
@@ -317,6 +326,54 @@ impl<'db> QpidObjects<'db> {
 
             Ok(())
         })
+    }
+
+    pub async fn update_info(
+        &self,
+        object_id: &str,
+        info: ChangeInfo<'_>,
+    ) -> Result<(), QueryError> {
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        match info {
+            ChangeInfo::Stone(info) => {
+                use crate::db::schema::qpid_object_stone_infos::dsl;
+                diesel::update(dsl::qpid_object_stone_infos)
+                    .filter(dsl::object_id.eq(object_id))
+                    .set(info)
+                    .execute(conn)?;
+            }
+            ChangeInfo::Parking(info) => {
+                use crate::db::schema::qpid_object_parking_infos::dsl;
+                diesel::update(dsl::qpid_object_parking_infos)
+                    .filter(dsl::object_id.eq(object_id))
+                    .set(info)
+                    .execute(conn)?;
+            }
+            ChangeInfo::Vehicle(info) => {
+                use crate::db::schema::qpid_object_vehicle_infos::dsl;
+                diesel::update(dsl::qpid_object_vehicle_infos)
+                    .filter(dsl::object_id.eq(object_id))
+                    .set(info)
+                    .execute(conn)?;
+            }
+            ChangeInfo::Customize(info) => {
+                use crate::db::schema::qpid_object_customize_infos::dsl;
+                diesel::update(dsl::qpid_object_customize_infos)
+                    .filter(dsl::object_id.eq(object_id))
+                    .set(info)
+                    .execute(conn)?;
+            }
+            ChangeInfo::Extra(info) => {
+                use crate::db::schema::qpid_object_extra_infos::dsl;
+                diesel::update(dsl::qpid_object_extra_infos)
+                    .filter(dsl::object_id.eq(object_id))
+                    .set(info)
+                    .execute(conn)?;
+            }
+        }
+
+        Ok(())
     }
 
     fn add_tag(

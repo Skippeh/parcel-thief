@@ -1,4 +1,4 @@
-use diesel::{Insertable, Queryable};
+use diesel::{AsChangeset, Insertable, Queryable};
 use parcel_common::api_types;
 
 use crate::db::schema::qpid_object_customize_infos;
@@ -23,6 +23,22 @@ impl CustomizeInfo {
         api_types::object::CustomizeInfo {
             customize_param: self.customize_param as u32,
             customize_color: self.customize_color as u32,
+        }
+    }
+}
+
+#[derive(Debug, AsChangeset)]
+#[diesel(table_name = qpid_object_customize_infos)]
+pub struct ChangeCustomizeInfo {
+    pub customize_param: Option<i32>,
+    pub customize_color: Option<i32>,
+}
+
+impl From<&api_types::object::CustomizeInfo> for ChangeCustomizeInfo {
+    fn from(value: &api_types::object::CustomizeInfo) -> Self {
+        Self {
+            customize_param: Some(value.customize_param as i32),
+            customize_color: Some(value.customize_color as i32),
         }
     }
 }
