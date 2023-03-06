@@ -98,7 +98,7 @@ pub async fn delete_object(
     // hold items that other players have donated, or otherwise may rely on.
     if let Some(object) = object {
         objects
-            .mark_deleted_for(&object.id, &session.account_id)
+            .mark_deleted_for_account(&object.id, &session.account_id)
             .await?;
         Ok(EmptyResponse)
     } else {

@@ -289,7 +289,7 @@ impl<'db> QpidObjects<'db> {
             .map_err(|err| err.into())
     }
 
-    pub async fn mark_deleted_for(
+    pub async fn mark_deleted_for_account(
         &self,
         object_id: &str,
         account_id: &str,
