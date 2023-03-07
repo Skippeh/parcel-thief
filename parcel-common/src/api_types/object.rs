@@ -159,7 +159,7 @@ pub enum ObjectType {
     #[serde(rename = "z")]
     Z = 1,
     #[serde(rename = "c")]
-    C = 2,
+    PowerGenerator = 2,
     #[serde(rename = "p")]
     Postbox = 3,
     #[serde(rename = "a")]
@@ -211,7 +211,7 @@ where
         match self {
             ObjectType::M => 0.to_sql(out),
             ObjectType::Z => 1.to_sql(out),
-            ObjectType::C => 2.to_sql(out),
+            ObjectType::PowerGenerator => 2.to_sql(out),
             ObjectType::Postbox => 3.to_sql(out),
             ObjectType::A => 4.to_sql(out),
             ObjectType::R => 5.to_sql(out),
@@ -242,7 +242,7 @@ where
         match i32::from_sql(bytes)? {
             0 => Ok(ObjectType::M),
             1 => Ok(ObjectType::Z),
-            2 => Ok(ObjectType::C),
+            2 => Ok(ObjectType::PowerGenerator),
             3 => Ok(ObjectType::Postbox),
             4 => Ok(ObjectType::A),
             5 => Ok(ObjectType::R),
