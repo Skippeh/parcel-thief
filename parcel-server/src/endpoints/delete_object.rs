@@ -5,7 +5,7 @@ use actix_web::{
     web::{Data, Json},
 };
 use diesel::ConnectionError;
-use parcel_common::api_types::{object::ObjectType, requests::delete_object::DeleteObjectRequest};
+use parcel_common::api_types::requests::delete_object::DeleteObjectRequest;
 
 use crate::{
     data::database::Database,
@@ -16,6 +16,7 @@ use crate::{
 };
 
 #[derive(Debug, thiserror::Error)]
+#[allow(clippy::enum_variant_names)]
 pub enum Error {
     NoIdSpecified,
     InternalError(InternalError),
