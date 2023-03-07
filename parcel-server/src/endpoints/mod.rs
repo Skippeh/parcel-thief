@@ -120,6 +120,6 @@ impl Responder for EmptyResponse {
     type Body = BoxBody;
 
     fn respond_to(self, _req: &actix_web::HttpRequest) -> actix_web::HttpResponse<Self::Body> {
-        HttpResponse::build(StatusCode::OK).body(Vec::<u8>::new())
+        HttpResponse::build(StatusCode::OK).body("")
     }
 }
