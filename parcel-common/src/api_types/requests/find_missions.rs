@@ -6,6 +6,7 @@ use crate::api_types::{area::AreaHash, mission::Mission};
 pub struct FindMissionsRequest {
     #[serde(rename = "areaId")]
     pub area_hash: AreaHash,
+    /// The max number of total missions to return
     #[serde(rename = "limit")]
     pub limit: u32,
     #[serde(rename = "lpb")]
@@ -29,5 +30,5 @@ pub struct FindMissionsRequest {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct FindMissionsResponse {
     #[serde(rename = "missions")]
-    missions: Vec<Mission>,
+    pub missions: Vec<Mission>,
 }

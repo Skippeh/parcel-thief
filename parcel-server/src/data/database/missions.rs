@@ -1,6 +1,12 @@
+use std::collections::HashMap;
+
 use chrono::{Days, Utc};
-use diesel::prelude::*;
-use parcel_common::api_types::{self, mission::ProgressState, requests};
+use diesel::{dsl::not, prelude::*};
+use parcel_common::api_types::{
+    self,
+    mission::{MissionType, OnlineMissionType, ProgressState},
+    requests,
+};
 
 use crate::db::{
     models::mission::{
@@ -57,17 +63,9 @@ impl<'db> Missions<'db> {
                     registered_time: &registered_time,
                     expiration_time: &expiration_time,
                 })
-                .get_result(conn)?;
+                .get_result::<Mission>(conn)?;
 
-            let mut result = DbMission {
-                mission: db_mission,
-                supply_info: None,
-                dynamic_start_info: None,
-                dynamic_end_info: None,
-                dynamic_delivered_info: None,
-                dynamic_mission_info: None,
-                baggages: Vec::default(),
-            };
+            let mut result = DbMission::from(db_mission);
 
             if let Some(supply_info) = &mission.supply_info {
                 use crate::db::schema::mission_supply_infos::table;
@@ -136,7 +134,7 @@ impl<'db> Missions<'db> {
 
             if let Some(baggages) = &mission.baggages {
                 use crate::db::schema::mission_baggages::table;
-                let mut res_baggages = Vec::with_capacity(baggages.len());
+                let mut db_baggages = Vec::with_capacity(baggages.len());
                 for baggage in baggages {
                     let db_baggage = diesel::insert_into(table)
                         .values(&NewBaggage {
@@ -151,29 +149,123 @@ impl<'db> Missions<'db> {
                         })
                         .get_result::<Baggage>(conn)?;
                     let baggage_id = db_baggage.id;
-                    let mut res_baggage = db_baggage.into_api_type();
 
                     if let Some(ammo_info) = &baggage.ammo_info {
                         use crate::db::schema::mission_baggage_ammo_infos::table;
-                        res_baggage.ammo_info = Some(
-                            diesel::insert_into(table)
-                                .values(&NewAmmoInfo {
-                                    baggage_id,
-                                    ammo_id: &ammo_info.ammo_id,
-                                    clip_count: ammo_info.clip_count,
-                                    count: ammo_info.count,
-                                })
-                                .get_result::<AmmoInfo>(conn)?
-                                .into_api_type(),
-                        );
+                        let ammo_info = diesel::insert_into(table)
+                            .values(&NewAmmoInfo {
+                                baggage_id,
+                                ammo_id: &ammo_info.ammo_id,
+                                clip_count: ammo_info.clip_count,
+                                count: ammo_info.count,
+                            })
+                            .get_result::<AmmoInfo>(conn)?;
+
+                        result.baggage_ammo_infos.insert(baggage_id, ammo_info);
                     }
 
-                    res_baggages.push(res_baggage);
+                    db_baggages.push(db_baggage);
                 }
+
+                result.baggages = db_baggages;
             }
 
             Ok(result)
         })
+    }
+
+    pub async fn find_missions(
+        &self,
+        online_types: &[OnlineMissionType],
+        mission_types: &[MissionType],
+        exclude_accounts: &[&str],
+        progress_states: &[ProgressState],
+        qpid_ids: &[i32],
+    ) -> Result<Vec<Mission>, QueryError> {
+        let conn = &mut *self.connection.get_pg_connection().await;
+        Ok(dsl::missions
+            .filter(dsl::online_mission_type.eq_any(online_types))
+            .filter(dsl::mission_type.eq_any(mission_types))
+            .filter(dsl::progress_state.eq_any(progress_states))
+            .filter(dsl::qpid_id.eq_any(qpid_ids))
+            .filter(not(dsl::creator_id.eq_any(exclude_accounts)))
+            .get_results(conn)?)
+    }
+
+    pub async fn query_mission_data(
+        &self,
+        missions: impl IntoIterator<Item = Mission>,
+    ) -> Result<Vec<DbMission>, QueryError> {
+        let conn = &mut *self.connection.get_pg_connection().await;
+        let mut db_missions = Vec::new();
+
+        // todo: optimize this, use less db queries
+        for mission in missions.into_iter() {
+            let id = mission.id.clone();
+            let mut mission: DbMission = mission.into();
+
+            {
+                use crate::db::schema::mission_supply_infos::dsl;
+                mission.supply_info = dsl::mission_supply_infos
+                    .filter(dsl::mission_id.eq(&id))
+                    .first(conn)
+                    .optional()?;
+            }
+
+            {
+                use crate::db::schema::mission_dynamic_location_infos::dsl;
+                mission.dynamic_start_info = dsl::mission_dynamic_location_infos
+                    .filter(dsl::mission_id.eq(&id))
+                    .filter(dsl::type_.eq(InfoType::Start))
+                    .first(conn)
+                    .optional()?;
+
+                mission.dynamic_end_info = dsl::mission_dynamic_location_infos
+                    .filter(dsl::mission_id.eq(&id))
+                    .filter(dsl::type_.eq(InfoType::End))
+                    .first(conn)
+                    .optional()?;
+
+                mission.dynamic_delivered_info = dsl::mission_dynamic_location_infos
+                    .filter(dsl::mission_id.eq(&id))
+                    .filter(dsl::type_.eq(InfoType::Delivered))
+                    .first(conn)
+                    .optional()?;
+            }
+
+            {
+                use crate::db::schema::mission_dynamic_mission_infos::dsl;
+                mission.dynamic_mission_info = dsl::mission_dynamic_mission_infos
+                    .filter(dsl::mission_id.eq(&id))
+                    .first(conn)
+                    .optional()?;
+            }
+
+            {
+                use crate::db::schema::mission_baggages::dsl;
+
+                mission.baggages = dsl::mission_baggages
+                    .filter(dsl::mission_id.eq(&id))
+                    .get_results(conn)?;
+
+                for baggage in &mission.baggages {
+                    use crate::db::schema::mission_baggage_ammo_infos::dsl;
+
+                    let ammo_info = dsl::mission_baggage_ammo_infos
+                        .filter(dsl::baggage_id.eq(baggage.id))
+                        .first(conn)
+                        .optional()?;
+
+                    if let Some(ammo_info) = ammo_info {
+                        mission.baggage_ammo_infos.insert(baggage.id, ammo_info);
+                    }
+                }
+            }
+
+            db_missions.push(mission);
+        }
+
+        Ok(db_missions)
     }
 }
 
@@ -185,10 +277,26 @@ pub struct DbMission {
     pub dynamic_delivered_info: Option<DynamicLocationInfo>,
     pub dynamic_mission_info: Option<DynamicMissionInfo>,
     pub baggages: Vec<Baggage>,
+    pub baggage_ammo_infos: HashMap<i64, AmmoInfo>,
+}
+
+impl From<Mission> for DbMission {
+    fn from(value: Mission) -> Self {
+        Self {
+            mission: value,
+            supply_info: None,
+            dynamic_start_info: None,
+            dynamic_end_info: None,
+            dynamic_delivered_info: None,
+            dynamic_mission_info: None,
+            baggages: Vec::default(),
+            baggage_ammo_infos: HashMap::default(),
+        }
+    }
 }
 
 impl DbMission {
-    pub fn into_api_type(self) -> api_types::mission::Mission {
+    pub fn into_api_type(mut self) -> api_types::mission::Mission {
         let mut api_mission = self.mission.into_api_type();
 
         api_mission.supply_info = self.supply_info.map(|si| si.into_api_type());
@@ -199,7 +307,16 @@ impl DbMission {
         api_mission.baggages = self
             .baggages
             .into_iter()
-            .map(|b| b.into_api_type())
+            .map(|b| {
+                let id = b.id;
+                let mut baggage = b.into_api_type();
+
+                baggage.ammo_info = self
+                    .baggage_ammo_infos
+                    .remove(&id)
+                    .map(|ammo| ammo.into_api_type());
+                baggage
+            })
             .collect();
 
         api_mission
