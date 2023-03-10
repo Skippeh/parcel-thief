@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use actix_web::{
     post,
     web::{Data, Json},
@@ -45,15 +47,28 @@ pub async fn find_missions(
         )
         .await?;
 
-    let missions = db_missions
+    let mut missions = db_missions
         .query_mission_data(missions)
         .await?
         .into_iter()
         .collect::<Vec<_>>();
 
-    // todo: sort based on request parameters: target_ids
+    if let Some(target_ids) = &request.target_ids {
+        missions.sort_unstable_by(|a, b| {
+            let contains_a = target_ids.contains(&a.mission.creator_id);
+            let contains_b = target_ids.contains(&b.mission.creator_id);
 
-    // todo: limit number of missions based on request parameters: limit, limit_pot_baggages, mission_limit_per_pot, private_limit_per_pot
+            if contains_a && !contains_b {
+                Ordering::Less
+            } else if !contains_a && contains_b {
+                Ordering::Greater
+            } else {
+                Ordering::Equal
+            }
+        });
+    }
+
+    // todo: limit number of missions based on request parameters: limit_pot_baggages, mission_limit_per_pot, private_limit_per_pot
 
     let res_missions = missions
         .into_iter()
