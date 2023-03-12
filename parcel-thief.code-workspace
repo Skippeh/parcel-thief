@@ -15,6 +15,8 @@
       "**/bin/": true,
       "**/obj/": true
     },
-    "todo-tree.filtering.excludeGlobs": ["**/*.txt"]
+    "todo-tree.filtering.excludeGlobs": ["**/*.txt"],
+    "todo-tree.regex.regex": "((//|#|<!--|;|/\\*|^)\\s*($TAGS)|($TAGS)!.*)",
+    "todo-tree.regex.regexCaseSensitive": false
   }
 }
