@@ -24,7 +24,7 @@ impl StoneInfo {
     }
 }
 
-#[derive(Debug, AsChangeset)]
+#[derive(Debug, AsChangeset, Default)]
 #[diesel(table_name = qpid_object_stone_infos)]
 pub struct ChangeStoneInfo {
     pub resting_count: Option<i32>,

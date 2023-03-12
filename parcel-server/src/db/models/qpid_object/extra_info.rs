@@ -24,7 +24,7 @@ impl ExtraInfo {
     }
 }
 
-#[derive(Debug, AsChangeset)]
+#[derive(Debug, AsChangeset, Default)]
 #[diesel(table_name = qpid_object_extra_infos)]
 pub struct ChangeExtraInfo {
     pub alternative_qpid_id: i32,

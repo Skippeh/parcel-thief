@@ -27,7 +27,7 @@ impl CustomizeInfo {
     }
 }
 
-#[derive(Debug, AsChangeset)]
+#[derive(Debug, AsChangeset, Default)]
 #[diesel(table_name = qpid_object_customize_infos)]
 pub struct ChangeCustomizeInfo {
     pub customize_param: Option<i32>,

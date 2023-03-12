@@ -33,7 +33,7 @@ impl ParkingInfo {
     }
 }
 
-#[derive(Debug, AsChangeset)]
+#[derive(Debug, AsChangeset, Default)]
 #[diesel(table_name = qpid_object_parking_infos)]
 pub struct ChangeParkingInfo<'a> {
     pub location_id: Option<i32>,

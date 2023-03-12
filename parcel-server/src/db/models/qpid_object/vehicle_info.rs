@@ -62,7 +62,7 @@ impl VehicleInfo {
     }
 }
 
-#[derive(Debug, AsChangeset)]
+#[derive(Debug, AsChangeset, Default)]
 #[diesel(table_name = qpid_object_vehicle_infos)]
 pub struct ChangeVehicleInfo<'a> {
     pub location_id: Option<i32>,
