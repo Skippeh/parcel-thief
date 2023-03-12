@@ -130,7 +130,6 @@ async fn main() -> Result<()> {
 
     let mut builder = HttpServer::new(move || {
         App::new()
-            .app_data(JsonConfig::default().content_type_required(false)) // don't require Content-Type: application/json header to parse json request body
             .app_data(redis_client_data.clone())
             .app_data(steam_data.clone())
             .app_data(session_store.clone())
