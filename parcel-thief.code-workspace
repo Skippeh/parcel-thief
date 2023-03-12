@@ -14,6 +14,7 @@
       "**/.idea": true,
       "**/bin/": true,
       "**/obj/": true
-    }
+    },
+    "todo-tree.filtering.excludeGlobs": ["**/*.txt"]
   }
 }
