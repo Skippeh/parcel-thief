@@ -1,4 +1,5 @@
 pub mod baggage;
+pub mod catapult_shell_info;
 pub mod dynamic_location_info;
 pub mod dynamic_mission_info;
 pub mod relation;
@@ -6,7 +7,7 @@ pub mod supply_info;
 pub mod tag;
 
 use chrono::NaiveDateTime;
-use diesel::{Insertable, Queryable};
+use diesel::{AsChangeset, Insertable, Queryable};
 use parcel_common::api_types::{
     self,
     area::AreaHash,
@@ -57,6 +58,7 @@ impl Mission {
             dynamic_end_info: None,
             dynamic_delivered_info: None,
             dynamic_mission_info: None,
+            catapult_shell_info: None,
             baggages: Vec::default(),
         }
     }
@@ -79,4 +81,20 @@ pub struct NewMission<'a> {
     pub progress_state: ProgressState,
     pub registered_time: &'a NaiveDateTime,
     pub expiration_time: &'a NaiveDateTime,
+}
+
+#[derive(Debug, AsChangeset, Default)]
+#[diesel(table_name = missions)]
+pub struct ChangeMission<'a> {
+    pub worker_id: Option<Option<&'a str>>,
+    pub qpid_id: Option<i32>,
+    pub qpid_start_location: Option<i32>,
+    pub qpid_end_location: Option<i32>,
+    pub qpid_delivered_location: Option<i32>,
+    pub mission_static_id: Option<i64>,
+    pub mission_type: Option<MissionType>,
+    pub online_mission_type: Option<OnlineMissionType>,
+    pub progress_state: Option<ProgressState>,
+    pub registered_time: Option<&'a NaiveDateTime>,
+    pub expiration_time: Option<&'a NaiveDateTime>,
 }

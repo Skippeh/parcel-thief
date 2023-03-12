@@ -1,6 +1,6 @@
 use diesel::{
-    backend::Backend, deserialize::FromSql, serialize::ToSql, sql_types::Int2, AsExpression,
-    FromSqlRow, Insertable, Queryable,
+    backend::Backend, deserialize::FromSql, serialize::ToSql, sql_types::Int2, AsChangeset,
+    AsExpression, FromSqlRow, Insertable, Queryable,
 };
 use parcel_common::api_types;
 
@@ -79,4 +79,24 @@ pub struct NewDynamicLocationInfo<'a> {
     pub x: i32,
     pub y: i32,
     pub z: i32,
+}
+
+#[derive(Debug, AsChangeset, Default)]
+#[diesel(table_name = mission_dynamic_location_infos)]
+pub struct ChangeDynamicLocationInfo<'a> {
+    pub location_id: Option<&'a str>,
+    pub x: Option<i32>,
+    pub y: Option<i32>,
+    pub z: Option<i32>,
+}
+
+impl<'a> From<&'a api_types::mission::DynamicLocationInfo> for ChangeDynamicLocationInfo<'a> {
+    fn from(value: &'a api_types::mission::DynamicLocationInfo) -> Self {
+        Self {
+            location_id: Some(&value.location_object_id),
+            x: Some(value.x),
+            y: Some(value.y),
+            z: Some(value.z),
+        }
+    }
 }

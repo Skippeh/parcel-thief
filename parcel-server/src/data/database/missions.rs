@@ -293,6 +293,32 @@ impl<'db> Missions<'db> {
 
         Ok(db_missions)
     }
+
+    pub async fn get_by_id(&self, mission_id: &str) -> Result<Option<Mission>, QueryError> {
+        let conn = &mut *self.connection.get_pg_connection().await;
+        let mission = dsl::missions
+            .filter(dsl::id.eq(mission_id))
+            .first(conn)
+            .optional()?;
+
+        Ok(mission)
+    }
+
+    pub async fn update_mission(
+        &self,
+        mission_id: &str,
+        data: &ChangeMission<'_>,
+        baggages: Option<Option<&[api_types::mission::Baggage]>>,
+        dynamic_location_info: Option<Option<&ChangeDynamicLocationInfo<'_>>>,
+        catapult_shell_info: Option<Option<&ChangeCatapultShellInfo>>,
+    ) -> Result<(), QueryError> {
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        conn.transaction(|conn| {
+            // todo
+            todo!()
+        })
+    }
 }
 
 pub struct DbMission {
