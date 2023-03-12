@@ -27,13 +27,6 @@ pub async fn set_mission_progress(
             return Err(anyhow::anyhow!("Mismatched creator_account_id in request").into());
         }
 
-        let delivered_info = request
-            .dynamic_delivered_info
-            .as_ref()
-            .map(|info| info.into());
-
-        let catapult_shell_info = request.catapult_shell_info.as_ref().map(|info| info.into());
-
         missions
             .update_mission(
                 &mission.id,
@@ -44,8 +37,8 @@ pub async fn set_mission_progress(
                     ..Default::default()
                 },
                 request.baggages.as_deref().map(Some),
-                delivered_info.as_ref().map(Some),
-                catapult_shell_info.as_ref().map(Some),
+                request.dynamic_delivered_info.as_ref().map(Some),
+                request.catapult_shell_info.as_ref().map(Some),
             )
             .await?;
 

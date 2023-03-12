@@ -309,14 +309,117 @@ impl<'db> Missions<'db> {
         mission_id: &str,
         data: &ChangeMission<'_>,
         baggages: Option<Option<&[api_types::mission::Baggage]>>,
-        dynamic_location_info: Option<Option<&ChangeDynamicLocationInfo<'_>>>,
-        catapult_shell_info: Option<Option<&ChangeCatapultShellInfo>>,
+        delivered_location_info: Option<Option<&api_types::mission::DynamicLocationInfo>>,
+        catapult_shell_info: Option<Option<&api_types::mission::CatapultShellInfo>>,
     ) -> Result<(), QueryError> {
         let conn = &mut *self.connection.get_pg_connection().await;
 
         conn.transaction(|conn| {
-            // todo
-            todo!()
+            use dsl as dsl_missions;
+            let affected_rows = diesel::update(dsl_missions::missions)
+                .filter(dsl::id.eq(mission_id))
+                .set(data)
+                .execute(conn)?;
+
+            if affected_rows == 0 {
+                return Ok(()); // should we return error instead if there's no mission with the specified id?
+            }
+
+            if let Some(info) = delivered_location_info {
+                use crate::db::schema::mission_dynamic_location_infos::dsl;
+                match info {
+                    Some(info) => {
+                        // upsert dynamic delivered location info
+                        diesel::insert_into(dsl::mission_dynamic_location_infos)
+                            .values(NewDynamicLocationInfo {
+                                mission_id,
+                                ty: InfoType::Delivered,
+                                location_id: &info.location_object_id,
+                                x: info.x,
+                                y: info.y,
+                                z: info.z,
+                            })
+                            .on_conflict((dsl::mission_id, dsl::type_))
+                            .do_update()
+                            .set(ChangeDynamicLocationInfo::from(info))
+                            .execute(conn)?;
+                    }
+                    None => {
+                        // delete delivered location info
+                        diesel::delete(dsl::mission_dynamic_location_infos)
+                            .filter(dsl::mission_id.eq(mission_id))
+                            .filter(dsl::type_.eq(InfoType::Delivered))
+                            .execute(conn)?;
+                    }
+                }
+            }
+
+            if let Some(info) = catapult_shell_info {
+                use crate::db::schema::mission_catapult_shell_infos::dsl;
+                match info {
+                    Some(info) => {
+                        // upsert catapult shell info
+                        diesel::insert_into(dsl::mission_catapult_shell_infos)
+                            .values(NewCatapultShellInfo {
+                                mission_id,
+                                local_id: info.local_id,
+                                x: info.x,
+                                y: info.y,
+                                z: info.z,
+                            })
+                            .on_conflict(dsl::mission_id)
+                            .do_update()
+                            .set(ChangeCatapultShellInfo::from(info))
+                            .execute(conn)?;
+                    }
+                    None => {
+                        // delete catapult shell info
+                        diesel::delete(dsl::mission_catapult_shell_infos)
+                            .filter(dsl::mission_id.eq(mission_id))
+                            .execute(conn)?;
+                    }
+                }
+            }
+
+            if let Some(baggages) = baggages {
+                use crate::db::schema::mission_baggages::dsl;
+                // delete current baggages (this also deleted ammo infos since their baggage_id relation is ON DELETE CASCADE)
+                diesel::delete(dsl::mission_baggages)
+                    .filter(dsl::mission_id.eq(mission_id))
+                    .execute(conn)?;
+
+                // insert new baggages if Some
+                if let Some(baggages) = baggages {
+                    for baggage in baggages {
+                        let db_baggage = diesel::insert_into(dsl::mission_baggages)
+                            .values(NewBaggage {
+                                mission_id,
+                                amount: baggage.amount,
+                                name_hash: baggage.name_hash,
+                                user_index: baggage.user_index,
+                                x: baggage.x,
+                                y: baggage.y,
+                                z: baggage.z,
+                                is_returned: baggage.is_returned,
+                            })
+                            .get_result::<Baggage>(conn)?;
+
+                        if let Some(ammo_info) = &baggage.ammo_info {
+                            use crate::db::schema::mission_baggage_ammo_infos::dsl;
+                            diesel::insert_into(dsl::mission_baggage_ammo_infos)
+                                .values(NewAmmoInfo {
+                                    baggage_id: db_baggage.id,
+                                    ammo_id: &ammo_info.ammo_id,
+                                    clip_count: ammo_info.clip_count,
+                                    count: ammo_info.count,
+                                })
+                                .execute(conn)?;
+                        }
+                    }
+                }
+            }
+
+            Ok(())
         })
     }
 }
