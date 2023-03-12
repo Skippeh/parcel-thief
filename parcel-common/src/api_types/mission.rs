@@ -311,6 +311,20 @@ pub struct Baggage {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct CatapultShellInfo {
+    #[serde(rename = "oid")]
+    pub mission_id: String,
+    #[serde(rename = "lid")]
+    pub local_id: i32, // todo: verify type, it might be wrong
+    #[serde(rename = "x")]
+    pub x: i32,
+    #[serde(rename = "y")]
+    pub y: i32,
+    #[serde(rename = "z")]
+    pub z: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(deny_unknown_fields)]
 pub struct Mission {
     #[serde(rename = "aid")]
@@ -357,6 +371,8 @@ pub struct Mission {
     pub dynamic_delivered_info: Option<DynamicLocationInfo>,
     #[serde(rename = "dmi")]
     pub dynamic_mission_info: Option<DynamicMissionInfo>,
+    #[serde(rename = "csi")]
+    pub catapult_shell_info: Option<CatapultShellInfo>,
     #[serde(rename = "b")]
     pub baggages: Vec<Baggage>,
 }

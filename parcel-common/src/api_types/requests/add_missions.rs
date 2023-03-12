@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::api_types::{
     area::AreaHash,
     mission::{
-        Baggage, DynamicLocationInfo, DynamicMissionInfo, Mission, MissionType, OnlineMissionType,
-        SupplyInfo,
+        Baggage, CatapultShellInfo, DynamicLocationInfo, DynamicMissionInfo, Mission, MissionType,
+        OnlineMissionType, SupplyInfo,
     },
 };
 
@@ -33,6 +33,8 @@ pub struct NewMission {
     pub dynamic_end_info: Option<DynamicLocationInfo>,
     #[serde(rename = "dmi")]
     pub dynamic_mission_info: Option<DynamicMissionInfo>,
+    #[serde(rename = "csi")]
+    pub catapult_shell_info: Option<CatapultShellInfo>,
     #[serde(rename = "b")]
     pub baggages: Option<Vec<Baggage>>,
 }

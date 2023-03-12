@@ -5,7 +5,7 @@ use diesel::{dsl::not, prelude::*};
 use parcel_common::api_types::{
     self,
     mission::{MissionType, OnlineMissionType, ProgressState},
-    requests,
+    requests::{self},
 };
 
 use crate::db::{
@@ -14,10 +14,13 @@ use crate::db::{
             ammo_info::{AmmoInfo, NewAmmoInfo},
             Baggage, NewBaggage,
         },
-        dynamic_location_info::{DynamicLocationInfo, InfoType, NewDynamicLocationInfo},
+        catapult_shell_info::{CatapultShellInfo, ChangeCatapultShellInfo, NewCatapultShellInfo},
+        dynamic_location_info::{
+            ChangeDynamicLocationInfo, DynamicLocationInfo, InfoType, NewDynamicLocationInfo,
+        },
         dynamic_mission_info::{DynamicMissionInfo, NewDynamicMissionInfo},
         supply_info::{NewSupplyInfo, SupplyInfo},
-        Mission, NewMission,
+        ChangeMission, Mission, NewMission,
     },
     schema::missions::dsl,
     QueryError,
@@ -129,6 +132,21 @@ impl<'db> Missions<'db> {
                             })
                             .get_result(conn)?,
                     );
+                }
+
+                if let Some(info) = &mission.catapult_shell_info {
+                    use crate::db::schema::mission_catapult_shell_infos::table;
+                    result.catapult_shell_info = Some(
+                        diesel::insert_into(table)
+                            .values(&NewCatapultShellInfo {
+                                mission_id: &id,
+                                local_id: info.local_id,
+                                x: info.x,
+                                y: info.y,
+                                z: info.z,
+                            })
+                            .get_result(conn)?,
+                    )
                 }
             }
 
@@ -242,6 +260,14 @@ impl<'db> Missions<'db> {
             }
 
             {
+                use crate::db::schema::mission_catapult_shell_infos::dsl;
+                mission.catapult_shell_info = dsl::mission_catapult_shell_infos
+                    .filter(dsl::mission_id.eq(&id))
+                    .first(conn)
+                    .optional()?;
+            }
+
+            {
                 use crate::db::schema::mission_baggages::dsl;
 
                 mission.baggages = dsl::mission_baggages
@@ -276,6 +302,7 @@ pub struct DbMission {
     pub dynamic_end_info: Option<DynamicLocationInfo>,
     pub dynamic_delivered_info: Option<DynamicLocationInfo>,
     pub dynamic_mission_info: Option<DynamicMissionInfo>,
+    pub catapult_shell_info: Option<CatapultShellInfo>,
     pub baggages: Vec<Baggage>,
     pub baggage_ammo_infos: HashMap<i64, AmmoInfo>,
 }
@@ -289,6 +316,7 @@ impl From<Mission> for DbMission {
             dynamic_end_info: None,
             dynamic_delivered_info: None,
             dynamic_mission_info: None,
+            catapult_shell_info: None,
             baggages: Vec::default(),
             baggage_ammo_infos: HashMap::default(),
         }
@@ -304,6 +332,7 @@ impl DbMission {
         api_mission.dynamic_end_info = self.dynamic_end_info.map(|d| d.into_api_type());
         api_mission.dynamic_delivered_info = self.dynamic_delivered_info.map(|d| d.into_api_type());
         api_mission.dynamic_mission_info = self.dynamic_mission_info.map(|d| d.into_api_type());
+        api_mission.catapult_shell_info = self.catapult_shell_info.map(|c| c.into_api_type());
         api_mission.baggages = self
             .baggages
             .into_iter()

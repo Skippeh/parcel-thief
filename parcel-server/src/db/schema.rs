@@ -34,6 +34,16 @@ diesel::table! {
 }
 
 diesel::table! {
+    mission_catapult_shell_infos (mission_id) {
+        mission_id -> Varchar,
+        local_id -> Int4,
+        x -> Int4,
+        y -> Int4,
+        z -> Int4,
+    }
+}
+
+diesel::table! {
     mission_dynamic_location_infos (id) {
         id -> Int8,
         mission_id -> Varchar,
@@ -294,6 +304,7 @@ diesel::table! {
 
 diesel::joinable!(mission_baggage_ammo_infos -> mission_baggages (baggage_id));
 diesel::joinable!(mission_baggages -> missions (mission_id));
+diesel::joinable!(mission_catapult_shell_infos -> missions (mission_id));
 diesel::joinable!(mission_dynamic_location_infos -> missions (mission_id));
 diesel::joinable!(mission_dynamic_mission_infos -> missions (mission_id));
 diesel::joinable!(mission_relations -> accounts (account_id));
@@ -323,6 +334,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     accounts,
     mission_baggage_ammo_infos,
     mission_baggages,
+    mission_catapult_shell_infos,
     mission_dynamic_location_infos,
     mission_dynamic_mission_infos,
     mission_relations,
