@@ -8,6 +8,7 @@ use std::{
 use anyhow::Context;
 use lazy_static::lazy_static;
 use windows::{
+    core::{PCWSTR, PWSTR},
     w,
     Win32::System::{
         Diagnostics::Debug::{IMAGE_NT_HEADERS64, IMAGE_SECTION_HEADER},
@@ -151,7 +152,7 @@ where
 {
     pub fn new() -> Self {
         unsafe {
-            let module = GetModuleHandleW(w!("ds.exe")).unwrap();
+            let module = GetModuleHandleW(PCWSTR(std::ptr::null_mut::<u16>())).unwrap();
             let dos_header = &*(module.0 as *const IMAGE_DOS_HEADER);
             let nt_headers =
                 &*((module.0 + (dos_header.e_lfanew as isize)) as *const IMAGE_NT_HEADERS64);
