@@ -1,5 +1,5 @@
 use actix_web::{
-    post,
+    put,
     web::{Data, Json},
 };
 use parcel_common::api_types::requests::set_mission_progress::{
@@ -11,7 +11,7 @@ use crate::{
     session::Session,
 };
 
-#[post("setMissionProgress")]
+#[put("setMissionProgress")]
 pub async fn set_mission_progress(
     request: Json<SetMissionProgressRequest>,
     _session: Session,
