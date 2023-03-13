@@ -59,7 +59,29 @@ pub fn map_offsets() -> Result<(), anyhow::Error> {
         )
         .context("Failed to find write_outgoing_data offset")?;
 
-    offsets.map_offset(LocationOffset::DataAuthUrlPtr, 0x4DF8130)?;
+    // Map DataAuthUrlPtr
+    let (start, end) = offsets
+        .get_data_section()
+        .expect(".data section should always exist");
+    let auth_url_offset = crate::pattern::find_single(
+        start,
+        end - start,
+        // https://prod-pc-15.wws-gs2.com/auth/ds\0
+        "68 74 74 70 73 3a 2f 2f 70 72 6f 64 2d 70 63 2d 31 35 2e \
+        77 77 73 2d 67 73 32 2e 63 6f 6d 2f 61 75 74 68 2f 64 73 00",
+    );
+
+    match auth_url_offset {
+        Ok(Some(mut addr)) => {
+            addr = offsets
+                .get_relative_addr(addr)
+                .expect("Should always return a valid address");
+
+            addr += 39 + 1; // length of auth url including terminator and +1 padding
+            offsets.map_offset(LocationOffset::DataAuthUrlPtr, addr)?;
+        }
+        _ => anyhow::bail!("Could not find auth url pointer offset"),
+    }
 
     Ok(())
 }
