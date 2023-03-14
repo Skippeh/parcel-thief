@@ -40,7 +40,12 @@ async fn main() -> Result<(), anyhow::Error> {
     println!("Waiting for ds.exe...");
 
     loop {
-        let target_process = OwnedProcess::find_first_by_name("ds");
+        let mut target_process = OwnedProcess::find_first_by_name("ds");
+
+        if target_process.is_none() {
+            // epic exe is named differently than steam
+            target_process = OwnedProcess::find_first_by_name("DeathStranding");
+        }
 
         if let Some(target_process) = target_process {
             println!("Found process, injecting...");

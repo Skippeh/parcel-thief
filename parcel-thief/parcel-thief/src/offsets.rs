@@ -8,8 +8,7 @@ use std::{
 use anyhow::Context;
 use lazy_static::lazy_static;
 use windows::{
-    core::{PCWSTR, PWSTR},
-    w,
+    core::PCWSTR,
     Win32::System::{
         Diagnostics::Debug::{IMAGE_NT_HEADERS64, IMAGE_SECTION_HEADER},
         LibraryLoader::GetModuleHandleW,
@@ -17,7 +16,7 @@ use windows::{
     },
 };
 
-use crate::pattern::MemoryReaderError;
+use crate::{pattern::MemoryReaderError, GAME_VERSION};
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, enum_display_derive::Display)]
 pub enum LocationOffset {
@@ -50,39 +49,21 @@ pub fn map_offsets() -> Result<(), anyhow::Error> {
     offsets
         .map_pattern_offset(
             LocationOffset::FnReadIncomingData,
-            "48 89 5C 24 08 55 56 57 41 56 41 57 48 83 EC 50 48 8B 05 D9 50 58 03 48 33 C4 48 89",
+            "48 89 5C 24 08 55 56 57 41 56 41 57 48 83 EC 50 48 8B 05 ? ? 58 03 48 33 C4 48 89",
         )
         .context("Failed to find read_incoming_data offset")?;
     offsets
         .map_pattern_offset(
             LocationOffset::FnWriteOutgoingData,
-            "48 89 5C 24 08 48 89 74 24 20 55 57 41 56 48 8B EC 48 81 EC 80 00 00 00 48 8B 05 11",
+            "48 89 5C 24 08 48 89 74 24 20 55 57 41 56 48 8B EC 48 81 EC 80 00 00 00 48 8B 05",
         )
         .context("Failed to find write_outgoing_data offset")?;
 
-    // Map DataAuthUrlPtr
-    let (start, end) = offsets
-        .get_data_section()
-        .expect(".data section should always exist");
-    let auth_url_offset = crate::pattern::find_single(
-        start,
-        end - start,
-        // https://prod-pc-15.wws-gs2.com/auth/ds\0
-        "68 74 74 70 73 3a 2f 2f 70 72 6f 64 2d 70 63 2d 31 35 2e \
-        77 77 73 2d 67 73 32 2e 63 6f 6d 2f 61 75 74 68 2f 64 73 00",
-    );
-
-    match auth_url_offset {
-        Ok(Some(mut addr)) => {
-            addr = offsets
-                .get_relative_addr(addr)
-                .expect("Should always return a valid address");
-
-            addr += 39 + 1; // length of auth url including terminator and +1 padding
-            offsets.map_offset(LocationOffset::DataAuthUrlPtr, addr)?;
-        }
-        _ => anyhow::bail!("Could not find auth url pointer offset"),
-    }
+    // Map DataAuthUrlPtr based on game version
+    match *GAME_VERSION.read().unwrap() {
+        crate::GameVersion::Steam => offsets.map_offset(LocationOffset::DataAuthUrlPtr, 0x4DF8130),
+        crate::GameVersion::Epic => offsets.map_offset(LocationOffset::DataAuthUrlPtr, 0x4DFA0B0),
+    }?;
 
     Ok(())
 }
@@ -152,7 +133,8 @@ where
 {
     pub fn new() -> Self {
         unsafe {
-            let module = GetModuleHandleW(PCWSTR(std::ptr::null_mut::<u16>())).unwrap();
+            let module = GetModuleHandleW(PCWSTR(std::ptr::null_mut::<u16>()))
+                .expect("Should always return Ok with null ptr");
             let dos_header = &*(module.0 as *const IMAGE_DOS_HEADER);
             let nt_headers =
                 &*((module.0 + (dos_header.e_lfanew as isize)) as *const IMAGE_NT_HEADERS64);

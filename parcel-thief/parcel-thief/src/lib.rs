@@ -2,13 +2,19 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 
+use std::sync::{Arc, RwLock};
+
 use anyhow::Context;
 use lazy_static::lazy_static;
-use windows::Win32::{
-    Foundation::HINSTANCE,
-    System::{
-        Console::{AllocConsole, FreeConsole},
-        SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH},
+use windows::{
+    w,
+    Win32::{
+        Foundation::HINSTANCE,
+        System::{
+            Console::{AllocConsole, FreeConsole},
+            LibraryLoader::GetModuleHandleW,
+            SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH},
+        },
     },
 };
 
@@ -18,6 +24,17 @@ mod ds_string;
 mod offsets;
 mod pattern;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum GameVersion {
+    Steam,
+    Epic,
+}
+
+lazy_static! {
+    pub static ref GAME_VERSION: Arc<RwLock<GameVersion>> =
+        Arc::new(RwLock::new(GameVersion::Steam));
+}
+
 #[derive(Default)]
 pub struct ParcelThief {}
 
@@ -25,6 +42,11 @@ impl ParcelThief {
     pub unsafe fn start(&self) -> anyhow::Result<()> {
         AllocConsole();
         println!("ParcelThief::start");
+
+        *GAME_VERSION.write().unwrap() =
+            find_game_version().context("Could not figure out game version")?;
+
+        println!("Detected game version: {:?}", GAME_VERSION.read().unwrap());
 
         offsets::map_offsets().context("Failed to map offsets")?;
 
@@ -52,6 +74,25 @@ impl ParcelThief {
         FreeConsole();
 
         Ok(())
+    }
+}
+
+unsafe fn find_game_version() -> Result<GameVersion, anyhow::Error> {
+    let working_dir = std::env::current_dir()?;
+    let mut steam_dll_path = working_dir.clone();
+    steam_dll_path.push("steam_api64.dll");
+
+    let mut egs_dll_path = working_dir;
+    egs_dll_path.push("EOSSDK-Win64-Shipping.dll");
+
+    if steam_dll_path.exists() {
+        Ok(GameVersion::Steam)
+    } else if egs_dll_path.exists() {
+        Ok(GameVersion::Epic)
+    } else {
+        anyhow::bail!(
+            "Could not find steam_api64.dll or EOSSDK-Win64-Shipping.dll in working directory"
+        );
     }
 }
 
