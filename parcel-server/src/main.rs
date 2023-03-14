@@ -20,7 +20,7 @@ use actix_web::{
 };
 use anyhow::{Context, Result};
 use clap::Parser;
-use data::{database::Database, redis_client::RedisClient, steam::Steam};
+use data::{database::Database, platforms::steam::Steam, redis_client::RedisClient};
 use diesel::{pg::Pg, Connection, PgConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use endpoints::configure_endpoints;

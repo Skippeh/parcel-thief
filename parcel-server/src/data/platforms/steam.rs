@@ -4,7 +4,7 @@ use anyhow::Context;
 use reqwest::{Client, RequestBuilder, StatusCode};
 use serde::Deserialize;
 
-use super::redis_client::RedisClient;
+use crate::data::redis_client::RedisClient;
 
 const APP_ID: u32 = 1850570;
 const URL_AUTH_USER_TICKET: &str =
