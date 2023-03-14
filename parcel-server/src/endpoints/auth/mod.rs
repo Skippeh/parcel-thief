@@ -18,7 +18,10 @@ use serde::Deserialize;
 use crate::{
     data::{
         database::Database,
-        platforms::steam::{Steam, VerifyUserAuthTicketError},
+        platforms::{
+            epic::{self, Epic},
+            steam::{self, Steam},
+        },
         redis_session_store::RedisSessionStore,
     },
     response_error::{impl_response_error, CommonResponseError},
@@ -119,6 +122,7 @@ impl CommonResponseError for Error {
 pub async fn auth(
     request: Query<AuthQuery>,
     steam: Data<Steam>,
+    epic: Data<Epic>,
     session_store: Data<RedisSessionStore>,
     db: Data<Database>,
     gateway_url: Data<GatewayUrl>,
@@ -133,7 +137,7 @@ pub async fn auth(
                 .verify_user_auth_ticket(&request.code)
                 .await
                 .map_err(|err| match err {
-                    VerifyUserAuthTicketError::InvalidTicket => Error::InvalidCode,
+                    steam::VerifyUserAuthTicketError::InvalidTicket => Error::InvalidCode,
                     other => Error::ApiResponseError(other.into()),
                 })?;
 
@@ -152,7 +156,30 @@ pub async fn auth(
             provider_id = user_info.steam_id.to_string();
             display_name = user_info.name;
         }
-        other => return Err(Error::UnsupportedPlatform(*other)),
+        Provider::Epic => {
+            let account_id = epic
+                .verify_token(&request.code)
+                .await
+                .map_err(|err| match err {
+                    epic::VerifyTokenError::InvalidToken => Error::InvalidCode,
+                    other => Error::ApiResponseError(other.into()),
+                })?;
+
+            let account_info = epic
+                .get_account_infos(&request.code, &[&account_id.account_id])
+                .await
+                .map_err(|err| Error::InternalError(err.into()))?
+                .into_iter()
+                .next()
+                .map(|tuple| tuple.1)
+                .ok_or_else(|| {
+                    Error::InternalError(anyhow::anyhow!("Could not query account info").into())
+                })?;
+
+            provider = Provider::Epic;
+            provider_id = account_id.account_id;
+            display_name = account_info.display_name;
+        }
     }
 
     let login_date = Utc::now().naive_utc();
@@ -164,7 +191,7 @@ pub async fn auth(
         session_store.delete_session(&token).await?;
     }
 
-    // todo: create account if one doesn't exist
+    // create account if one doesn't exist
     let db = &mut db
         .connect()
         .map_err(|err| Error::InternalError(err.into()))?;
