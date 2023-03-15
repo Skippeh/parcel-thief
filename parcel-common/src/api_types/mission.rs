@@ -98,7 +98,7 @@ pub enum MissionType {
     Delivery = 0,
     #[serde(rename = "Collect")]
     Collect = 1,
-    #[serde(rename = "LostObject")]
+    #[serde(rename = "Lostobject")]
     LostObject = 2,
     #[serde(rename = "Supply")]
     Supply = 3,
