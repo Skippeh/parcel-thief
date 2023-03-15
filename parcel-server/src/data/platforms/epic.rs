@@ -93,8 +93,6 @@ impl Epic {
             .map_err(VerifyTokenError::InvalidApiResponse)
             .await?;
 
-        dbg!(&response);
-
         match response.json::<VerifyTokenResponse>().await {
             Ok(response) => match response {
                 VerifyTokenResponse::NotActive { active: _ } => Err(VerifyTokenError::InvalidToken),
