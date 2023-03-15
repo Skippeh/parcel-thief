@@ -290,46 +290,46 @@ pub struct Object {
     pub object_type: ObjectType,
     #[serde(rename = "ut")]
     pub updated_time: i64,
-    #[serde(rename = "mt")]
+    #[serde(rename = "mt", skip_serializing_if = "Option::is_none")]
     pub construction_materials_contributions: Option<Vec<ConstructionMaterials>>,
-    #[serde(rename = "rmt")]
+    #[serde(rename = "rmt", skip_serializing_if = "Option::is_none")]
     pub recycle_materials: Option<Vec<RecycleMaterials>>,
-    #[serde(rename = "bgs")]
+    #[serde(rename = "bgs", skip_serializing_if = "Option::is_none")]
     pub baggages: Option<Vec<Baggage>>,
-    #[serde(rename = "cm")]
+    #[serde(rename = "cm", skip_serializing_if = "Option::is_none")]
     pub comments: Option<Vec<Comment>>,
-    #[serde(rename = "ri")]
+    #[serde(rename = "ri", skip_serializing_if = "Option::is_none")]
     pub rope_info: Option<RopeInfo>,
-    #[serde(rename = "si")]
+    #[serde(rename = "si", skip_serializing_if = "Option::is_none")]
     pub stone_info: Option<StoneInfo>,
-    #[serde(rename = "bi")]
+    #[serde(rename = "bi", skip_serializing_if = "Option::is_none")]
     pub bridge_info: Option<BridgeInfo>,
-    #[serde(rename = "pi")]
+    #[serde(rename = "pi", skip_serializing_if = "Option::is_none")]
     pub parking_info: Option<ParkingInfo>,
-    #[serde(rename = "vi")]
+    #[serde(rename = "vi", skip_serializing_if = "Option::is_none")]
     pub vehicle_info: Option<VehicleInfo>,
-    #[serde(rename = "ei")]
+    #[serde(rename = "ei", skip_serializing_if = "Option::is_none")]
     pub extra_info: Option<ExtraInfo>,
-    #[serde(rename = "ci")]
+    #[serde(rename = "ci", skip_serializing_if = "Option::is_none")]
     pub customize_info: Option<CustomizeInfo>,
-    #[serde(rename = "tags")]
+    #[serde(rename = "tags", skip_serializing_if = "Option::is_none")]
     pub tags: Option<Vec<String>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct QpidObjectsResponse {
-    #[serde(rename = "ro")]
+    #[serde(rename = "ro", skip_serializing_if = "Option::is_none")]
     pub roads: Option<Vec<Road>>,
-    #[serde(rename = "m")]
+    #[serde(rename = "m", skip_serializing_if = "Option::is_none")]
     pub missions: Option<Vec<Mission>>,
-    #[serde(rename = "oa")]
+    #[serde(rename = "oa", skip_serializing_if = "Option::is_none")]
     pub object_a: Option<Vec<Object>>,
-    #[serde(rename = "ob")]
+    #[serde(rename = "ob", skip_serializing_if = "Option::is_none")]
     pub object_b: Option<Vec<Object>>,
-    #[serde(rename = "od")]
+    #[serde(rename = "od", skip_serializing_if = "Option::is_none")]
     pub object_d: Option<Vec<Object>>,
-    #[serde(rename = "oe")]
+    #[serde(rename = "oe", skip_serializing_if = "Option::is_none")]
     pub object_e: Option<Vec<Object>>,
-    #[serde(rename = "op")]
+    #[serde(rename = "op", skip_serializing_if = "Option::is_none")]
     pub object_p: Option<Vec<Object>>,
 }

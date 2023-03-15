@@ -306,7 +306,7 @@ pub struct Baggage {
         deserialize_with = "deserialize_bool_from_number"
     )]
     pub is_returned: bool,
-    #[serde(rename = "am")]
+    #[serde(rename = "am", skip_serializing_if = "Option::is_none")]
     pub ammo_info: Option<AmmoInfo>,
 }
 
@@ -361,17 +361,17 @@ pub struct Mission {
     pub registered_time: i64,
     #[serde(rename = "et")]
     pub expiration_time: i64,
-    #[serde(rename = "si")]
+    #[serde(rename = "si", skip_serializing_if = "Option::is_none")]
     pub supply_info: Option<SupplyInfo>,
-    #[serde(rename = "dsi")]
+    #[serde(rename = "dsi", skip_serializing_if = "Option::is_none")]
     pub dynamic_start_info: Option<DynamicLocationInfo>,
-    #[serde(rename = "dei")]
+    #[serde(rename = "dei", skip_serializing_if = "Option::is_none")]
     pub dynamic_end_info: Option<DynamicLocationInfo>,
-    #[serde(rename = "ddi")]
+    #[serde(rename = "ddi", skip_serializing_if = "Option::is_none")]
     pub dynamic_delivered_info: Option<DynamicLocationInfo>,
-    #[serde(rename = "dmi")]
+    #[serde(rename = "dmi", skip_serializing_if = "Option::is_none")]
     pub dynamic_mission_info: Option<DynamicMissionInfo>,
-    #[serde(rename = "csi")]
+    #[serde(rename = "csi", skip_serializing_if = "Option::is_none")]
     pub catapult_shell_info: Option<CatapultShellInfo>,
     #[serde(rename = "b")]
     pub baggages: Vec<Baggage>,
