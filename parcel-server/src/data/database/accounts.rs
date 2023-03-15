@@ -30,7 +30,7 @@ impl<'db> Accounts<'db> {
         let conn = &mut *self.connection.get_pg_connection().await;
         let account = diesel::insert_into(accounts::table)
             .values(&NewAccount {
-                id: &generate_account_id(),
+                id: &format!("{}_{}", provider.to_string().to_lowercase(), provider_id),
                 display_name,
                 provider: &provider,
                 provider_id,

@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use diesel::{
     backend::Backend, deserialize::FromSql, serialize::ToSql, sql_types::Integer, AsExpression,
     FromSqlRow,
@@ -54,6 +56,15 @@ pub enum Provider {
     Steam = 0,
     #[serde(rename = "epic")]
     Epic = 1,
+}
+
+impl Display for Provider {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Provider::Steam => write!(f, "Steam"),
+            Provider::Epic => write!(f, "Epic"),
+        }
+    }
 }
 
 impl<DB> ToSql<Integer, DB> for Provider
