@@ -41,7 +41,7 @@ pub async fn find_missions(
         .find_missions(
             ONLINE_MISSION_TYPES,
             MISSION_TYPES,
-            &[/*&session.account_id*/],
+            &[&session.account_id],
             PROGRESS_STATES,
             &request.qpid_ids,
         )
