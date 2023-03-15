@@ -1,5 +1,5 @@
 CREATE TABLE accounts (
-    id CHAR(32) PRIMARY KEY,
+    id VARCHAR PRIMARY KEY,
     display_name VARCHAR NOT NULL,
     provider INTEGER NOT NULL,
     provider_id VARCHAR NOT NULL,

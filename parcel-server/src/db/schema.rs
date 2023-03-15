@@ -2,7 +2,7 @@
 
 diesel::table! {
     accounts (id) {
-        id -> Bpchar,
+        id -> Varchar,
         display_name -> Varchar,
         provider -> Int4,
         provider_id -> Varchar,
@@ -68,7 +68,7 @@ diesel::table! {
     mission_relations (id) {
         id -> Int8,
         mission_id -> Varchar,
-        account_id -> Bpchar,
+        account_id -> Varchar,
     }
 }
 
@@ -84,8 +84,8 @@ diesel::table! {
     missions (id) {
         id -> Varchar,
         area_id -> Int4,
-        creator_id -> Bpchar,
-        worker_id -> Nullable<Bpchar>,
+        creator_id -> Varchar,
+        worker_id -> Nullable<Varchar>,
         qpid_id -> Int4,
         qpid_start_location -> Int4,
         qpid_end_location -> Int4,
@@ -101,7 +101,7 @@ diesel::table! {
 
 diesel::table! {
     player_profiles (account_id) {
-        account_id -> Bpchar,
+        account_id -> Varchar,
         banner_id -> Int4,
         num_bronze_medals -> Int4,
         num_bronze_medals_large -> Int4,
@@ -137,7 +137,7 @@ diesel::table! {
     qpid_object_baggages (id) {
         id -> Int8,
         object_id -> Varchar,
-        creator -> Bpchar,
+        creator -> Varchar,
         item_name_hash -> Int4,
         mission_id -> Int4,
         life -> Int4,
@@ -166,7 +166,7 @@ diesel::table! {
     qpid_object_comments (id) {
         id -> Int8,
         object_id -> Varchar,
-        writer -> Bpchar,
+        writer -> Varchar,
         likes -> Int8,
         parent_index -> Int2,
         is_deleted -> Bool,
@@ -178,7 +178,7 @@ diesel::table! {
     qpid_object_construction_materials (id) {
         id -> Int8,
         object_id -> Varchar,
-        contributor -> Bpchar,
+        contributor -> Varchar,
         mats_0 -> Int4,
         mats_1 -> Int4,
         mats_2 -> Int4,
@@ -224,7 +224,7 @@ diesel::table! {
     qpid_object_recycle_materials (id) {
         id -> Int8,
         object_id -> Varchar,
-        contributor -> Bpchar,
+        contributor -> Varchar,
         mats_0 -> Int4,
         mats_1 -> Int4,
         mats_2 -> Int4,
@@ -283,7 +283,7 @@ diesel::table! {
 diesel::table! {
     qpid_objects (id) {
         id -> Varchar,
-        creator_id -> Bpchar,
+        creator_id -> Varchar,
         exponent -> Int4,
         likes -> Int8,
         pos_x -> Int4,

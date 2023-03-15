@@ -1,7 +1,7 @@
 CREATE TABLE qpid_objects (
     id VARCHAR PRIMARY KEY,
     -- account id of creator
-    creator_id CHAR(32) NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    creator_id VARCHAR NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
     exponent INTEGER NOT NULL,
     -- this is technically u32 but we're storing as i64 since postgres doesn't have unsigned types
     likes BIGINT NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE qpid_objects (
 CREATE TABLE qpid_object_construction_materials (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     object_id VARCHAR NOT NULL REFERENCES qpid_objects(id) ON DELETE CASCADE,
-    contributor CHAR(32) NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    contributor VARCHAR NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
     mats_0 INTEGER NOT NULL DEFAULT 0,
     mats_1 INTEGER NOT NULL DEFAULT 0,
     mats_2 INTEGER NOT NULL DEFAULT 0,
@@ -44,7 +44,7 @@ CREATE INDEX qpid_object_construction_materials_object_id_idx ON qpid_object_con
 CREATE TABLE qpid_object_recycle_materials (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     object_id VARCHAR NOT NULL REFERENCES qpid_objects(id) ON DELETE CASCADE,
-    contributor CHAR(32) NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    contributor VARCHAR NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
     mats_0 INTEGER NOT NULL DEFAULT 0,
     mats_1 INTEGER NOT NULL DEFAULT 0,
     mats_2 INTEGER NOT NULL DEFAULT 0,
@@ -59,7 +59,7 @@ CREATE INDEX qpid_object_recycle_materials_object_id_idx ON qpid_object_recycle_
 CREATE TABLE qpid_object_baggages (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     object_id VARCHAR NOT NULL REFERENCES qpid_objects(id) ON DELETE CASCADE,
-    creator CHAR(32) NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    creator VARCHAR NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
     item_name_hash INTEGER NOT NULL,
     mission_id INTEGER NOT NULL,
     life INTEGER NOT NULL,
@@ -72,7 +72,7 @@ CREATE INDEX qpid_object_baggages_object_id_idx ON qpid_object_baggages (object_
 CREATE TABLE qpid_object_comments (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     object_id VARCHAR NOT NULL REFERENCES qpid_objects(id) ON DELETE CASCADE,
-    writer CHAR(32) NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    writer VARCHAR NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
     likes BIGINT NOT NULL,
     -- value is i8 but is stored as i16 due to postgres not having an i8 type
     parent_index SMALLINT NOT NULL,

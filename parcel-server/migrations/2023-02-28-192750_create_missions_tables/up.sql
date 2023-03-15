@@ -1,8 +1,8 @@
 CREATE TABLE missions (
     id VARCHAR PRIMARY KEY,
     area_id INTEGER NOT NULL,
-    creator_id CHAR(32) NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
-    worker_id CHAR(32) REFERENCES accounts(id) ON DELETE CASCADE,
+    creator_id VARCHAR NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    worker_id VARCHAR REFERENCES accounts(id) ON DELETE CASCADE,
     qpid_id INTEGER NOT NULL,
     qpid_start_location INTEGER NOT NULL,
     qpid_end_location INTEGER NOT NULL,
@@ -67,7 +67,7 @@ CREATE TABLE mission_baggage_ammo_infos (
 CREATE TABLE mission_relations (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     mission_id VARCHAR NOT NULL REFERENCES missions(id) ON DELETE CASCADE,
-    account_id CHAR(32) NOT NULL REFERENCES accounts(id) ON DELETE CASCADE
+    account_id VARCHAR NOT NULL REFERENCES accounts(id) ON DELETE CASCADE
 );
 
 CREATE INDEX mission_relations_mission_id_idx ON mission_relations (mission_id);

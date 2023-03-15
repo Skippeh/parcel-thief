@@ -1,5 +1,5 @@
 CREATE TABLE player_profiles (
-    account_id CHAR(32) PRIMARY KEY,
+    account_id VARCHAR PRIMARY KEY,
     banner_id INTEGER NOT NULL,
     num_bronze_medals INTEGER NOT NULL,
     num_bronze_medals_large INTEGER NOT NULL,
