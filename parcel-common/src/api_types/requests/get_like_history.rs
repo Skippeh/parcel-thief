@@ -43,7 +43,7 @@ pub struct LikeHistory {
     pub time: i64,
     /// The account id of the person who gave the likes.
     /// If summarized_count is > 0 then this will always be an empty string,
-    /// as the data is, you guessed it, summarized from multiple players.
+    /// as the data is summarized from multiple players.
     #[serde(rename = "uid")]
     pub account_id: String,
 }
