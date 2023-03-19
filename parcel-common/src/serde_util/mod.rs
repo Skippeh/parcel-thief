@@ -1,4 +1,4 @@
-use serde::{Deserialize, Deserializer};
+use serde::{Deserialize, Deserializer, Serializer};
 use serde_json::Value;
 
 pub fn deserialize_i64_from_string_or_i64<'de, D>(deserializer: D) -> Result<i64, D::Error>
@@ -34,4 +34,16 @@ where
             "unexpected value, expected 0 or 1.",
         )),
     }
+}
+
+pub fn serialize_bool_to_number<S>(val: &bool, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    let number = match val {
+        true => 1,
+        false => 0,
+    };
+
+    serializer.serialize_u8(number)
 }

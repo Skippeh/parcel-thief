@@ -77,6 +77,7 @@ impl QpidObject {
             updated_time: self.updated_time.timestamp_millis(),
             construction_materials_contributions: None,
             recycle_materials: None,
+            priority: false,
             baggages: None,
             comments: None,
             rope_info: None,

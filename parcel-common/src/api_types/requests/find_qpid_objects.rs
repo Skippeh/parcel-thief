@@ -2,7 +2,10 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::api_types::{area::AreaHash, object::QpidObjectsResponse};
+use crate::api_types::{
+    area::AreaHash,
+    object::{ObjectType, QpidObjectsResponse},
+};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct FindQpidObjectsRequest {
@@ -24,7 +27,7 @@ pub struct FindQpidObjectsRequest {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ObjectRequest {
     #[serde(rename = "ct")]
-    pub counts: HashMap<String, i32>,
+    pub counts: HashMap<ObjectType, i32>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

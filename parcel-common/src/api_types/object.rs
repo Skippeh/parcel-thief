@@ -4,6 +4,8 @@ use diesel::{
 };
 use serde::{Deserialize, Serialize};
 
+use crate::serde_util::serialize_bool_to_number;
+
 use super::{area::AreaHash, mission::Mission, road::Road};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -314,9 +316,15 @@ pub struct Object {
     pub customize_info: Option<CustomizeInfo>,
     #[serde(rename = "tags", skip_serializing_if = "Option::is_none")]
     pub tags: Option<Vec<String>>,
+    #[serde(
+        rename = "p",
+        serialize_with = "serialize_bool_to_number",
+        skip_deserializing
+    )]
+    pub priority: bool,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct QpidObjectsResponse {
     #[serde(rename = "ro", skip_serializing_if = "Option::is_none")]
     pub roads: Option<Vec<Road>>,

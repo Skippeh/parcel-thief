@@ -1,8 +1,8 @@
 use chrono::Utc;
-use diesel::prelude::*;
+use diesel::{dsl::not, prelude::*};
 
 use parcel_common::api_types::{
-    self, object::ObjectType, requests::create_object::CreateObjectRequest,
+    self, area::AreaHash, object::ObjectType, requests::create_object::CreateObjectRequest,
 };
 
 use crate::db::{
@@ -25,6 +25,7 @@ use crate::db::{
 
 use super::DatabaseConnection;
 
+#[derive(Debug)]
 pub struct DbQpidObject {
     pub object: QpidObject,
     pub rope_info: Option<RopeInfo>,
@@ -374,6 +375,155 @@ impl<'db> QpidObjects<'db> {
         }
 
         Ok(())
+    }
+
+    pub async fn find_objects(
+        &self,
+        area_hashes: &[AreaHash],
+        qpid_ids: &[i32],
+        priority_ids: Option<&[&str]>,
+        limit: Option<i64>,
+        exclude_account_ids: &[&str],
+    ) -> Result<Vec<QpidObject>, QueryError> {
+        use crate::db::schema::qpid_objects::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        let objects = dsl::qpid_objects
+            .filter(dsl::qpid_id.eq_any(qpid_ids))
+            .filter(dsl::area_id.eq_any(area_hashes))
+            .filter(not(dsl::creator_id.eq_any(exclude_account_ids)));
+
+        if let Some(limit) = limit {
+            let objects = objects.limit(limit).get_results::<QpidObject>(conn)?;
+            Ok(objects)
+        } else {
+            let objects = objects.get_results::<QpidObject>(conn)?;
+            Ok(objects)
+        }
+    }
+
+    pub async fn find_objects_by_id(&self, ids: &[String]) -> Result<Vec<QpidObject>, QueryError> {
+        use crate::db::schema::qpid_objects::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        let objects = dsl::qpid_objects
+            .filter(dsl::id.eq_any(ids))
+            .get_results(conn)?;
+
+        Ok(objects)
+    }
+
+    pub async fn query_object_data(
+        &self,
+        objects: Vec<QpidObject>,
+    ) -> Result<Vec<DbQpidObject>, QueryError> {
+        let conn = &mut *self.connection.get_pg_connection().await;
+        let mut result = Vec::new();
+
+        // todo: optimize this (use less queries)
+
+        for object in objects {
+            let mut db_object = DbQpidObject {
+                object,
+                rope_info: None,
+                stone_info: None,
+                bridge_info: None,
+                parking_info: None,
+                vehicle_info: None,
+                extra_info: None,
+                customize_info: None,
+                comment: None,
+                comment_phrases: None,
+                _phantom: std::marker::PhantomData,
+            };
+            let id = &db_object.object.id;
+
+            {
+                use crate::db::schema::qpid_object_rope_infos::dsl;
+
+                db_object.rope_info = dsl::qpid_object_rope_infos
+                    .filter(dsl::object_id.eq(id))
+                    .first(conn)
+                    .optional()?;
+            }
+
+            {
+                use crate::db::schema::qpid_object_stone_infos::dsl;
+
+                db_object.stone_info = dsl::qpid_object_stone_infos
+                    .filter(dsl::object_id.eq(id))
+                    .first(conn)
+                    .optional()?;
+            }
+
+            {
+                use crate::db::schema::qpid_object_bridge_infos::dsl;
+
+                db_object.bridge_info = dsl::qpid_object_bridge_infos
+                    .filter(dsl::object_id.eq(id))
+                    .first(conn)
+                    .optional()?;
+            }
+
+            {
+                use crate::db::schema::qpid_object_parking_infos::dsl;
+
+                db_object.parking_info = dsl::qpid_object_parking_infos
+                    .filter(dsl::object_id.eq(id))
+                    .first(conn)
+                    .optional()?;
+            }
+
+            {
+                use crate::db::schema::qpid_object_vehicle_infos::dsl;
+
+                db_object.vehicle_info = dsl::qpid_object_vehicle_infos
+                    .filter(dsl::object_id.eq(id))
+                    .first(conn)
+                    .optional()?;
+            }
+
+            {
+                use crate::db::schema::qpid_object_extra_infos::dsl;
+
+                db_object.extra_info = dsl::qpid_object_extra_infos
+                    .filter(dsl::object_id.eq(id))
+                    .first(conn)
+                    .optional()?;
+            }
+
+            {
+                use crate::db::schema::qpid_object_customize_infos::dsl;
+
+                db_object.customize_info = dsl::qpid_object_customize_infos
+                    .filter(dsl::object_id.eq(id))
+                    .first(conn)
+                    .optional()?;
+            }
+
+            {
+                use crate::db::schema::qpid_object_comments::dsl;
+
+                db_object.comment = dsl::qpid_object_comments
+                    .filter(dsl::object_id.eq(id))
+                    .first(conn)
+                    .optional()?;
+
+                if let Some(comment) = &db_object.comment {
+                    use crate::db::schema::qpid_object_comment_phrases::dsl;
+
+                    db_object.comment_phrases = Some(
+                        dsl::qpid_object_comment_phrases
+                            .filter(dsl::comment_id.eq(&comment.id))
+                            .get_results::<Phrase>(conn)?,
+                    );
+                }
+            }
+
+            result.push(db_object);
+        }
+
+        Ok(result)
     }
 
     fn add_tag(
