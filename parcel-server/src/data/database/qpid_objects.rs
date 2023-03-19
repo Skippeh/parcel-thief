@@ -439,7 +439,7 @@ impl<'db> QpidObjects<'db> {
 
     pub async fn query_object_data(
         &self,
-        objects: Vec<QpidObject>,
+        objects: impl IntoIterator<Item = QpidObject>,
     ) -> Result<Vec<DbQpidObject>, QueryError> {
         let conn = &mut *self.connection.get_pg_connection().await;
         let mut result = Vec::new();
