@@ -50,7 +50,7 @@ pub async fn find_qpid_objects(
                 &[area_hash],
                 &[qpid_id],
                 priority_ids.as_deref(),
-                None,
+                10000,
                 &[&session.account_id],
             )
             .await?;

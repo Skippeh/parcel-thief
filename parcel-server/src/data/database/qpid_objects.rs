@@ -382,24 +382,48 @@ impl<'db> QpidObjects<'db> {
         area_hashes: &[AreaHash],
         qpid_ids: &[i32],
         priority_ids: Option<&[&str]>,
-        limit: Option<i64>,
+        limit: i64,
         exclude_account_ids: &[&str],
     ) -> Result<Vec<QpidObject>, QueryError> {
         use crate::db::schema::qpid_objects::dsl;
+
+        if limit <= 0 {
+            return Ok(Vec::new());
+        }
+
         let conn = &mut *self.connection.get_pg_connection().await;
 
-        let objects = dsl::qpid_objects
-            .filter(dsl::qpid_id.eq_any(qpid_ids))
-            .filter(dsl::area_id.eq_any(area_hashes))
-            .filter(not(dsl::creator_id.eq_any(exclude_account_ids)));
+        let mut result_objects = Vec::with_capacity(limit as usize);
+        let priority_ids = priority_ids.unwrap_or_default();
 
-        if let Some(limit) = limit {
-            let objects = objects.limit(limit).get_results::<QpidObject>(conn)?;
-            Ok(objects)
-        } else {
-            let objects = objects.get_results::<QpidObject>(conn)?;
-            Ok(objects)
+        // Find objects created by accounts in priority_ids
+        if !priority_ids.is_empty() {
+            let objects = dsl::qpid_objects
+                .filter(dsl::qpid_id.eq_any(qpid_ids))
+                .filter(dsl::area_id.eq_any(area_hashes))
+                .filter(dsl::creator_id.eq_any(priority_ids))
+                .filter(not(dsl::creator_id.eq_any(exclude_account_ids)))
+                .limit(limit)
+                .get_results::<QpidObject>(conn)?;
+
+            result_objects.extend(objects);
         }
+
+        // If we're not at the limit yet, find missions not created by accounts in priority_ids
+        if result_objects.len() < limit as usize {
+            let objects = dsl::qpid_objects
+                .filter(dsl::qpid_id.eq_any(qpid_ids))
+                .filter(dsl::area_id.eq_any(area_hashes))
+                .filter(not(dsl::creator_id.eq_any(priority_ids)))
+                .filter(not(dsl::creator_id.eq_any(exclude_account_ids)))
+                .limit(limit - result_objects.len() as i64)
+                .get_results::<QpidObject>(conn)?;
+
+            result_objects.extend(objects);
+        }
+
+        result_objects.shrink_to_fit();
+        Ok(result_objects)
     }
 
     pub async fn find_objects_by_id(&self, ids: &[String]) -> Result<Vec<QpidObject>, QueryError> {
