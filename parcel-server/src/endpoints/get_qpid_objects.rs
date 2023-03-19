@@ -1,7 +1,6 @@
 use actix_web::{
     post,
     web::{Data, Json},
-    HttpResponse, Responder,
 };
 use parcel_common::api_types::{
     object::QpidObjectsResponse,

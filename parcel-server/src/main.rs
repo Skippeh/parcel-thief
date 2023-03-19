@@ -15,7 +15,7 @@ use std::{
 };
 
 use actix_web::{
-    web::{self, JsonConfig},
+    web::{self},
     App, HttpServer,
 };
 use anyhow::{Context, Result};
