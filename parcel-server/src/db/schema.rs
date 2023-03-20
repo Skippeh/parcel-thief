@@ -11,6 +11,21 @@ diesel::table! {
 }
 
 diesel::table! {
+    likes (id) {
+        id -> Int8,
+        time -> Timestamp,
+        from_id -> Varchar,
+        to_id -> Varchar,
+        online_id -> Varchar,
+        likes_manual -> Int4,
+        likes_auto -> Int4,
+        #[sql_name = "type"]
+        type_ -> Varchar,
+        acknowledged -> Bool,
+    }
+}
+
+diesel::table! {
     mission_baggage_ammo_infos (baggage_id) {
         baggage_id -> Int8,
         ammo_id -> Varchar,
@@ -332,6 +347,7 @@ diesel::joinable!(qpid_objects -> accounts (creator_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     accounts,
+    likes,
     mission_baggage_ammo_infos,
     mission_baggages,
     mission_catapult_shell_infos,
