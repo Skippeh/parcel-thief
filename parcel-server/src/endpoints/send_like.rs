@@ -104,6 +104,12 @@ pub async fn send_like(
         return Err(Error::UnexpectedValue(anyhow::anyhow!("likes_manual < 0")));
     }
 
+    if request.account_id == session.account_id {
+        return Err(Error::UnexpectedValue(anyhow::anyhow!(
+            "Target account matches current session account, giving likes to self owned objects should not be possible"
+        )));
+    }
+
     let like_target = LikeTarget::try_from(request.online_id.as_ref())
         .map_err(|_| Error::UnknownObject(request.online_id.clone()))?;
 
