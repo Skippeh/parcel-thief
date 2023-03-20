@@ -1,9 +1,13 @@
 use std::fmt::Display;
 
-use chrono::Utc;
+use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
 use diesel::prelude::*;
 
-use crate::db::{models::like::NewLike, schema::likes::dsl, QueryError};
+use crate::db::{
+    models::like::{Like, NewLike},
+    schema::likes::dsl,
+    QueryError,
+};
 
 use super::DatabaseConnection;
 
@@ -113,5 +117,17 @@ impl<'db> Likes<'db> {
 
             Ok(())
         })
+    }
+
+    pub async fn get_likes_since(
+        &self,
+        account_id: &str,
+        since: &NaiveDateTime,
+    ) -> Result<Vec<Like>, QueryError> {
+        todo!()
+    }
+
+    pub async fn get_unacknowleged_likes(&self, account_id: &str) -> Result<Vec<Like>, QueryError> {
+        todo!()
     }
 }
