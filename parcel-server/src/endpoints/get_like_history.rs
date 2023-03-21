@@ -25,7 +25,7 @@ pub async fn get_like_history(
     let conn = database.connect()?;
     let likes = conn.likes();
 
-    let mut given_likes = if request.since <= 0 {
+    let given_likes = if request.since <= 0 {
         likes.get_unacknowleged_likes(&session.account_id).await?
     } else {
         let since = NaiveDateTime::from_timestamp_millis(request.since)
