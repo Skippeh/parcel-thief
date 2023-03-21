@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
+use chrono::{NaiveDateTime, Utc};
 use diesel::prelude::*;
 
 use crate::db::{
@@ -119,15 +119,37 @@ impl<'db> Likes<'db> {
         })
     }
 
+    pub async fn set_acknowledged(
+        &self,
+        like_ids: &[i64],
+        acknowledged: bool,
+    ) -> Result<(), QueryError> {
+        let conn = &mut *self.connection.get_pg_connection().await;
+        diesel::update(dsl::likes)
+            .filter(dsl::id.eq_any(like_ids))
+            .set(dsl::acknowledged.eq(acknowledged))
+            .execute(conn)?;
+
+        Ok(())
+    }
+
     pub async fn get_likes_since(
         &self,
         account_id: &str,
         since: &NaiveDateTime,
     ) -> Result<Vec<Like>, QueryError> {
-        todo!()
+        let conn = &mut *self.connection.get_pg_connection().await;
+        Ok(dsl::likes
+            .filter(dsl::to_id.eq(account_id))
+            .filter(dsl::time.gt(since))
+            .get_results(conn)?)
     }
 
     pub async fn get_unacknowleged_likes(&self, account_id: &str) -> Result<Vec<Like>, QueryError> {
-        todo!()
+        let conn = &mut *self.connection.get_pg_connection().await;
+        Ok(dsl::likes
+            .filter(dsl::to_id.eq(account_id))
+            .filter(dsl::acknowledged.eq(false))
+            .get_results(conn)?)
     }
 }
