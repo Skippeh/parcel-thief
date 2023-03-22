@@ -7,5 +7,6 @@ members = [
     "parcel-thief/parcel-thief",
     "re-testing/deobfuscate_json",
     "re-testing/rtti/rtti-exporter",
-    "re-testing/rtti/rtti-exporter-dll"
+    "re-testing/rtti/rtti-exporter-dll",
+    "parcel-save-tool",
 ]
