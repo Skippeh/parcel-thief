@@ -11,6 +11,7 @@ pub struct SlotInfo {
     pub title: String,
     pub sub_title: String,
     pub detail: String,
+    pub user_param: String,
     pub modification_time: DateTime<Utc>,
 }
 
@@ -107,6 +108,7 @@ fn parse_slot_info(ini_string: String) -> Result<SlotInfo, anyhow::Error> {
         title: read_decode!(slot, "Title"),
         sub_title: read_decode!(slot, "SubTitle"),
         detail: read_decode!(slot, "Detail"),
+        user_param: read_decode!(slot, "UserParam"),
         modification_time,
     })
 }
