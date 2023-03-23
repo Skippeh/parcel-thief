@@ -1,4 +1,4 @@
-use std::{ffi::CStr, fmt::Debug, fs::File};
+use std::{cmp::min, ffi::CStr, fmt::Debug, fs::File};
 
 use anyhow::Context;
 use binary_reader::BinaryReader;
@@ -146,8 +146,8 @@ fn decrypt_compressed_data(data: &mut [u8]) -> Result<(), anyhow::Error> {
 
             dbg_hex::dbg_hex!(&hash);
 
-            for chunk in data[8..].chunks_exact_mut(16) {
-                for i in 0..16 {
+            for chunk in data[8..].chunks_mut(16) {
+                for i in 0..min(16, chunk.len()) {
                     chunk[i] ^= hash[i];
                 }
             }
