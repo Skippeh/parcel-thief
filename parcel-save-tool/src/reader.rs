@@ -121,34 +121,34 @@ const STATIC_XOR_KEY: [u8; 16] = [
 ];
 
 fn decrypt_compressed_data(data: &mut [u8]) -> Result<(), anyhow::Error> {
-    let data_format = i32::from_le_bytes(
+    let data_format = u32::from_le_bytes(
         data.get(..4)
             .context("Compressed data is less than 4 bytes")?
             .try_into()?,
     );
 
-    match data_format {
-        -1069998563 => {
-            let file_key = data
-                .get(4..8)
-                .context("Compressed data is less than 8 bytes")?;
+    const FORMAT_SAVEFILE: u32 = 0xC0391E1D;
+    const FORMAT_UNK: u32 = 0xC0391E55;
 
-            let mut xor_key = vec![0; 16];
-            xor_key[0..4].copy_from_slice(file_key);
-            xor_key[4..16].copy_from_slice(&STATIC_XOR_KEY[4..16]);
+    if data_format == FORMAT_SAVEFILE || data_format == FORMAT_UNK {
+        let file_key = data
+            .get(4..8)
+            .context("Compressed data is less than 8 bytes")?;
 
-            let mut hash = vec![0u8; 16];
-            let (hash_1, hash_2) = murmurhash3_x64_128(&xor_key, 42);
-            hash[0..8].copy_from_slice(&hash_1.to_le_bytes());
-            hash[8..16].copy_from_slice(&hash_2.to_le_bytes());
+        let mut xor_key = vec![0; 16];
+        xor_key[0..4].copy_from_slice(file_key);
+        xor_key[4..16].copy_from_slice(&STATIC_XOR_KEY[4..16]);
 
-            for chunk in data[8..].chunks_mut(16) {
-                for i in 0..min(16, chunk.len()) {
-                    chunk[i] ^= hash[i];
-                }
+        let mut hash = vec![0u8; 16];
+        let (hash_1, hash_2) = murmurhash3_x64_128(&xor_key, 42);
+        hash[0..8].copy_from_slice(&hash_1.to_le_bytes());
+        hash[8..16].copy_from_slice(&hash_2.to_le_bytes());
+
+        for chunk in data[8..].chunks_mut(16) {
+            for i in 0..min(16, chunk.len()) {
+                chunk[i] ^= hash[i];
             }
         }
-        other => anyhow::bail!("Unknown format: {other}"),
     }
 
     Ok(())
