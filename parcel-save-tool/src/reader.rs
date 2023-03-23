@@ -137,14 +137,10 @@ fn decrypt_compressed_data(data: &mut [u8]) -> Result<(), anyhow::Error> {
             xor_key[0..4].copy_from_slice(file_key);
             xor_key[4..16].copy_from_slice(&STATIC_XOR_KEY[4..16]);
 
-            dbg_hex::dbg_hex!(&xor_key);
-
             let mut hash = vec![0u8; 16];
             let (hash_1, hash_2) = murmurhash3_x64_128(&xor_key, 42);
             hash[0..8].copy_from_slice(&hash_1.to_le_bytes());
             hash[8..16].copy_from_slice(&hash_2.to_le_bytes());
-
-            dbg_hex::dbg_hex!(&hash);
 
             for chunk in data[8..].chunks_mut(16) {
                 for i in 0..min(16, chunk.len()) {
