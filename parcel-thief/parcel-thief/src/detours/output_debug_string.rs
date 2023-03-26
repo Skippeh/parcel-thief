@@ -44,6 +44,9 @@ pub unsafe fn hook() -> Result<(), anyhow::Error> {
 }
 
 pub unsafe fn unhook() -> Result<(), anyhow::Error> {
+    OUTPUT_DEBUG_STRING_A_HOOK.disable()?;
+    OUTPUT_DEBUG_STRING_W_HOOK.disable()?;
+
     Ok(())
 }
 
