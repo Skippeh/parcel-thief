@@ -27,6 +27,9 @@ pub enum LocationOffset {
     FnWriteOutgoingData,
 
     DataAuthUrlPtr,
+
+    FnOodleDecompress,
+    FnOodleCompress,
 }
 
 pub fn map_offsets() -> Result<(), anyhow::Error> {
@@ -64,6 +67,20 @@ pub fn map_offsets() -> Result<(), anyhow::Error> {
         crate::GameVersion::Steam => offsets.map_offset(LocationOffset::DataAuthUrlPtr, 0x4DF8130),
         crate::GameVersion::Epic => offsets.map_offset(LocationOffset::DataAuthUrlPtr, 0x4DFA0B0),
     }?;
+
+    offsets
+        .map_pattern_offset(
+            LocationOffset::FnOodleDecompress,
+            "40 55 53 56 57 41 54 41 55 41 56 41 57 48 81 EC C8 00 00 00 48",
+        )
+        .context("Failed to find OodleLZ_Decompress offset")?;
+
+    offsets
+        .map_pattern_offset(
+            LocationOffset::FnOodleCompress,
+            "41 55 53 56 57 41 54 41 55 41 56 41 57 48 8D AC 24 48 FF FF FF 48 81 EC B8 01 00 00 48 C7 45 D0 FE FF FF FF"
+        )
+        .context("Failed to find OodleLZ_Compress offset")?;
 
     Ok(())
 }
