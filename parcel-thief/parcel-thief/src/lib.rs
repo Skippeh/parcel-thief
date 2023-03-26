@@ -104,9 +104,25 @@ lazy_static! {
 #[allow(non_snake_case)]
 pub extern "system" fn DllMain(_module: HINSTANCE, call_reason: u32, _reserved: u32) -> u32 {
     if call_reason == DLL_PROCESS_ATTACH {
-        unsafe { PARCEL_THIEF.start().is_ok() as u32 }
+        unsafe {
+            match PARCEL_THIEF.start() {
+                Ok(_) => 1,
+                Err(err) => {
+                    println!("Did not attach successfully: {:?}", err);
+                    0
+                }
+            }
+        }
     } else if call_reason == DLL_PROCESS_DETACH {
-        unsafe { PARCEL_THIEF.stop().is_ok() as u32 }
+        unsafe {
+            match PARCEL_THIEF.stop() {
+                Ok(_) => 1,
+                Err(err) => {
+                    println!("Did not detach successfully: {:?}", err);
+                    0
+                }
+            }
+        }
     } else {
         1
     }
