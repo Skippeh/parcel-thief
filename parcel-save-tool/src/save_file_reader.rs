@@ -3,6 +3,7 @@ use std::{cmp::min, ffi::CStr, fmt::Debug, fs::File};
 use anyhow::Context;
 use binary_reader::BinaryReader;
 use chrono::{DateTime, NaiveDateTime, Utc};
+use dbg_hex::dbg_hex;
 use ini::Ini;
 use murmurhash3::murmurhash3_x64_128;
 use percent_encoding::percent_decode_str;
@@ -16,15 +17,22 @@ pub struct SlotInfo {
     pub modification_time: DateTime<Utc>,
 }
 
-pub struct SaveFile {
+#[derive(Debug)]
+pub enum SaveFile {
+    Checkpoint(CompressedCheckpointData),
+    Profile(CompressedProfileData),
+}
+
+pub struct CompressedCheckpointData {
     pub slot_info: SlotInfo,
     pub icon_png_data: Vec<u8>,
     pub compressed_data: Vec<u8>,
 }
 
-impl Debug for SaveFile {
+impl Debug for CompressedCheckpointData {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("SaveFile")
+            .field("slot_info", &self.slot_info)
             .field(
                 "icon_png_data",
                 &format_args!("Vec<u8> ({} bytes)", self.icon_png_data.len()),
@@ -37,45 +45,77 @@ impl Debug for SaveFile {
     }
 }
 
-pub struct Reader {
+pub struct CompressedProfileData {
+    pub compressed_data: Vec<u8>,
+}
+
+impl Debug for CompressedProfileData {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ProfileData")
+            .field(
+                "compressed_data",
+                &format_args!("Vec<u8> ({} bytes)", self.compressed_data.len()),
+            )
+            .finish()
+    }
+}
+
+pub struct SaveFileReader {
     reader: BinaryReader,
 }
 
-impl Reader {
+impl SaveFileReader {
     pub fn from_file(mut file: File) -> Self {
-        Self {
-            reader: BinaryReader::from_file(&mut file),
-        }
+        let mut reader = BinaryReader::from_file(&mut file);
+        reader.set_endian(binary_reader::Endian::Little);
+        Self { reader }
     }
 
-    pub fn read_save_file(&mut self) -> Result<SaveFile, anyhow::Error> {
-        let slot_info_len = self.read_str_num()?;
-        let png_len = self.read_str_num()?;
-        let compressed_data_len = self.read_str_num()?;
+    pub fn read_save_file(mut self) -> Result<SaveFile, anyhow::Error> {
+        let test_read = self.read_str_num();
 
-        let slot_info_bytes = self.reader.read_bytes(slot_info_len)?.to_vec();
-        let icon_bytes = self.reader.read_bytes(png_len)?.to_vec();
-        let mut compressed_data = self.reader.read_bytes(compressed_data_len)?.to_vec();
+        match test_read {
+            Ok(slot_info_len) => {
+                println!("Detected checkpoint save file");
 
-        if self.reader.pos != self.reader.length {
-            anyhow::bail!("Expected to reach end of file");
+                let png_len = self.read_str_num()?;
+                let compressed_data_len = self.read_str_num()?;
+
+                let slot_info_bytes = self.reader.read_bytes(slot_info_len)?.to_vec();
+                let icon_bytes = self.reader.read_bytes(png_len)?.to_vec();
+                let mut compressed_data = self.reader.read_bytes(compressed_data_len)?.to_vec();
+
+                if self.reader.pos != self.reader.length {
+                    anyhow::bail!("Expected to reach end of file");
+                }
+
+                let slot_info_str = String::from_utf8(slot_info_bytes)?;
+                let slot_info = parse_slot_info(slot_info_str)?;
+                decrypt_compressed_data(&mut compressed_data)?;
+
+                Ok(SaveFile::Checkpoint(CompressedCheckpointData {
+                    slot_info,
+                    icon_png_data: icon_bytes,
+                    compressed_data,
+                }))
+            }
+            Err(_) => {
+                self.reader.pos = 0;
+                println!("Detected profile save file");
+                let mut data = self.reader.read_bytes(self.reader.length)?.to_vec();
+                decrypt_compressed_data(&mut data)?;
+
+                Ok(SaveFile::Profile(CompressedProfileData {
+                    compressed_data: data,
+                }))
+            }
         }
-
-        let slot_info_str = String::from_utf8(slot_info_bytes)?;
-        let slot_info = parse_slot_info(slot_info_str)?;
-        decrypt_compressed_data(&mut compressed_data)?;
-        compressed_data.drain(0..8);
-
-        Ok(SaveFile {
-            slot_info,
-            icon_png_data: icon_bytes,
-            compressed_data,
-        })
     }
 
     fn read_str_num(&mut self) -> Result<usize, anyhow::Error> {
         let ascii = self.reader.read_bytes(8)?;
-        let utf8 = CStr::from_bytes_until_nul(ascii)?;
+        let utf8 = CStr::from_bytes_until_nul(ascii)
+            .with_context(|| format!("Could not read c_string from {:?}", ascii))?;
         Ok(utf8.to_str()?.parse()?)
     }
 }
@@ -120,7 +160,7 @@ const STATIC_XOR_KEY: [u8; 16] = [
     0x46, 0x3F, 0xBB, 0xBC, 0x7B, 0x6F, 0x57, 0xED, 0x9B, 0x41, 0x7D, 0x36, 0xE3, 0x26, 0x12, 0xBC,
 ];
 
-fn decrypt_compressed_data(data: &mut [u8]) -> Result<(), anyhow::Error> {
+fn decrypt_compressed_data(data: &mut Vec<u8>) -> Result<(), anyhow::Error> {
     let data_format = u32::from_le_bytes(
         data.get(..4)
             .context("Compressed data is less than 4 bytes")?
@@ -139,12 +179,15 @@ fn decrypt_compressed_data(data: &mut [u8]) -> Result<(), anyhow::Error> {
         xor_key[0..4].copy_from_slice(file_key);
         xor_key[4..16].copy_from_slice(&STATIC_XOR_KEY[4..16]);
 
+        // Remove file format type and file hash salt from source
+        data.drain(0..8);
+
         let mut hash = vec![0u8; 16];
         let (hash_1, hash_2) = murmurhash3_x64_128(&xor_key, 42);
         hash[0..8].copy_from_slice(&hash_1.to_le_bytes());
         hash[8..16].copy_from_slice(&hash_2.to_le_bytes());
 
-        for chunk in data[8..].chunks_mut(16) {
+        for chunk in data.chunks_mut(16) {
             for i in 0..min(16, chunk.len()) {
                 chunk[i] ^= hash[i];
             }
