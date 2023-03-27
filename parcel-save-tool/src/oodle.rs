@@ -174,12 +174,7 @@ pub fn decompress(
     check_crc: bool,
 ) -> Result<Vec<u8>, OodleError> {
     let mut dest = vec![0u8; dest_len];
-
-    println!("dest buff size: {}", dest.len());
-
-    let dest_len = decompress_to(src, &mut dest, fuzz_safe, check_crc)?;
-    dest.truncate(dest_len);
-    dest.shrink_to_fit();
+    decompress_to(src, &mut dest, fuzz_safe, check_crc)?;
 
     Ok(dest)
 }
