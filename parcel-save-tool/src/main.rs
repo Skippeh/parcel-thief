@@ -41,35 +41,23 @@ fn main() -> Result<(), anyhow::Error> {
         save_file_reader::SaveFile::Checkpoint(data) => {
             dbg!(&data.slot_info);
 
-            let mut png_path = save_directory.clone();
-            png_path.push("icon.png");
-
-            let mut compressed_data_path = save_directory.clone();
-            compressed_data_path.push("compressed-data.bin");
-
-            let mut decompressed_data_path = save_directory.clone();
-            decompressed_data_path.push("decompressed-data.bin");
-
-            write_file(&png_path, &data.icon_png_data)?;
-            write_file(&compressed_data_path, &data.compressed_data)?;
-
             let checkpoint_data = dbg!(checkpoint_reader::read_compressed_data(
                 data.compressed_data
             )?);
 
-            write_file(&decompressed_data_path, &checkpoint_data.data)?;
-        }
-        save_file_reader::SaveFile::Profile(data) => {
-            let mut compressed_data_path = save_directory.clone();
-            compressed_data_path.push("compressed-data.bin");
+            let mut png_path = save_directory.clone();
+            png_path.push("icon.png");
+            write_file(&png_path, &data.icon_png_data)?;
 
             let mut decompressed_data_path = save_directory.clone();
             decompressed_data_path.push("decompressed-data.bin");
-
-            write_file(&compressed_data_path, &data.compressed_data)?;
-
+            write_file(&decompressed_data_path, &checkpoint_data.data)?;
+        }
+        save_file_reader::SaveFile::Profile(data) => {
             let profile_data = dbg!(profile_reader::read_compressed_data(data.compressed_data)?);
 
+            let mut decompressed_data_path = save_directory.clone();
+            decompressed_data_path.push("decompressed-data.bin");
             write_file(&decompressed_data_path, &profile_data.data)?;
         }
     }
