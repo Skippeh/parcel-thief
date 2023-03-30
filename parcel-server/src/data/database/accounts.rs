@@ -1,3 +1,4 @@
+use base64::Engine;
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use parcel_common::{api_types::auth::Provider, rand};
@@ -30,7 +31,7 @@ impl<'db> Accounts<'db> {
         let conn = &mut *self.connection.get_pg_connection().await;
         let account = diesel::insert_into(accounts::table)
             .values(&NewAccount {
-                id: &format!("{}_{}", provider.to_string().to_lowercase(), provider_id),
+                id: &generate_account_id(),
                 display_name,
                 provider: &provider,
                 provider_id,
@@ -117,11 +118,20 @@ impl<'db> Accounts<'db> {
     }
 }
 
-/// Generates a 32 character long account id
+/// Generates a 32 character long account id.
+///
+/// The first few characters are always zygo_**** (where **** is STATIC_BYTES encoded as base64), followed by random bytes encoded as base64, up to a total of 20 bytes (not including zygo_).
+///
+/// Note that the real server doesn't follow this logic, it's only done this way because i'm not really sure what the id "is".
+///
+/// When this value does not "conform" to some format some things don't work in the game, such as displaying player names associated with this id.
+/// I haven't been able to figure out what exactly it is but this seems to work from the somewhat limited testing i've done.
 fn generate_account_id() -> String {
-    const CHARS: &[u8] = b"aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ0123456789";
-    let mut result = "zygo_".into();
-    rand::append_generate_string(&mut result, 27, CHARS);
+    const STATIC_BYTES: [u8; 8] = [0xd8, 0x9c, 0x20, 0xf6, 0x97, 0xe0, 0xe6, 0x86];
+    let mut id = vec![0; 20];
+    id[..8].copy_from_slice(&STATIC_BYTES);
+    rand::overwrite_generate_u8(&mut id[8..]);
 
-    result
+    let b64 = base64::engine::general_purpose::STANDARD.encode(id);
+    format!("zygo_{}", b64)
 }
