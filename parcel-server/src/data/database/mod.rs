@@ -1,4 +1,5 @@
 pub mod accounts;
+pub mod highway_resources;
 pub mod likes;
 pub mod missions;
 pub mod player_profiles;
@@ -10,8 +11,8 @@ use diesel::{Connection, ConnectionResult, PgConnection};
 use futures_util::lock::{Mutex, MutexLockFuture};
 
 use self::{
-    accounts::Accounts, likes::Likes, missions::Missions, player_profiles::PlayerProfiles,
-    qpid_objects::QpidObjects,
+    accounts::Accounts, highway_resources::HighwayResources, likes::Likes, missions::Missions,
+    player_profiles::PlayerProfiles, qpid_objects::QpidObjects,
 };
 
 pub struct Database {
@@ -64,6 +65,10 @@ impl<'db> DatabaseConnection<'db> {
 
     pub fn likes(&self) -> Likes {
         Likes::new(self)
+    }
+
+    pub fn highway_resources(&self) -> HighwayResources {
+        HighwayResources::new(self)
     }
 
     fn get_pg_connection(&self) -> MutexLockFuture<PgConnection> {

@@ -13,7 +13,7 @@ pub struct PutHistory {
     #[serde(rename = "n")]
     pub put_num: i32,
     #[serde(rename = "ri")]
-    pub resource_id: i32,
+    pub resource_id: i16,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

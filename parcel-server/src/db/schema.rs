@@ -11,6 +11,17 @@ diesel::table! {
 }
 
 diesel::table! {
+    devoted_highway_resources (id) {
+        id -> Int8,
+        account_id -> Varchar,
+        construction_id -> Int4,
+        time -> Timestamp,
+        resource_id -> Int2,
+        num_resources -> Int4,
+    }
+}
+
+diesel::table! {
     likes (id) {
         id -> Int8,
         time -> Timestamp,
@@ -317,6 +328,16 @@ diesel::table! {
     }
 }
 
+diesel::table! {
+    total_highway_resources (id) {
+        id -> Int4,
+        construction_id -> Nullable<Int4>,
+        resource_id -> Int2,
+        num_resources -> Int8,
+    }
+}
+
+diesel::joinable!(devoted_highway_resources -> accounts (account_id));
 diesel::joinable!(mission_baggage_ammo_infos -> mission_baggages (baggage_id));
 diesel::joinable!(mission_baggages -> missions (mission_id));
 diesel::joinable!(mission_catapult_shell_infos -> missions (mission_id));
@@ -347,6 +368,7 @@ diesel::joinable!(qpid_objects -> accounts (creator_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     accounts,
+    devoted_highway_resources,
     likes,
     mission_baggage_ammo_infos,
     mission_baggages,
@@ -371,4 +393,5 @@ diesel::allow_tables_to_appear_in_same_query!(
     qpid_object_tags,
     qpid_object_vehicle_infos,
     qpid_objects,
+    total_highway_resources,
 );
