@@ -16,3 +16,4 @@ rand = "0.8.5"
 rand_chacha = "0.3.1"
 diesel = { version = "2.0.3", features = ["postgres", "chrono"] }
 diesel_derives = "2.0.2"
+validator = { version = "0.16.0", features = ["derive"] }

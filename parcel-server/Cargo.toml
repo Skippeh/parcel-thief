@@ -10,6 +10,8 @@ thiserror = "1.0.38"
 actix-web = { version = "4.3.0", features = ["rustls"] }
 actix-http = "3.3.0"
 actix-web-httpauth = "0.8.0"
+actix-web-validator = "5.0.1"
+validator = { version = "0.16.0", features = ["derive"] }
 rustls = "0.20.8"
 rustls-pemfile = "1.0.2"
 serde = { version = "1.0.152", features = ["derive"] }

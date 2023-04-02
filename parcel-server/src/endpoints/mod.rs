@@ -33,6 +33,8 @@ use actix_http::{body::BoxBody, StatusCode};
 use actix_web::{web::ServiceConfig, HttpResponse, Responder};
 use diesel::ConnectionError;
 
+pub type ValidatedJson<T> = actix_web_validator::Json<T>;
+
 use crate::{
     db::QueryError,
     response_error::{impl_response_error, CommonResponseError},
