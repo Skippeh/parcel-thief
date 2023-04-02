@@ -1,4 +1,5 @@
 use actix_http::StatusCode;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 pub trait CommonResponseError {
     fn get_status_code(&self) -> String;
@@ -63,4 +64,3 @@ macro_rules! impl_response_error {
 }
 
 pub(crate) use impl_response_error;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
