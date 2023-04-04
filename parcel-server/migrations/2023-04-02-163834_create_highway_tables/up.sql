@@ -11,7 +11,7 @@ CREATE INDEX idx_devoted_highway_resources_time ON devoted_highway_resources (ti
 
 CREATE TABLE total_highway_resources (
     id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    construction_id INTEGER,
+    construction_id INTEGER NOT NULL,
     resource_id SMALLINT NOT NULL,
     num_resources BIGINT NOT NULL DEFAULT 0
 );

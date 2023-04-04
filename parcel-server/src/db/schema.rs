@@ -331,7 +331,7 @@ diesel::table! {
 diesel::table! {
     total_highway_resources (id) {
         id -> Int4,
-        construction_id -> Nullable<Int4>,
+        construction_id -> Int4,
         resource_id -> Int2,
         num_resources -> Int8,
     }
