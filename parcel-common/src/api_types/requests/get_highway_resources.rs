@@ -5,7 +5,7 @@ pub struct GetHighwayResourcesRequest {
     #[serde(rename = "cds")]
     pub constructions: Vec<ConstructionRequest>,
     #[serde(rename = "rids")]
-    pub resource_ids: Vec<i32>,
+    pub resource_ids: Vec<i16>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -50,7 +50,7 @@ pub struct PutResource {
     #[serde(rename = "n")]
     pub put_num: i64,
     #[serde(rename = "rid")]
-    pub resource_id: i32,
+    pub resource_id: i16,
     /// Seems to always be 0
     #[serde(rename = "un")]
     pub users_put_num: i64,

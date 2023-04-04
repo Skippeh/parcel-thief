@@ -1,5 +1,6 @@
 use chrono::NaiveDateTime;
 use diesel::{Insertable, Queryable};
+use parcel_common::api_types;
 
 use crate::db::schema::{devoted_highway_resources, total_highway_resources};
 

@@ -1,9 +1,15 @@
-use chrono::Utc;
-use diesel::prelude::*;
+use std::collections::HashMap;
+
+use chrono::{DateTime, Utc};
+use diesel::{dsl::not, prelude::*};
+use itertools::Itertools;
 use parcel_common::api_types::requests::devote_highway_resources::PutHistory;
 
 use crate::db::{
-    models::highway::{NewDevotedHighwayResources, NewTotalHighwayResources},
+    models::highway::{
+        DevotedHighwayResources, NewDevotedHighwayResources, NewTotalHighwayResources,
+        TotalHighwayResources,
+    },
     QueryError,
 };
 
@@ -52,6 +58,67 @@ impl<'db> HighwayResources<'db> {
 
             Ok(())
         })
+    }
+
+    pub async fn get_contributors(
+        &self,
+        constructions_since: impl IntoIterator<Item = (i32, DateTime<Utc>)>,
+        resource_ids: &[i16],
+        account_id: &str,
+        limit: Option<i64>,
+    ) -> Result<HashMap<i32, Vec<DevotedHighwayResources>>, QueryError> {
+        use crate::db::schema::devoted_highway_resources::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+        let constructions_since = constructions_since.into_iter().collect::<Vec<_>>();
+        let construction_ids = constructions_since
+            .iter()
+            .map(|id_since| id_since.0)
+            .collect::<Vec<_>>();
+        let earliest_date = constructions_since
+            .iter()
+            .min_by_key(|id_since| id_since.1)
+            .map(|id_since| id_since.1.naive_utc())
+            .unwrap_or_else(|| Utc::now().naive_utc());
+
+        let resources: Vec<DevotedHighwayResources> = dsl::devoted_highway_resources
+            .filter(dsl::resource_id.eq_any(resource_ids))
+            .filter(dsl::construction_id.eq_any(construction_ids))
+            .filter(not(dsl::account_id.eq(account_id)))
+            .filter(dsl::time.gt(earliest_date))
+            .distinct_on(dsl::account_id)
+            .get_results(conn)?;
+
+        let mut by_construction_id = resources
+            .into_iter()
+            .into_group_map_by(|r| r.construction_id);
+
+        if let Some(limit) = limit {
+            // If there's a way to limit number of results by column in db query then we should do that instead of the following
+            for array in by_construction_id.values_mut() {
+                if array.len() > limit as usize {
+                    array.truncate(limit as usize);
+                    array.shrink_to_fit();
+                }
+            }
+        }
+
+        Ok(by_construction_id)
+    }
+
+    pub async fn get_total_resources(
+        &self,
+        construction_ids: impl IntoIterator<Item = i32>,
+        resource_ids: impl IntoIterator<Item = i16>,
+    ) -> Result<Vec<TotalHighwayResources>, QueryError> {
+        use crate::db::schema::total_highway_resources::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        let resources = dsl::total_highway_resources
+            .filter(dsl::construction_id.eq_any(construction_ids.into_iter()))
+            .filter(dsl::resource_id.eq_any(resource_ids.into_iter()))
+            .get_results(conn)?;
+
+        Ok(resources)
     }
 
     fn add_total_resources(
