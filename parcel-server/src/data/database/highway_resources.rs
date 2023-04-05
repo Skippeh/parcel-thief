@@ -66,7 +66,7 @@ impl<'db> HighwayResources<'db> {
         resource_ids: &[i16],
         account_id: &str,
         limit: Option<i64>,
-    ) -> Result<HashMap<i32, Vec<DevotedHighwayResources>>, QueryError> {
+    ) -> Result<HashMap<i32, Vec<String>>, QueryError> {
         use crate::db::schema::devoted_highway_resources::dsl;
         let conn = &mut *self.connection.get_pg_connection().await;
         let constructions_since = constructions_since.into_iter().collect::<Vec<_>>();
@@ -102,7 +102,16 @@ impl<'db> HighwayResources<'db> {
             }
         }
 
-        Ok(by_construction_id)
+        let mut result = HashMap::new();
+
+        for (construction_id, resources) in by_construction_id {
+            result.insert(
+                construction_id,
+                resources.into_iter().map(|res| res.account_id).collect(),
+            );
+        }
+
+        Ok(result)
     }
 
     pub async fn get_total_resources(

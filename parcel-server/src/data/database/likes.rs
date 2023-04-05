@@ -1,10 +1,10 @@
-use std::fmt::Display;
+use std::{collections::HashMap, fmt::Display};
 
 use chrono::{NaiveDateTime, Utc};
 use diesel::prelude::*;
 
 use crate::db::{
-    models::like::{Like, NewLike},
+    models::like::{Like, NewLike, NewTotalHighwayLikes, TotalHighwayLikes},
     schema::likes::dsl,
     QueryError,
 };
@@ -70,29 +70,50 @@ impl<'db> Likes<'db> {
         let conn = &mut *self.connection.get_pg_connection().await;
 
         conn.transaction(|conn| {
-            if let LikeTarget::Object(object_id) = &target_online_id {
-                use crate::db::schema::qpid_objects::dsl as object_dsl;
+            let total_likes = num_likes_auto as i64 + num_likes_manual as i64;
 
-                let mut current_likes = object_dsl::qpid_objects
-                    .filter(object_dsl::id.eq(object_id))
-                    .select(object_dsl::likes)
-                    .first::<i64>(conn)?;
+            match &target_online_id {
+                LikeTarget::Object(object_id) => {
+                    use crate::db::schema::qpid_objects::dsl as object_dsl;
 
-                let total_likes = num_likes_auto as i64 + num_likes_manual as i64;
-                current_likes += total_likes;
+                    let new_total = diesel::update(object_dsl::qpid_objects)
+                        .filter(object_dsl::id.eq(object_id))
+                        .set(object_dsl::likes.eq(object_dsl::likes + total_likes))
+                        .returning(object_dsl::likes)
+                        .get_result::<i64>(conn)
+                        .optional()?;
 
-                diesel::update(object_dsl::qpid_objects)
-                    .filter(object_dsl::id.eq(object_id))
-                    .set(object_dsl::likes.eq(current_likes))
-                    .execute(conn)?;
+                    match new_total {
+                        Some(new_total) => {
+                            log::debug!(
+                                "Added {} likes to {}, new total = {}",
+                                total_likes,
+                                object_id,
+                                new_total
+                            );
+                        }
+                        None => {
+                            log::warn!("Could not find object to increment likes on: {}", object_id)
+                        }
+                    }
+                }
+                LikeTarget::Highway(_) => {
+                    use crate::db::schema::total_highway_likes::dsl;
 
-                log::debug!(
-                    "Incremented likes on {}: {} + {} = {}",
-                    object_id,
-                    current_likes - total_likes,
-                    total_likes,
-                    current_likes
-                )
+                    let new_total = diesel::insert_into(dsl::total_highway_likes)
+                        .values(&NewTotalHighwayLikes {
+                            account_id: to_id,
+                            likes: total_likes,
+                        })
+                        .on_conflict(dsl::account_id)
+                        .do_update()
+                        .set(dsl::likes.eq(dsl::likes + total_likes))
+                        .returning(dsl::likes)
+                        .get_result::<i64>(conn)?;
+
+                    log::debug!("New total highway likes for {} = {}", to_id, new_total);
+                }
+                _ => (),
             }
 
             let target_online_id = match target_online_id {
@@ -151,5 +172,25 @@ impl<'db> Likes<'db> {
             .filter(dsl::to_id.eq(account_id))
             .filter(dsl::acknowledged.eq(false))
             .get_results(conn)?)
+    }
+
+    pub async fn get_total_highway_likes<'a>(
+        &self,
+        account_ids: impl IntoIterator<Item = &str>,
+    ) -> Result<HashMap<String, i64>, QueryError> {
+        use crate::db::schema::total_highway_likes::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        let likes = dsl::total_highway_likes
+            .filter(dsl::account_id.eq_any(account_ids))
+            .get_results::<TotalHighwayLikes>(conn)?;
+
+        let mut result = HashMap::new();
+
+        for like in likes {
+            result.insert(like.account_id, like.likes);
+        }
+
+        Ok(result)
     }
 }

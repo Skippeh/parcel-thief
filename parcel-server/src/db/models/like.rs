@@ -2,7 +2,10 @@ use chrono::NaiveDateTime;
 use diesel::{Insertable, Queryable};
 use parcel_common::api_types;
 
-use crate::db::schema::likes::{self};
+use crate::db::schema::{
+    likes::{self},
+    total_highway_likes,
+};
 
 #[derive(Debug, Queryable)]
 pub struct Like {
@@ -47,4 +50,17 @@ pub struct NewLike<'a> {
     #[diesel(column_name = type_)]
     pub ty: &'a str,
     pub acknowledged: bool,
+}
+
+#[derive(Debug, Queryable)]
+pub struct TotalHighwayLikes {
+    pub account_id: String,
+    pub likes: i64,
+}
+
+#[derive(Debug, Insertable)]
+#[diesel(table_name = total_highway_likes)]
+pub struct NewTotalHighwayLikes<'a> {
+    pub account_id: &'a str,
+    pub likes: i64,
 }

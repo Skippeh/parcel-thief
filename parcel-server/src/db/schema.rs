@@ -329,6 +329,13 @@ diesel::table! {
 }
 
 diesel::table! {
+    total_highway_likes (account_id) {
+        account_id -> Varchar,
+        likes -> Int8,
+    }
+}
+
+diesel::table! {
     total_highway_resources (id) {
         id -> Int4,
         construction_id -> Int4,
@@ -365,6 +372,7 @@ diesel::joinable!(qpid_object_stone_infos -> qpid_objects (object_id));
 diesel::joinable!(qpid_object_tags -> qpid_objects (object_id));
 diesel::joinable!(qpid_object_vehicle_infos -> qpid_objects (object_id));
 diesel::joinable!(qpid_objects -> accounts (creator_id));
+diesel::joinable!(total_highway_likes -> accounts (account_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     accounts,
@@ -393,5 +401,6 @@ diesel::allow_tables_to_appear_in_same_query!(
     qpid_object_tags,
     qpid_object_vehicle_infos,
     qpid_objects,
+    total_highway_likes,
     total_highway_resources,
 );

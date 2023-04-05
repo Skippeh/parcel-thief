@@ -1,0 +1,4 @@
+CREATE TABLE total_highway_likes (
+    account_id VARCHAR PRIMARY KEY REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    likes BIGINT NOT NULL DEFAULT 0
+);

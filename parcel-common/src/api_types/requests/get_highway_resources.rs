@@ -24,7 +24,7 @@ pub struct GetHighwayResourcesResponse {
     #[serde(rename = "pr")]
     pub put_resources: Vec<PutResource>,
     #[serde(rename = "ul")]
-    pub users_like: i32,
+    pub users_like: i64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -38,7 +38,7 @@ pub struct ConstructionContributors {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Contributor {
     #[serde(rename = "l")]
-    pub likes: i32,
+    pub likes: i64,
     #[serde(rename = "u")]
     pub account_id: String,
 }

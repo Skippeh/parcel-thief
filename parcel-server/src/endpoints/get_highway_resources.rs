@@ -18,8 +18,9 @@ pub async fn get_highway_resources(
 ) -> Result<Json<GetHighwayResourcesResponse>, InternalError> {
     let conn = database.connect()?;
     let highway_resources = conn.highway_resources();
+    let likes = conn.likes();
 
-    let devoted_resources = highway_resources
+    let mut devoted_resources = highway_resources
         .get_contributors(
             request
                 .constructions
@@ -37,19 +38,35 @@ pub async fn get_highway_resources(
         )
         .await?
         .into_iter()
-        .map(
-            |(construction_id, contributions)| ConstructionContributors {
-                construction_id,
-                contributors: contributions
-                    .into_iter()
-                    .map(|contribution| Contributor {
-                        account_id: contribution.account_id,
-                        likes: 0, // todo: change this when highway likes are implemented
-                    })
-                    .collect(),
-            },
-        )
-        .collect();
+        .map(|(construction_id, contributors)| ConstructionContributors {
+            construction_id,
+            contributors: contributors
+                .into_iter()
+                .map(|account_id| Contributor {
+                    account_id,
+                    likes: 0,
+                })
+                .collect(),
+        })
+        .collect::<Vec<ConstructionContributors>>();
+
+    let mut account_ids = devoted_resources
+        .iter()
+        .flat_map(|res| res.contributors.iter().map(|con| &con.account_id))
+        .collect::<Vec<_>>();
+
+    account_ids.push(&session.account_id);
+
+    // Query total likes and update contributor likes
+    let total_likes = likes
+        .get_total_highway_likes(account_ids.iter().map(|id| id as &str))
+        .await?;
+
+    for devoted_resource in &mut devoted_resources {
+        for contributor in &mut devoted_resource.contributors {
+            contributor.likes = *total_likes.get(&contributor.account_id).unwrap_or(&0);
+        }
+    }
 
     let total_resources = highway_resources
         .get_total_resources(
@@ -72,7 +89,7 @@ pub async fn get_highway_resources(
     Ok(Json(GetHighwayResourcesResponse {
         construction_contributors: devoted_resources,
         put_resources: total_resources,
-        users_like: 0, // todo: change this when highway likes are implemented
+        users_like: *total_likes.get(&session.account_id).unwrap_or(&0),
     }))
 }
 
