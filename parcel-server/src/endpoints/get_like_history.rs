@@ -8,7 +8,6 @@ use actix_web::{
     web::{Data, Json},
 };
 use chrono::NaiveDateTime;
-use itertools::Itertools;
 use parcel_common::api_types::requests::get_like_history::{
     GetLikeHistoryRequest, GetLikeHistoryResponse, LikeHistory,
 };

@@ -6,15 +6,11 @@ use std::sync::{Arc, RwLock};
 
 use anyhow::Context;
 use lazy_static::lazy_static;
-use windows::{
-    w,
-    Win32::{
-        Foundation::HINSTANCE,
-        System::{
-            Console::{AllocConsole, FreeConsole},
-            LibraryLoader::GetModuleHandleW,
-            SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH},
-        },
+use windows::Win32::{
+    Foundation::HINSTANCE,
+    System::{
+        Console::{AllocConsole, FreeConsole},
+        SystemServices::{DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH},
     },
 };
 

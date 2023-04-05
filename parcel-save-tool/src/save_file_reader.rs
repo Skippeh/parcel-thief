@@ -3,7 +3,6 @@ use std::{cmp::min, ffi::CStr, fmt::Debug, fs::File};
 use anyhow::Context;
 use binary_reader::BinaryReader;
 use chrono::{DateTime, NaiveDateTime, Utc};
-use dbg_hex::dbg_hex;
 use ini::Ini;
 use murmurhash3::murmurhash3_x64_128;
 use percent_encoding::percent_decode_str;
