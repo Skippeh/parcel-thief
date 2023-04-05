@@ -33,7 +33,7 @@ pub async fn get_highway_resources(
                 .collect::<Result<Vec<_>, anyhow::Error>>()?,
             &request.resource_ids,
             &session.account_id,
-            Some(5),
+            None,
         )
         .await?
         .into_iter()
