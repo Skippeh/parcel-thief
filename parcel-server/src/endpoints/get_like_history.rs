@@ -8,6 +8,7 @@ use actix_web::{
     web::{Data, Json},
 };
 use chrono::NaiveDateTime;
+use itertools::Itertools;
 use parcel_common::api_types::requests::get_like_history::{
     GetLikeHistoryRequest, GetLikeHistoryResponse, LikeHistory,
 };
@@ -66,9 +67,17 @@ pub async fn get_like_history(
     }
 
     let mut given_likes = merged_likes.into_values().collect::<Vec<_>>();
+    let mut highway_likes = Vec::new();
 
-    // sort by most likes
-    given_likes.sort_unstable_by_key(|like| like.total_likes());
+    // Move highway to its own vec so we can merge it with the summarized count later
+    for index in 0..given_likes.len() {
+        if given_likes[index].online_id.starts_with('h') {
+            highway_likes.push(given_likes.swap_remove(index));
+        }
+    }
+
+    // sort by most likes in descending order
+    given_likes.sort_unstable_by_key(|like| std::cmp::Reverse(like.total_likes()));
 
     let result = given_likes
         .drain(..min(given_likes.len(), 5))
@@ -85,6 +94,9 @@ pub async fn get_like_history(
         time: 0,
     };
     let mut user_ids = HashSet::new();
+
+    // Move highway likes to given likes now that it only contains likes that will be summarized
+    given_likes.append(&mut highway_likes);
 
     for like in given_likes {
         summarized_like.likes_auto += like.likes_auto;
