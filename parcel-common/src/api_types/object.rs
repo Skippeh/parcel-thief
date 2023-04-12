@@ -167,7 +167,7 @@ pub enum ObjectType {
     #[serde(rename = "a")]
     A = 4,
     #[serde(rename = "r")]
-    R = 5,
+    R1 = 5,
     #[serde(rename = "l")]
     Ladder = 6,
     #[serde(rename = "s")]
@@ -175,7 +175,7 @@ pub enum ObjectType {
     #[serde(rename = "w")]
     Watchtower = 8,
     #[serde(rename = "b")]
-    B = 9,
+    B1 = 9,
     /// Subtype holds the type of the sign.
     #[serde(rename = "t")]
     Sign = 10,
@@ -199,6 +199,10 @@ pub enum ObjectType {
     /// A mushroom created from a player peeing.
     #[serde(rename = "x")]
     PeeMushroom = 19,
+    #[serde(rename = "B")]
+    B2 = 20,
+    #[serde(rename = "R")]
+    R2 = 21,
 }
 
 impl<DB> ToSql<Integer, DB> for ObjectType
@@ -216,11 +220,11 @@ where
             ObjectType::PowerGenerator => 2.to_sql(out),
             ObjectType::Postbox => 3.to_sql(out),
             ObjectType::A => 4.to_sql(out),
-            ObjectType::R => 5.to_sql(out),
+            ObjectType::R1 => 5.to_sql(out),
             ObjectType::Ladder => 6.to_sql(out),
             ObjectType::S => 7.to_sql(out),
             ObjectType::Watchtower => 8.to_sql(out),
-            ObjectType::B => 9.to_sql(out),
+            ObjectType::B1 => 9.to_sql(out),
             ObjectType::Sign => 10.to_sql(out),
             ObjectType::V => 11.to_sql(out),
             ObjectType::K => 12.to_sql(out),
@@ -231,6 +235,8 @@ where
             ObjectType::I => 17.to_sql(out),
             ObjectType::O => 18.to_sql(out),
             ObjectType::PeeMushroom => 19.to_sql(out),
+            ObjectType::B2 => 20.to_sql(out),
+            ObjectType::R2 => 21.to_sql(out),
         }
     }
 }
@@ -247,11 +253,11 @@ where
             2 => Ok(ObjectType::PowerGenerator),
             3 => Ok(ObjectType::Postbox),
             4 => Ok(ObjectType::A),
-            5 => Ok(ObjectType::R),
+            5 => Ok(ObjectType::R1),
             6 => Ok(ObjectType::Ladder),
             7 => Ok(ObjectType::S),
             8 => Ok(ObjectType::Watchtower),
-            9 => Ok(ObjectType::B),
+            9 => Ok(ObjectType::B1),
             10 => Ok(ObjectType::Sign),
             11 => Ok(ObjectType::V),
             12 => Ok(ObjectType::K),
@@ -262,6 +268,8 @@ where
             17 => Ok(ObjectType::I),
             18 => Ok(ObjectType::O),
             19 => Ok(ObjectType::PeeMushroom),
+            20 => Ok(ObjectType::B2),
+            21 => Ok(ObjectType::R2),
             other => Err(format!("Unknown ObjectType variant: {}", other).into()),
         }
     }
