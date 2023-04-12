@@ -118,9 +118,9 @@ pub struct VehicleInfo {
     #[serde(rename = "cc")]
     pub customize_color: i32,
     #[serde(rename = "nl")]
-    pub new_position: (i32, i32, i32),
+    pub new_position: Option<(i32, i32, i32)>,
     #[serde(rename = "nr")]
-    pub new_rotation: (i32, i32, i32),
+    pub new_rotation: Option<(i32, i32, i32)>,
     #[serde(rename = "exp")]
     pub exponent: i32,
 }

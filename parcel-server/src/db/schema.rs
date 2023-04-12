@@ -296,12 +296,12 @@ diesel::table! {
         is_race -> Bool,
         customize_type -> Int4,
         customize_color -> Int4,
-        new_pos_x -> Int4,
-        new_pos_y -> Int4,
-        new_pos_z -> Int4,
-        new_rot_x -> Int4,
-        new_rot_y -> Int4,
-        new_rot_z -> Int4,
+        new_pos_x -> Nullable<Int4>,
+        new_pos_y -> Nullable<Int4>,
+        new_pos_z -> Nullable<Int4>,
+        new_rot_x -> Nullable<Int4>,
+        new_rot_y -> Nullable<Int4>,
+        new_rot_z -> Nullable<Int4>,
         exponent -> Int4,
     }
 }
