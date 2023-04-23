@@ -35,7 +35,7 @@ pub fn map_offsets() -> Result<(), anyhow::Error> {
     offsets
         .map_pattern_offset(
             LocationOffset::FnStringCtor,
-            "40 53 48 83 EC 20 48 8B D9 48 C7 01 00 00 00 00 49 C7 C0 FF FF FF FF",
+            "40 53 48 83 EC 20 48 8B D9 48 C7 01 00 00 00 00 49 C7 C0 FF FF FF FF 66 0F 1F 84 00 00 00 00 00 49 FF C0 42 80 3C 02 00 75 F6 E8 E1",
         )
         .context("Failed to find String::ctor offset")?;
 
@@ -61,8 +61,8 @@ pub fn map_offsets() -> Result<(), anyhow::Error> {
 
     // Map DataAuthUrlPtr based on game version
     match *GAME_VERSION.read().unwrap() {
-        crate::GameVersion::Steam => offsets.map_offset(LocationOffset::DataAuthUrlPtr, 0x4DF8130),
-        crate::GameVersion::Epic => offsets.map_offset(LocationOffset::DataAuthUrlPtr, 0x4DFA0B0),
+        crate::GameVersion::Steam => offsets.map_offset(LocationOffset::DataAuthUrlPtr, 0x4DFA130),
+        crate::GameVersion::Epic => offsets.map_offset(LocationOffset::DataAuthUrlPtr, 0x4DFC0B0),
     }?;
 
     Ok(())
