@@ -19,6 +19,7 @@ mod get_road_data;
 mod get_version;
 mod get_wasted_baggages;
 mod lookup;
+mod put_wasted_baggages;
 mod reverse_lookup;
 mod send_like;
 mod set_construction_materials;
@@ -67,6 +68,7 @@ pub fn configure_endpoints(cfg: &mut ServiceConfig) {
         .service(get_qpid_objects::get_qpid_objects)
         .service(find_qpid_objects::find_qpid_objects)
         .service(get_wasted_baggages::get_wasted_baggages)
+        .service(put_wasted_baggages::put_wasted_baggages)
         .service(get_player_ranking_records::get_player_ranking_records);
 }
 

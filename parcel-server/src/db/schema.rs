@@ -344,6 +344,19 @@ diesel::table! {
     }
 }
 
+diesel::table! {
+    wasted_baggages (id) {
+        id -> Varchar,
+        qpid_id -> Int4,
+        creator_id -> Varchar,
+        item_hash -> Int4,
+        broken -> Bool,
+        x -> Int4,
+        y -> Int4,
+        z -> Int4,
+    }
+}
+
 diesel::joinable!(devoted_highway_resources -> accounts (account_id));
 diesel::joinable!(mission_baggage_ammo_infos -> mission_baggages (baggage_id));
 diesel::joinable!(mission_baggages -> missions (mission_id));
@@ -373,6 +386,7 @@ diesel::joinable!(qpid_object_tags -> qpid_objects (object_id));
 diesel::joinable!(qpid_object_vehicle_infos -> qpid_objects (object_id));
 diesel::joinable!(qpid_objects -> accounts (creator_id));
 diesel::joinable!(total_highway_likes -> accounts (account_id));
+diesel::joinable!(wasted_baggages -> accounts (creator_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     accounts,
@@ -403,4 +417,5 @@ diesel::allow_tables_to_appear_in_same_query!(
     qpid_objects,
     total_highway_likes,
     total_highway_resources,
+    wasted_baggages,
 );

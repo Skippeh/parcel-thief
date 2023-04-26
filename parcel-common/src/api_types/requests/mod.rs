@@ -18,6 +18,7 @@ pub mod get_road_data;
 pub mod get_version;
 pub mod get_wasted_baggages;
 pub mod lookup;
+pub mod put_wasted_baggages;
 pub mod reverse_lookup;
 pub mod send_like;
 pub mod set_construction_materials;

@@ -4,6 +4,7 @@ pub mod likes;
 pub mod missions;
 pub mod player_profiles;
 pub mod qpid_objects;
+pub mod wasted_baggages;
 
 use std::sync::Arc;
 
@@ -12,7 +13,7 @@ use futures_util::lock::{Mutex, MutexLockFuture};
 
 use self::{
     accounts::Accounts, highway_resources::HighwayResources, likes::Likes, missions::Missions,
-    player_profiles::PlayerProfiles, qpid_objects::QpidObjects,
+    player_profiles::PlayerProfiles, qpid_objects::QpidObjects, wasted_baggages::WastedBaggages,
 };
 
 pub struct Database {
@@ -69,6 +70,10 @@ impl<'db> DatabaseConnection<'db> {
 
     pub fn highway_resources(&self) -> HighwayResources {
         HighwayResources::new(self)
+    }
+
+    pub fn wasted_baggages(&self) -> WastedBaggages {
+        WastedBaggages::new(self)
     }
 
     fn get_pg_connection(&self) -> MutexLockFuture<PgConnection> {
