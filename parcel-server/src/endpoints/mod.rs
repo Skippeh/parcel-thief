@@ -26,7 +26,7 @@ mod set_construction_materials;
 mod set_mission_progress;
 mod set_player_profile;
 mod set_strand;
-pub mod update_object;
+mod update_object;
 
 use std::fmt::Display;
 
