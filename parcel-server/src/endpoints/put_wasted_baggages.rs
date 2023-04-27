@@ -19,5 +19,13 @@ pub async fn put_wasted_baggages(
     let conn = database.connect()?;
     let wasted_baggages = conn.wasted_baggages();
 
-    Err(anyhow::anyhow!("Not implemented").into())
+    wasted_baggages
+        .add_wasted_items(
+            request.0.qpid_id,
+            &session.account_id,
+            &request.0.wasted_items,
+        )
+        .await?;
+
+    Ok(EmptyResponse)
 }
