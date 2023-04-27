@@ -1,3 +1,4 @@
+use chrono::NaiveDateTime;
 use diesel::{Insertable, Queryable};
 use parcel_common::api_types;
 
@@ -8,6 +9,7 @@ pub struct WastedBaggage {
     id: String,
     qpid_id: i32,
     creator_id: String,
+    created_at: NaiveDateTime,
     item_hash: i32,
     broken: bool,
     x: i32,
@@ -38,6 +40,7 @@ pub struct NewWastedBaggage<'a> {
     pub id: String,
     pub qpid_id: i32,
     pub creator_id: &'a str,
+    pub created_at: &'a NaiveDateTime,
     pub item_hash: i32,
     pub broken: bool,
     pub x: i32,

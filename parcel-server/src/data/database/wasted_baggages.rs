@@ -24,6 +24,8 @@ impl<'db> WastedBaggages<'db> {
         use crate::db::schema::wasted_baggages::dsl;
         let conn = &mut *self.connection.get_pg_connection().await;
 
+        let created_at = chrono::Utc::now().naive_utc();
+
         conn.transaction(|conn| {
             diesel::insert_into(dsl::wasted_baggages)
                 .values(
@@ -33,6 +35,7 @@ impl<'db> WastedBaggages<'db> {
                             id: generate_wasted_baggage_id(),
                             qpid_id,
                             creator_id: owner_id,
+                            created_at: &created_at,
                             item_hash: item.item_hash,
                             broken: item.broken,
                             x: item.x,

@@ -349,6 +349,7 @@ diesel::table! {
         id -> Varchar,
         qpid_id -> Int4,
         creator_id -> Varchar,
+        created_at -> Timestamp,
         item_hash -> Int4,
         broken -> Bool,
         x -> Int4,
