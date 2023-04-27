@@ -44,7 +44,7 @@ pub async fn find_qpid_objects(
         priority_ids = Some(ids);
     }
 
-    if let Some(object) = request.object {
+    if let Some(_object) = request.object {
         let found_objects = objects
             .find_objects(
                 &[area_hash],
