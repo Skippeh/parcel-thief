@@ -1,7 +1,9 @@
+use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use diesel::Connection;
 use parcel_common::api_types::requests::get_wasted_baggages::WastedItem;
 
+use crate::db::models::wasted_baggage::WastedBaggage;
 use crate::db::{models::wasted_baggage::NewWastedBaggage, QueryError};
 
 use super::DatabaseConnection;
@@ -48,6 +50,28 @@ impl<'db> WastedBaggages<'db> {
 
             Ok(())
         })
+    }
+
+    pub async fn get_wasted_baggages(
+        &self,
+        qpid_id: i32,
+        earliest_date: Option<&NaiveDateTime>,
+    ) -> Result<Vec<WastedBaggage>, QueryError> {
+        use crate::db::schema::wasted_baggages::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        let baggages = if let Some(earliest_date) = earliest_date {
+            dsl::wasted_baggages
+                .filter(dsl::qpid_id.eq(qpid_id))
+                .filter(dsl::created_at.gt(earliest_date))
+                .get_results(conn)?
+        } else {
+            dsl::wasted_baggages
+                .filter(dsl::qpid_id.eq(qpid_id))
+                .get_results(conn)?
+        };
+
+        Ok(baggages)
     }
 }
 
