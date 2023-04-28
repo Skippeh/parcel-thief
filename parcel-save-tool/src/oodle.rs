@@ -97,8 +97,6 @@ pub enum Verbosity {
 
 #[derive(Debug, thiserror::Error)]
 pub enum OodleError {
-    #[error("The destination buffer is not big enough")]
-    DestinationTooSmall,
     #[error("Compression failed")]
     CompressionFailed,
     #[error("Decompression failed. Check DebugView or similar programs to get more info.")]
