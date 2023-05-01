@@ -192,6 +192,20 @@ impl<'db> Missions<'db> {
         })
     }
 
+    pub async fn delete_missions(
+        &self,
+        creator_id: &str,
+        mission_ids: impl Iterator<Item = &str>,
+    ) -> Result<usize, QueryError> {
+        let conn = &mut *self.connection.get_pg_connection().await;
+        Ok(diesel::delete(
+            dsl::missions
+                .filter(dsl::creator_id.eq(creator_id))
+                .filter(dsl::id.eq_any(mission_ids)),
+        )
+        .execute(conn)?)
+    }
+
     pub async fn find_missions(
         &self,
         online_types: &[OnlineMissionType],
