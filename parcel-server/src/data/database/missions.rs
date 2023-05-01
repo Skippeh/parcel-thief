@@ -210,6 +210,18 @@ impl<'db> Missions<'db> {
             .get_results(conn)?)
     }
 
+    pub async fn get_ordered_missions(&self, account_id: &str) -> Result<Vec<Mission>, QueryError> {
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        let missions: Vec<Mission> = dsl::missions
+            .filter(dsl::creator_id.eq(account_id))
+            .order_by(dsl::registered_time.desc())
+            .limit(1000)
+            .get_results(conn)?;
+
+        Ok(missions)
+    }
+
     pub async fn query_mission_data(
         &self,
         missions: impl IntoIterator<Item = Mission>,
