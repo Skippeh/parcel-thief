@@ -26,3 +26,4 @@ pub mod set_mission_progress;
 pub mod set_player_profile;
 pub mod set_strand;
 pub mod update_object;
+pub mod update_objects_tag;

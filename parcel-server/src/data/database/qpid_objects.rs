@@ -550,6 +550,39 @@ impl<'db> QpidObjects<'db> {
         Ok(result)
     }
 
+    pub async fn add_remove_tag_from_objects(
+        &self,
+        tag: &str,
+        add: Option<impl Iterator<Item = &str>>,
+        delete: Option<impl Iterator<Item = &str>>,
+    ) -> Result<(), QueryError> {
+        use crate::db::schema::qpid_object_tags::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        conn.transaction(|conn| {
+            // add tag to objects
+            if let Some(add) = add {
+                diesel::insert_into(dsl::qpid_object_tags)
+                    .values(
+                        &add.map(|id| NewTag { object_id: id, tag })
+                            .collect::<Vec<_>>(),
+                    )
+                    .on_conflict_do_nothing()
+                    .execute(conn)?;
+            }
+
+            // remove tag from objects
+            if let Some(delete) = delete {
+                diesel::delete(dsl::qpid_object_tags)
+                    .filter(dsl::tag.eq(tag))
+                    .filter(dsl::object_id.eq_any(delete))
+                    .execute(conn)?;
+            }
+
+            Ok(())
+        })
+    }
+
     fn add_tag(
         &self,
         conn: &mut PgConnection,

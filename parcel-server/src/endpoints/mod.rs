@@ -27,6 +27,7 @@ mod set_mission_progress;
 mod set_player_profile;
 mod set_strand;
 mod update_object;
+mod update_objects_tag;
 
 use std::fmt::Display;
 
@@ -69,7 +70,8 @@ pub fn configure_endpoints(cfg: &mut ServiceConfig) {
         .service(find_qpid_objects::find_qpid_objects)
         .service(get_wasted_baggages::get_wasted_baggages)
         .service(put_wasted_baggages::put_wasted_baggages)
-        .service(get_player_ranking_records::get_player_ranking_records);
+        .service(get_player_ranking_records::get_player_ranking_records)
+        .service(update_objects_tag::update_objects_tag);
 }
 
 /// An error that implements CommonResponseError that should be used when an endpoint can only fail by an internal error.
