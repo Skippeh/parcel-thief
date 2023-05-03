@@ -1,6 +1,7 @@
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use diesel::Connection;
+use parcel_common::api_types::requests::delete_wasted_baggages::DeleteRequest;
 use parcel_common::api_types::requests::get_wasted_baggages::WastedItem;
 
 use crate::db::models::wasted_baggage::WastedBaggage;
@@ -72,6 +73,25 @@ impl<'db> WastedBaggages<'db> {
         };
 
         Ok(baggages)
+    }
+
+    pub async fn delete_by_requests(
+        &self,
+        delete_requests: impl Iterator<Item = &DeleteRequest>,
+    ) -> Result<(), QueryError> {
+        use crate::db::schema::wasted_baggages::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        conn.transaction(|conn| {
+            for request in delete_requests {
+                diesel::delete(dsl::wasted_baggages)
+                    .filter(dsl::id.eq(&request.baggage_id))
+                    .filter(dsl::creator_id.eq(&request.account_id))
+                    .execute(conn)?;
+            }
+
+            Ok(())
+        })
     }
 }
 

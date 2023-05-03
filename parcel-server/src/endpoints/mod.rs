@@ -4,6 +4,7 @@ mod create_object;
 mod create_road;
 mod delete_missions;
 mod delete_object;
+mod delete_wasted_baggages;
 mod devote_highway_resources;
 mod find_missions;
 mod find_qpid_objects;
@@ -70,6 +71,7 @@ pub fn configure_endpoints(cfg: &mut ServiceConfig) {
         .service(find_qpid_objects::find_qpid_objects)
         .service(get_wasted_baggages::get_wasted_baggages)
         .service(put_wasted_baggages::put_wasted_baggages)
+        .service(delete_wasted_baggages::delete_wasted_baggages)
         .service(get_player_ranking_records::get_player_ranking_records)
         .service(update_objects_tag::update_objects_tag);
 }

@@ -3,6 +3,7 @@ pub mod create_object;
 pub mod create_road;
 pub mod delete_missions;
 pub mod delete_object;
+pub mod delete_wasted_baggages;
 pub mod devote_highway_resources;
 pub mod find_missions;
 pub mod find_qpid_objects;
