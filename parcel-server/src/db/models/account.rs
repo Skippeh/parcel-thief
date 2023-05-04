@@ -27,6 +27,7 @@ pub struct NewAccount<'a> {
 pub struct AccountHistory {
     pub id: i64,
     pub account_id: String,
+    pub encountered_id: String,
     pub encountered_at: NaiveDateTime,
 }
 
@@ -34,6 +35,7 @@ pub struct AccountHistory {
 #[diesel(table_name = account_histories)]
 pub struct NewAccountHistory<'a> {
     pub account_id: &'a str,
+    pub encountered_id: &'a str,
     pub encountered_at: &'a NaiveDateTime,
 }
 

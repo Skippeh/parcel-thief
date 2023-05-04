@@ -4,6 +4,7 @@ diesel::table! {
     account_histories (id) {
         id -> Int8,
         account_id -> Varchar,
+        encountered_id -> Varchar,
         encountered_at -> Timestamp,
     }
 }
@@ -374,7 +375,6 @@ diesel::table! {
     }
 }
 
-diesel::joinable!(account_histories -> accounts (account_id));
 diesel::joinable!(devoted_highway_resources -> accounts (account_id));
 diesel::joinable!(mission_baggage_ammo_infos -> mission_baggages (baggage_id));
 diesel::joinable!(mission_baggages -> missions (mission_id));
