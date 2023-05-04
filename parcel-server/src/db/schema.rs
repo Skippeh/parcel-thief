@@ -1,6 +1,22 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
+    account_histories (id) {
+        id -> Int8,
+        account_id -> Varchar,
+        encountered_at -> Timestamp,
+    }
+}
+
+diesel::table! {
+    account_strand_contracts (id) {
+        id -> Int8,
+        owner_account_id -> Varchar,
+        contract_account_id -> Varchar,
+    }
+}
+
+diesel::table! {
     accounts (id) {
         id -> Varchar,
         display_name -> Varchar,
@@ -358,6 +374,7 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(account_histories -> accounts (account_id));
 diesel::joinable!(devoted_highway_resources -> accounts (account_id));
 diesel::joinable!(mission_baggage_ammo_infos -> mission_baggages (baggage_id));
 diesel::joinable!(mission_baggages -> missions (mission_id));
@@ -390,6 +407,8 @@ diesel::joinable!(total_highway_likes -> accounts (account_id));
 diesel::joinable!(wasted_baggages -> accounts (creator_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
+    account_histories,
+    account_strand_contracts,
     accounts,
     devoted_highway_resources,
     likes,
