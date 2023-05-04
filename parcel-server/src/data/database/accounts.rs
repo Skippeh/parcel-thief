@@ -4,7 +4,9 @@ use diesel::prelude::*;
 use parcel_common::{api_types::auth::Provider, rand};
 
 use crate::db::{
-    models::account::{Account, NewAccount},
+    models::account::{
+        Account, AccountHistory, NewAccount, NewAccountHistory, NewAccountStrandContract,
+    },
     schema::accounts,
     QueryError,
 };
@@ -113,6 +115,88 @@ impl<'db> Accounts<'db> {
                 accounts::last_login_date.eq(last_login),
             ))
             .get_result::<Account>(conn)?;
+
+        Ok(())
+    }
+
+    pub async fn get_relationship_history(
+        &self,
+        account_id: &str,
+        limit: Option<i64>,
+    ) -> Result<Vec<AccountHistory>, QueryError> {
+        use crate::db::schema::account_histories::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        let account_histories = if let Some(limit) = limit {
+            dsl::account_histories
+                .filter(dsl::account_id.eq(account_id))
+                .limit(limit)
+                .get_results::<AccountHistory>(conn)?
+        } else {
+            dsl::account_histories
+                .filter(dsl::account_id.eq(account_id))
+                .get_results::<AccountHistory>(conn)?
+        };
+
+        Ok(account_histories)
+    }
+
+    pub async fn add_relationship_history(
+        &self,
+        account_id: &str,
+        encountered_id: &str,
+        encountered_at: &NaiveDateTime,
+    ) -> Result<(), QueryError> {
+        use crate::db::schema::account_histories::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        diesel::insert_into(dsl::account_histories)
+            .values(&NewAccountHistory {
+                account_id,
+                encountered_id,
+                encountered_at,
+            })
+            .on_conflict((dsl::account_id, dsl::encountered_id))
+            .do_update()
+            .set(dsl::encountered_at.eq(encountered_at))
+            .execute(conn)?;
+
+        Ok(())
+    }
+
+    pub async fn add_strand_contract(
+        &self,
+        account_id: &str,
+        contract_account_id: &str,
+    ) -> Result<(), QueryError> {
+        use crate::db::schema::account_strand_contracts::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        diesel::insert_into(dsl::account_strand_contracts)
+            .values(&NewAccountStrandContract {
+                owner_account_id: account_id,
+                contract_account_id,
+            })
+            .on_conflict_do_nothing()
+            .execute(conn)?;
+
+        Ok(())
+    }
+
+    pub async fn remove_strand_contract(
+        &self,
+        account_id: &str,
+        contract_account_id: &str,
+    ) -> Result<(), QueryError> {
+        use crate::db::schema::account_strand_contracts::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        diesel::delete(
+            dsl::account_strand_contracts
+                .filter(dsl::owner_account_id.eq(account_id))
+                .filter(dsl::contract_account_id.eq(contract_account_id)),
+        )
+        .execute(conn)?;
 
         Ok(())
     }
