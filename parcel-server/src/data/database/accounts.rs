@@ -164,29 +164,33 @@ impl<'db> Accounts<'db> {
         Ok(())
     }
 
-    pub async fn add_strand_contract(
+    pub async fn add_strand_contracts(
         &self,
         account_id: &str,
-        contract_account_id: &str,
+        contract_account_ids: impl Iterator<Item = &str>,
     ) -> Result<(), QueryError> {
         use crate::db::schema::account_strand_contracts::dsl;
         let conn = &mut *self.connection.get_pg_connection().await;
 
         diesel::insert_into(dsl::account_strand_contracts)
-            .values(&NewAccountStrandContract {
-                owner_account_id: account_id,
-                contract_account_id,
-            })
+            .values(
+                &contract_account_ids
+                    .map(|id| NewAccountStrandContract {
+                        owner_account_id: account_id,
+                        contract_account_id: id,
+                    })
+                    .collect::<Vec<NewAccountStrandContract>>(),
+            )
             .on_conflict_do_nothing()
             .execute(conn)?;
 
         Ok(())
     }
 
-    pub async fn remove_strand_contract(
+    pub async fn remove_strand_contracts(
         &self,
         account_id: &str,
-        contract_account_id: &str,
+        contract_account_ids: impl Iterator<Item = &str>,
     ) -> Result<(), QueryError> {
         use crate::db::schema::account_strand_contracts::dsl;
         let conn = &mut *self.connection.get_pg_connection().await;
@@ -194,7 +198,7 @@ impl<'db> Accounts<'db> {
         diesel::delete(
             dsl::account_strand_contracts
                 .filter(dsl::owner_account_id.eq(account_id))
-                .filter(dsl::contract_account_id.eq(contract_account_id)),
+                .filter(dsl::contract_account_id.eq_any(contract_account_ids)),
         )
         .execute(conn)?;
 
