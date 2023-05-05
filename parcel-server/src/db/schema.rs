@@ -14,6 +14,7 @@ diesel::table! {
         id -> Int8,
         owner_account_id -> Varchar,
         contract_account_id -> Varchar,
+        created_at -> Timestamp,
     }
 }
 

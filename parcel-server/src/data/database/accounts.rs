@@ -171,6 +171,7 @@ impl<'db> Accounts<'db> {
     ) -> Result<(), QueryError> {
         use crate::db::schema::account_strand_contracts::dsl;
         let conn = &mut *self.connection.get_pg_connection().await;
+        let created_at = chrono::Utc::now().naive_utc();
 
         diesel::insert_into(dsl::account_strand_contracts)
             .values(
@@ -178,6 +179,7 @@ impl<'db> Accounts<'db> {
                     .map(|id| NewAccountStrandContract {
                         owner_account_id: account_id,
                         contract_account_id: id,
+                        created_at: &created_at,
                     })
                     .collect::<Vec<NewAccountStrandContract>>(),
             )

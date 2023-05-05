@@ -44,6 +44,7 @@ pub struct AccountStrandContract {
     pub id: i64,
     pub owner_account_id: String,
     pub contract_account_id: String,
+    pub created_at: NaiveDateTime,
 }
 
 #[derive(Debug, Insertable)]
@@ -51,4 +52,5 @@ pub struct AccountStrandContract {
 pub struct NewAccountStrandContract<'a> {
     pub owner_account_id: &'a str,
     pub contract_account_id: &'a str,
+    pub created_at: &'a NaiveDateTime,
 }
