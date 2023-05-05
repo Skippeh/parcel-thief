@@ -5,7 +5,8 @@ use parcel_common::{api_types::auth::Provider, rand};
 
 use crate::db::{
     models::account::{
-        Account, AccountHistory, NewAccount, NewAccountHistory, NewAccountStrandContract,
+        Account, AccountHistory, AccountStrandContract, NewAccount, NewAccountHistory,
+        NewAccountStrandContract,
     },
     schema::accounts,
     QueryError,
@@ -205,6 +206,18 @@ impl<'db> Accounts<'db> {
         .execute(conn)?;
 
         Ok(())
+    }
+
+    pub async fn get_strand_contracts(
+        &self,
+        account_id: &str,
+    ) -> Result<Vec<AccountStrandContract>, QueryError> {
+        use crate::db::schema::account_strand_contracts::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        Ok(dsl::account_strand_contracts
+            .filter(dsl::owner_account_id.eq(account_id))
+            .get_results::<AccountStrandContract>(conn)?)
     }
 }
 

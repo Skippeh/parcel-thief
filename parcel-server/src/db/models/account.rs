@@ -31,6 +31,17 @@ pub struct AccountHistory {
     pub encountered_at: NaiveDateTime,
 }
 
+impl AccountHistory {
+    pub fn into_api_type(
+        self,
+    ) -> parcel_common::api_types::requests::get_relationships::RelationshipHistory {
+        parcel_common::api_types::requests::get_relationships::RelationshipHistory {
+            last_interaction_time: self.encountered_at.timestamp_millis(),
+            account_id: self.encountered_id,
+        }
+    }
+}
+
 #[derive(Debug, Insertable)]
 #[diesel(table_name = account_histories)]
 pub struct NewAccountHistory<'a> {
@@ -45,6 +56,17 @@ pub struct AccountStrandContract {
     pub owner_account_id: String,
     pub contract_account_id: String,
     pub created_at: NaiveDateTime,
+}
+
+impl AccountStrandContract {
+    pub fn into_api_type(
+        self,
+    ) -> parcel_common::api_types::requests::get_relationships::StrandContract {
+        parcel_common::api_types::requests::get_relationships::StrandContract {
+            added_time: self.created_at.timestamp_millis(),
+            account_id: self.contract_account_id,
+        }
+    }
 }
 
 #[derive(Debug, Insertable)]
