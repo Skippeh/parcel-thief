@@ -131,8 +131,8 @@ impl<'db> Accounts<'db> {
         let account_histories = if let Some(limit) = limit {
             dsl::account_histories
                 .filter(dsl::account_id.eq(account_id))
-                .limit(limit)
                 .order_by(dsl::encountered_at.desc())
+                .limit(limit)
                 .get_results::<AccountHistory>(conn)?
         } else {
             dsl::account_histories
