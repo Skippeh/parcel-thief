@@ -132,10 +132,12 @@ impl<'db> Accounts<'db> {
             dsl::account_histories
                 .filter(dsl::account_id.eq(account_id))
                 .limit(limit)
+                .order_by(dsl::encountered_at.desc())
                 .get_results::<AccountHistory>(conn)?
         } else {
             dsl::account_histories
                 .filter(dsl::account_id.eq(account_id))
+                .order_by(dsl::encountered_at.desc())
                 .get_results::<AccountHistory>(conn)?
         };
 
