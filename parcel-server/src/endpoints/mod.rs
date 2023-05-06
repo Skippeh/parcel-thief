@@ -26,6 +26,7 @@ mod send_like;
 mod set_construction_materials;
 mod set_mission_progress;
 mod set_player_profile;
+mod set_recycle_materials;
 mod set_strand;
 mod update_object;
 mod update_objects_tag;
@@ -66,6 +67,7 @@ pub fn configure_endpoints(cfg: &mut ServiceConfig) {
         .service(create_object::create_object)
         .service(update_object::update_object)
         .service(set_construction_materials::set_construction_materials)
+        .service(set_recycle_materials::set_recycle_materials)
         .service(create_road::create_road)
         .service(get_qpid_objects::get_qpid_objects)
         .service(find_qpid_objects::find_qpid_objects)
