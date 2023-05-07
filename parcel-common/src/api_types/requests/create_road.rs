@@ -19,9 +19,11 @@ pub struct CreateRoadRequest {
     #[serde(rename = "eq")]
     pub end_qpid_id: i32,
     #[serde(rename = "hdif")]
-    pub max_height_difference: u32,
+    pub max_height_difference: i32,
     #[serde(rename = "len")]
-    pub path_length: u32,
+    pub path_length: i32,
+    #[serde(rename = "vq")]
+    pub via_qpids: Option<Vec<i32>>,
 }
 
 pub type CreateRoadResponse = Road;

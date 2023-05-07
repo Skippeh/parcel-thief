@@ -17,15 +17,15 @@ pub struct Road {
     #[serde(rename = "eq")]
     pub end_qpid_id: i32,
     #[serde(rename = "hdif")]
-    pub max_height_difference: u32,
+    pub max_height_difference: i32,
     #[serde(rename = "id")]
     pub online_id: String,
     #[serde(rename = "len")]
-    pub path_length: u32,
+    pub path_length: i32,
     #[serde(rename = "t")]
     pub created_time: i64,
-    #[serde(skip)]
-    pub data: Vec<u8>,
     #[serde(rename = "ver")]
     pub data_version: i32,
+    #[serde(rename = "vq", skip_serializing_if = "Option::is_none")]
+    pub via_qpids: Option<Vec<i32>>,
 }
