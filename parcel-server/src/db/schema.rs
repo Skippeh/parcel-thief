@@ -347,6 +347,37 @@ diesel::table! {
 }
 
 diesel::table! {
+    road_data (road_id) {
+        road_id -> Varchar,
+        data -> Bytea,
+    }
+}
+
+diesel::table! {
+    road_via_qpids (road_id, qpid_id, sort_order) {
+        road_id -> Varchar,
+        qpid_id -> Int4,
+        sort_order -> Int4,
+    }
+}
+
+diesel::table! {
+    roads (id) {
+        id -> Varchar,
+        area_hash -> Int4,
+        creator_id -> Varchar,
+        qpid_start_id -> Int4,
+        qpid_end_id -> Int4,
+        location_start_id -> Int4,
+        location_end_id -> Int4,
+        max_height_difference -> Int4,
+        length -> Int4,
+        created_at -> Timestamp,
+        data_version -> Int4,
+    }
+}
+
+diesel::table! {
     total_highway_likes (account_id) {
         account_id -> Varchar,
         likes -> Int8,
@@ -404,6 +435,9 @@ diesel::joinable!(qpid_object_stone_infos -> qpid_objects (object_id));
 diesel::joinable!(qpid_object_tags -> qpid_objects (object_id));
 diesel::joinable!(qpid_object_vehicle_infos -> qpid_objects (object_id));
 diesel::joinable!(qpid_objects -> accounts (creator_id));
+diesel::joinable!(road_data -> roads (road_id));
+diesel::joinable!(road_via_qpids -> roads (road_id));
+diesel::joinable!(roads -> accounts (creator_id));
 diesel::joinable!(total_highway_likes -> accounts (account_id));
 diesel::joinable!(wasted_baggages -> accounts (creator_id));
 
@@ -436,6 +470,9 @@ diesel::allow_tables_to_appear_in_same_query!(
     qpid_object_tags,
     qpid_object_vehicle_infos,
     qpid_objects,
+    road_data,
+    road_via_qpids,
+    roads,
     total_highway_likes,
     total_highway_resources,
     wasted_baggages,
