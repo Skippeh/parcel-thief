@@ -7,7 +7,7 @@ use parcel_common::api_types::requests::{
 };
 
 use crate::db::{
-    models::road::{NewRoad, NewRoadData, NewRoadViaQpid, Road, RoadViaQpid},
+    models::road::{NewRoad, NewRoadData, NewRoadViaQpid, Road, RoadData, RoadViaQpid},
     QueryError,
 };
 
@@ -191,6 +191,13 @@ impl<'db> Roads<'db> {
         }
 
         Ok(result)
+    }
+
+    pub async fn get_road_data(&self, road_id: &str) -> Result<Option<RoadData>, QueryError> {
+        use crate::db::schema::road_data::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        Ok(dsl::road_data.find(road_id).first(conn).optional()?)
     }
 }
 

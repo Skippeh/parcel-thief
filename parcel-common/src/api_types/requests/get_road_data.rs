@@ -6,7 +6,7 @@ pub struct GetRoadDataRequest {
     ///
     /// Note that road in this context refers to the player generated paths and not highway segments.
     #[serde(rename = "id")]
-    pub object_id: String,
+    pub road_id: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
