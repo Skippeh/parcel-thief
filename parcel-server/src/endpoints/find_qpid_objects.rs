@@ -65,8 +65,22 @@ pub async fn find_qpid_objects(
         result.normal.object_p = Some(api_objects);
     }
 
-    if let Some(road) = request.road {
-        // todo
+    if let Some(mut road_request) = request.road {
+        road_request.count = 100;
+        let roads = conn.roads();
+
+        let found_roads = roads
+            .find_roads(
+                &road_request,
+                &[&session.account_id],
+                priority_ids.as_deref(),
+            )
+            .await?
+            .into_iter()
+            .map(|r| r.into_api_type())
+            .collect();
+
+        result.normal.roads = Some(found_roads);
     }
 
     Ok(Json(result))

@@ -1,6 +1,10 @@
+use std::collections::HashMap;
+
 use base64::Engine;
-use diesel::prelude::*;
-use parcel_common::api_types::requests::create_road::CreateRoadRequest;
+use diesel::{dsl::not, prelude::*};
+use parcel_common::api_types::requests::{
+    create_road::CreateRoadRequest, find_qpid_objects::RoadRequest,
+};
 
 use crate::db::{
     models::road::{NewRoad, NewRoadData, NewRoadViaQpid, Road, RoadViaQpid},
@@ -135,6 +139,58 @@ impl<'db> Roads<'db> {
 
             Ok(result)
         })
+    }
+
+    pub async fn find_roads(
+        &self,
+        parameters: &RoadRequest,
+        exclude_ids: &[&str],
+        _priority_ids: Option<&[&str]>,
+    ) -> Result<Vec<DbRoad>, QueryError> {
+        use crate::db::schema::roads::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+        let mut result = Vec::new();
+
+        // todo: respect priority_ids and parameters.prioritized_location_id
+
+        let roads: Vec<Road> = dsl::roads
+            .filter(dsl::location_start_id.eq(parameters.required_location_id))
+            .or_filter(dsl::location_end_id.eq(parameters.required_location_id))
+            .filter(dsl::qpid_end_id.eq_any(&parameters.end_qpids))
+            .filter(dsl::data_version.eq(parameters.data_version))
+            .filter(not(dsl::creator_id.eq_any(exclude_ids)))
+            .order_by(dsl::created_at.desc())
+            .limit(parameters.count as i64)
+            .get_results::<Road>(conn)?;
+
+        {
+            use crate::db::schema::road_via_qpids::dsl;
+            let road_ids = roads.iter().map(|r| &r.id).collect::<Vec<_>>();
+
+            let all_via_qpids: Vec<RoadViaQpid> = dsl::road_via_qpids
+                .filter(dsl::road_id.eq_any(road_ids))
+                .order_by(dsl::sort_order.asc())
+                .get_results::<RoadViaQpid>(conn)?;
+
+            let mut via_qpids = HashMap::<String, Vec<RoadViaQpid>>::new();
+            for via_qpid in all_via_qpids {
+                let vec = via_qpids
+                    .entry(via_qpid.road_id.clone())
+                    .or_insert_with(Vec::new);
+                vec.push(via_qpid);
+            }
+
+            roads.into_iter().for_each(|road| {
+                let db_road = DbRoad {
+                    via_qpids: via_qpids.remove(&road.id).unwrap_or_default(),
+                    road,
+                };
+
+                result.push(db_road);
+            })
+        }
+
+        Ok(result)
     }
 }
 
