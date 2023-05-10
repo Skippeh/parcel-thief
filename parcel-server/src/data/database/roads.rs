@@ -153,15 +153,21 @@ impl<'db> Roads<'db> {
 
         // todo: respect priority_ids and parameters.prioritized_location_id
 
-        let roads: Vec<Road> = dsl::roads
-            .filter(dsl::location_start_id.eq(parameters.required_location_id))
-            .or_filter(dsl::location_end_id.eq(parameters.required_location_id))
+        let mut roads_query = dsl::roads
             .filter(dsl::qpid_end_id.eq_any(&parameters.end_qpids))
             .filter(dsl::data_version.eq(parameters.data_version))
             .filter(not(dsl::creator_id.eq_any(exclude_ids)))
             .order_by(dsl::created_at.desc())
             .limit(parameters.count as i64)
-            .get_results::<Road>(conn)?;
+            .into_boxed();
+
+        if let Some(required_location_id) = &parameters.required_location_id {
+            roads_query = roads_query
+                .filter(dsl::location_start_id.eq(required_location_id))
+                .or_filter(dsl::location_end_id.eq(required_location_id));
+        }
+
+        let roads: Vec<Road> = roads_query.get_results::<Road>(conn)?;
 
         {
             use crate::db::schema::road_via_qpids::dsl;

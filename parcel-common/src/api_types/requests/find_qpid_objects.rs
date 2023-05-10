@@ -39,7 +39,7 @@ pub struct RoadRequest {
     #[serde(rename = "qe")]
     pub end_qpids: Vec<i32>,
     #[serde(rename = "rlid")]
-    pub required_location_id: i32,
+    pub required_location_id: Option<i32>,
     #[serde(rename = "ver")]
     pub data_version: i32,
 }

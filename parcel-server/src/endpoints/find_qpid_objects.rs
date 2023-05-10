@@ -67,6 +67,11 @@ pub async fn find_qpid_objects(
 
     if let Some(mut road_request) = request.road {
         road_request.count = 100;
+
+        if let Some(-1) = &road_request.required_location_id {
+            road_request.required_location_id = None;
+        }
+
         let roads = conn.roads();
 
         let found_roads = roads
