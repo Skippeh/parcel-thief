@@ -203,6 +203,8 @@ pub enum ObjectType {
     B2 = 20,
     #[serde(rename = "R")]
     R2 = 21,
+    #[serde(rename = "S")]
+    S2 = 22,
 }
 
 impl<DB> ToSql<Integer, DB> for ObjectType
@@ -237,6 +239,7 @@ where
             ObjectType::PeeMushroom => 19.to_sql(out),
             ObjectType::B2 => 20.to_sql(out),
             ObjectType::R2 => 21.to_sql(out),
+            ObjectType::S2 => 22.to_sql(out),
         }
     }
 }
@@ -270,6 +273,7 @@ where
             19 => Ok(ObjectType::PeeMushroom),
             20 => Ok(ObjectType::B2),
             21 => Ok(ObjectType::R2),
+            22 => Ok(ObjectType::S2),
             other => Err(format!("Unknown ObjectType variant: {}", other).into()),
         }
     }
