@@ -10,15 +10,16 @@ use super::{area::AreaHash, mission::Mission, road::Road};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ConstructionMaterials {
+    /// The account id of the user that has contributed these materials
     #[serde(rename = "c")]
     pub contributor_account_id: String,
-    /// The materials currently in this object
+    /// The total amount of materials contributed for upgrades
     #[serde(rename = "mat")]
     pub materials: [i32; 6],
-    /// The materials to contribute
+    /// The total amount of materials contributed for repairs
     #[serde(rename = "rmat")]
     pub materials_to_repair: [i32; 6],
-    /// The time when these materials were contributed, expressed as epoch (milliseconds)
+    /// The most recent time when these materials were contributed, expressed as epoch (milliseconds)
     #[serde(rename = "t")]
     pub contribute_time: i64,
 }

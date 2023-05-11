@@ -1,10 +1,12 @@
 pub mod bridge_info;
 pub mod comment;
+pub mod construction_materials;
 pub mod customize_info;
 pub mod extra_info;
 pub mod parking_info;
 pub mod rope_info;
 pub mod stone_info;
+pub mod tag;
 pub mod vehicle_info;
 
 use std::num::TryFromIntError;

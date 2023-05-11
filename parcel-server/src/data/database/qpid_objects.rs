@@ -6,19 +6,20 @@ use parcel_common::api_types::{
 };
 
 use crate::db::{
-    models::{
-        mission::tag::NewTag,
-        qpid_object::{
-            bridge_info::{BridgeInfo, NewBridgeInfo},
-            comment::{Comment, NewComment, NewPhrase, Phrase},
-            customize_info::{ChangeCustomizeInfo, CustomizeInfo, NewCustomizeInfo},
-            extra_info::{ChangeExtraInfo, ExtraInfo, NewExtraInfo},
-            parking_info::{ChangeParkingInfo, NewParkingInfo, ParkingInfo},
-            rope_info::{NewRopeInfo, RopeInfo},
-            stone_info::{ChangeStoneInfo, NewStoneInfo, StoneInfo},
-            vehicle_info::{ChangeVehicleInfo, NewVehicleInfo, VehicleInfo},
-            NewQpidObject, QpidObject,
+    models::qpid_object::{
+        bridge_info::{BridgeInfo, NewBridgeInfo},
+        comment::{Comment, NewComment, NewPhrase, Phrase},
+        construction_materials::{
+            ChangeConstructionMaterials, ConstructionMaterials, NewConstructionMaterials,
         },
+        customize_info::{ChangeCustomizeInfo, CustomizeInfo, NewCustomizeInfo},
+        extra_info::{ChangeExtraInfo, ExtraInfo, NewExtraInfo},
+        parking_info::{ChangeParkingInfo, NewParkingInfo, ParkingInfo},
+        rope_info::{NewRopeInfo, RopeInfo},
+        stone_info::{ChangeStoneInfo, NewStoneInfo, StoneInfo},
+        tag::{NewTag, Tag},
+        vehicle_info::{ChangeVehicleInfo, NewVehicleInfo, VehicleInfo},
+        NewQpidObject, QpidObject,
     },
     QueryError,
 };
@@ -37,7 +38,8 @@ pub struct DbQpidObject {
     pub customize_info: Option<CustomizeInfo>,
     pub comment: Option<Comment>,
     pub comment_phrases: Option<Vec<Phrase>>,
-    _phantom: std::marker::PhantomData<()>, // prevent other modules from creating this struct
+    pub construction_materials: Option<Vec<ConstructionMaterials>>,
+    pub tags: Option<Vec<Tag>>,
 }
 
 impl DbQpidObject {
@@ -51,6 +53,10 @@ impl DbQpidObject {
         result.vehicle_info = self.vehicle_info.map(|i| i.into_api_type());
         result.extra_info = self.extra_info.map(|i| i.into_api_type());
         result.customize_info = self.customize_info.map(|i| i.into_api_type());
+        result.construction_materials_contributions = self
+            .construction_materials
+            .map(|i| i.into_iter().map(|mats| mats.into_api_type()).collect());
+        result.tags = self.tags.map(|i| i.into_iter().map(|t| t.tag).collect());
 
         if let Some(comment) = self.comment {
             let mut comments = Vec::with_capacity(1);
@@ -283,7 +289,8 @@ impl<'db> QpidObjects<'db> {
                 customize_info: db_customize_info,
                 comment: db_comment,
                 comment_phrases: db_comment_phrases,
-                _phantom: std::marker::PhantomData,
+                construction_materials: None,
+                tags: None,
             })
         })
     }
@@ -458,7 +465,8 @@ impl<'db> QpidObjects<'db> {
                 customize_info: None,
                 comment: None,
                 comment_phrases: None,
-                _phantom: std::marker::PhantomData,
+                construction_materials: None,
+                tags: None,
             };
             let id = &db_object.object.id;
 
@@ -544,6 +552,26 @@ impl<'db> QpidObjects<'db> {
                 }
             }
 
+            {
+                use crate::db::schema::qpid_object_construction_materials::dsl;
+
+                db_object.construction_materials = Some(
+                    dsl::qpid_object_construction_materials
+                        .filter(dsl::object_id.eq(id))
+                        .get_results::<ConstructionMaterials>(conn)?,
+                )
+            }
+
+            {
+                use crate::db::schema::qpid_object_tags::dsl;
+
+                db_object.tags = Some(
+                    dsl::qpid_object_tags
+                        .filter(dsl::object_id.eq(id))
+                        .get_results::<Tag>(conn)?,
+                )
+            }
+
             result.push(db_object);
         }
 
@@ -581,6 +609,44 @@ impl<'db> QpidObjects<'db> {
 
             Ok(())
         })
+    }
+
+    pub async fn contribute_materials(
+        &self,
+        contributor_id: Option<&str>,
+        object_id: &str,
+        upgrade_materials: &[i32; 6],
+        repair_materials: &[i32; 6],
+    ) -> Result<(), QueryError> {
+        use crate::db::schema::qpid_object_construction_materials::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        let new_row = NewConstructionMaterials {
+            object_id,
+            contributor_id,
+            contribute_time: &chrono::Utc::now().naive_utc(),
+            mats_0: upgrade_materials[0],
+            mats_1: upgrade_materials[1],
+            mats_2: upgrade_materials[2],
+            mats_3: upgrade_materials[3],
+            mats_4: upgrade_materials[4],
+            mats_5: upgrade_materials[5],
+            repair_0: repair_materials[0],
+            repair_1: repair_materials[1],
+            repair_2: repair_materials[2],
+            repair_3: repair_materials[3],
+            repair_4: repair_materials[4],
+            repair_5: repair_materials[5],
+        };
+
+        diesel::insert_into(dsl::qpid_object_construction_materials)
+            .values(&new_row)
+            .on_conflict((dsl::object_id, dsl::contributor_id))
+            .do_update()
+            .set(ChangeConstructionMaterials::from(&new_row))
+            .execute(conn)?;
+
+        Ok(())
     }
 
     fn add_tag(
