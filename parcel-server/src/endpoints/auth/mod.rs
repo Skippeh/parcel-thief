@@ -42,11 +42,9 @@ pub struct AuthQuery {
 #[allow(clippy::enum_variant_names)]
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    UnsupportedPlatform(Provider),
     ApiResponseError(anyhow::Error),
     InvalidCode,
     InternalError(InternalError),
-    AlreadyAuthenticated,
 }
 
 impl From<crate::db::QueryError> for Error {
@@ -64,9 +62,6 @@ impl From<redis::RedisError> for Error {
 impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Error::UnsupportedPlatform(platform) => {
-                write!(f, "The provided platform is not supported: {:?}", platform)
-            }
             Error::ApiResponseError(err) => {
                 write!(
                     f,
@@ -80,7 +75,6 @@ impl Display for Error {
             Error::InternalError(err) => {
                 write!(f, "{}", err)
             }
-            Error::AlreadyAuthenticated => write!(f, "The user is already authenticated"),
         }
     }
 }
@@ -89,31 +83,25 @@ impl_response_error!(Error);
 impl CommonResponseError for Error {
     fn get_status_code(&self) -> String {
         match self {
-            Error::UnsupportedPlatform(_) => "AU-UP".into(),
             Error::ApiResponseError(_) => "AU-AE".into(),
             Error::InvalidCode => "AU-IC".into(),
             Error::InternalError(err) => err.get_status_code(),
-            Error::AlreadyAuthenticated => "AU_AA".into(),
         }
     }
 
     fn get_http_status_code(&self) -> StatusCode {
         match self {
-            Error::UnsupportedPlatform(_) => StatusCode::BAD_REQUEST,
             Error::ApiResponseError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::InternalError(err) => err.get_http_status_code(),
             Error::InvalidCode => StatusCode::UNAUTHORIZED,
-            Error::AlreadyAuthenticated => StatusCode::BAD_REQUEST,
         }
     }
 
     fn get_message(&self) -> String {
         match self {
-            Error::UnsupportedPlatform(_) => "unsupported provider".into(),
             Error::ApiResponseError(_) => "provider error".into(),
             Error::InvalidCode => "invalid provider code".into(),
             Error::InternalError(err) => err.get_message(),
-            Error::AlreadyAuthenticated => "already authenticated".into(),
         }
     }
 }
