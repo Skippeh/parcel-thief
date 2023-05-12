@@ -1,5 +1,3 @@
-#![allow(dead_code)] // todo: remove this when things are starting to come together
-
 mod data;
 mod db;
 mod endpoints;
