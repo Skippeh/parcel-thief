@@ -113,17 +113,9 @@ async fn main() -> Result<()> {
 
     let redis_client = redis_client_data.clone().into_inner();
     let steam_data = web::Data::new(
-        Steam::new(
-            args.steam_api_key.clone(),
-            redis_client.clone(),
-            "platform/steam/",
-        )
-        .context("Could not create steam web api client")?,
+        Steam::new(args.steam_api_key.clone()).context("Could not create steam web api client")?,
     );
-    let epic_data = web::Data::new(
-        Epic::new(redis_client.clone(), "platform/epic/")
-            .context("Could not create epic web api client")?,
-    );
+    let epic_data = web::Data::new(Epic::new().context("Could not create epic web api client")?);
     let session_store = web::Data::new(RedisSessionStore::new(redis_client.clone(), "ds-session/"));
     let database = web::Data::new(Database::new(&args.database_url));
 

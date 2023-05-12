@@ -75,16 +75,6 @@ impl<'db> Accounts<'db> {
         Ok(accounts)
     }
 
-    pub async fn get_by_id(&self, account_id: &str) -> Result<Option<Account>, QueryError> {
-        let conn = &mut *self.connection.get_pg_connection().await;
-        let account = accounts::table
-            .filter(accounts::id.eq(account_id))
-            .first(conn)
-            .optional()?;
-
-        Ok(account)
-    }
-
     pub async fn get_by_ids(
         &self,
         account_ids: &[impl AsRef<str>],

@@ -39,13 +39,13 @@ pub struct DatabaseConnection<'db> {
     connection: Arc<Mutex<PgConnection>>,
 
     /// Technically not used for anything, but it's borrowed so we can't accidentally leave a connection somewhere past the database struct's life
-    db: &'db Database,
+    _db: &'db Database,
 }
 
 impl<'db> DatabaseConnection<'db> {
     pub fn new(db: &'db Database, connection: PgConnection) -> Self {
         Self {
-            db,
+            _db: db,
             connection: Arc::new(Mutex::new(connection)),
         }
     }

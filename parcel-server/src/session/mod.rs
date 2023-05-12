@@ -44,24 +44,6 @@ impl Session {
         }
     }
 
-    pub fn with_values(
-        provider: Provider,
-        provider_id: &str,
-        account_id: &str,
-        values: HashMap<String, String>,
-        token: String,
-        expire_date: DateTime<Utc>,
-    ) -> Session {
-        Self {
-            provider,
-            provider_id: provider_id.into(),
-            account_id: account_id.into(),
-            token,
-            expire_date,
-            values,
-        }
-    }
-
     /// Gets the token that identifies this session. It is the value that is sent to and read from the client.
     #[inline]
     pub fn get_token(&self) -> &str {

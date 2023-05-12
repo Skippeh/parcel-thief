@@ -1,11 +1,9 @@
-use std::{collections::HashMap, fmt::Display, sync::Arc};
+use std::{collections::HashMap, fmt::Display};
 
 use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
 use futures_util::TryFutureExt;
 use reqwest::Client;
 use serde::{Deserialize, Deserializer};
-
-use crate::data::redis_client::RedisClient;
 
 #[derive(Debug, thiserror::Error)]
 pub enum VerifyTokenError {
@@ -65,8 +63,6 @@ pub enum VerifyTokenResponse {
 }
 
 pub struct Epic {
-    redis_client: Arc<RedisClient>,
-    redis_prefix: String,
     web_client: Client,
 }
 
@@ -75,13 +71,9 @@ const TOKEN_INFO_URL: &str = "https://api.epicgames.dev/epic/oauth/v1/tokenInfo"
 const ACCOUNTS_INFO_URL: &str = "https://api.epicgames.dev/epic/id/v1/accounts";
 
 impl Epic {
-    pub fn new(redis_client: Arc<RedisClient>, redis_prefix: &str) -> Result<Self, reqwest::Error> {
+    pub fn new() -> Result<Self, reqwest::Error> {
         let web_client = Client::builder().user_agent("DS").build()?;
-        Ok(Self {
-            redis_client,
-            redis_prefix: redis_prefix.to_owned(),
-            web_client,
-        })
+        Ok(Self { web_client })
     }
 
     pub async fn verify_token(&self, token: &str) -> Result<UserEpicId, VerifyTokenError> {

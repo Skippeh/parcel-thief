@@ -14,19 +14,6 @@ impl<'db> PlayerProfiles<'db> {
         Self { connection }
     }
 
-    pub async fn get_by_account_id(
-        &self,
-        account_id: &str,
-    ) -> Result<Option<PlayerProfile>, QueryError> {
-        let conn = &mut *self.connection.get_pg_connection().await;
-        let result = dsl::player_profiles
-            .find(account_id)
-            .first(conn)
-            .optional()?;
-
-        Ok(result)
-    }
-
     pub async fn get_by_account_ids(
         &self,
         account_ids: &[impl AsRef<str>],

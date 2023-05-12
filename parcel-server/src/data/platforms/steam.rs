@@ -1,10 +1,8 @@
-use std::{collections::HashMap, fmt::Display, sync::Arc};
+use std::{collections::HashMap, fmt::Display};
 
 use anyhow::Context;
 use reqwest::{Client, RequestBuilder, StatusCode};
 use serde::Deserialize;
-
-use crate::data::redis_client::RedisClient;
 
 const APP_ID: u32 = 1850570;
 const URL_AUTH_USER_TICKET: &str =
@@ -57,15 +55,15 @@ impl Display for ErrorResponse {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct AuthenticateUserTicketParams {
-    result: String,
+    _result: String,
     #[serde(rename = "steamid")]
     steam_id: String,
     #[serde(rename = "ownersteamid")]
     owner_steam_id: String,
     #[serde(rename = "vacbanned")]
-    vac_banned: bool,
+    _vac_banned: bool,
     #[serde(rename = "publisherbanned")]
-    publisher_banned: bool,
+    _publisher_banned: bool,
 }
 
 #[derive(Debug)]
@@ -117,8 +115,6 @@ impl PlayerSummary {
 pub struct Steam {
     api_key: String,
     web_client: Client,
-    redis_client: Arc<RedisClient>,
-    redis_prefix: String,
 }
 
 pub trait AsHexString {
@@ -161,17 +157,11 @@ impl Display for VerifyUserAuthTicketError {
 }
 
 impl Steam {
-    pub fn new(
-        api_key: String,
-        redis_client: Arc<RedisClient>,
-        redis_prefix: &str,
-    ) -> Result<Self, reqwest::Error> {
+    pub fn new(api_key: String) -> Result<Self, reqwest::Error> {
         let web_client = Client::builder().user_agent("DS").build()?;
         Ok(Self {
             api_key,
             web_client,
-            redis_client,
-            redis_prefix: redis_prefix.into(),
         })
     }
 
