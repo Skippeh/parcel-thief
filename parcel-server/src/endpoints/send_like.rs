@@ -82,6 +82,7 @@ pub async fn send_like(
 ) -> Result<EmptyResponse, Error> {
     let conn = database.connect()?;
     let likes = conn.likes();
+    let accounts = conn.accounts();
 
     if request.index != -1 {
         return Err(Error::UnexpectedValue(anyhow::anyhow!(
@@ -137,6 +138,14 @@ pub async fn send_like(
             &session.account_id,
             &request.account_id,
             like_target,
+        )
+        .await?;
+
+    accounts
+        .add_relationship_history(
+            &session.account_id,
+            &request.account_id,
+            &chrono::Utc::now().naive_utc(),
         )
         .await?;
 

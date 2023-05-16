@@ -76,11 +76,12 @@ impl From<InternalError> for Error {
 #[post("updateObject")]
 pub async fn update_object(
     request: Json<UpdateObjectRequest>,
-    _session: Session,
+    session: Session,
     database: Data<Database>,
 ) -> Result<EmptyResponse, Error> {
     let conn = database.connect()?;
     let objects = conn.qpid_objects();
+    let accounts = conn.accounts();
 
     let object = objects.get_by_id(&request.object_id).await?;
 
@@ -104,6 +105,16 @@ pub async fn update_object(
         } else if let Some(extra_info) = &request.extra_info {
             objects
                 .update_info(&object.id, ChangeInfo::Extra(&extra_info.into()))
+                .await?;
+        }
+
+        if session.account_id != object.creator_id {
+            accounts
+                .add_relationship_history(
+                    &session.account_id,
+                    &object.creator_id,
+                    &chrono::Utc::now().naive_utc(),
+                )
                 .await?;
         }
 

@@ -14,11 +14,12 @@ use crate::{
 #[put("setMissionProgress")]
 pub async fn set_mission_progress(
     request: Json<SetMissionProgressRequest>,
-    _session: Session,
+    session: Session,
     database: Data<Database>,
 ) -> Result<Json<SetMissionProgressResponse>, InternalError> {
     let conn = database.connect()?;
     let missions = conn.missions();
+    let accounts = conn.accounts();
 
     let mission = missions.get_by_id(&request.mission_online_id).await?;
 
@@ -41,6 +42,16 @@ pub async fn set_mission_progress(
                 request.catapult_shell_info.as_ref().map(Some),
             )
             .await?;
+
+        if session.account_id != mission.creator_id {
+            accounts
+                .add_relationship_history(
+                    &session.account_id,
+                    &mission.creator_id,
+                    &chrono::Utc::now().naive_utc(),
+                )
+                .await?;
+        }
 
         let mission = missions
             .query_mission_data([mission])
