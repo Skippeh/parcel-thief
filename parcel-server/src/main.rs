@@ -77,21 +77,27 @@ struct Options {
 
     /// The connection string to a redis database. This is where cached data and session info will be stored
     ///
+    /// If unspecified then an embedded redis instance will be launched and used.
+    /// This is the easiest way to setup a redis server if you don't have an existing one.
+    ///
     /// Example: redis://localhost
     #[arg(long = "redis-url", env = "REDIS_URL")]
-    redis_url: String,
+    redis_url: Option<String>,
 
-    /// The connection string to a postgresql database. This is where all data will be stored
+    /// The optional connection string to a postgresql database. This is where all data will be stored
+    ///
+    /// If unspecified then a portable version of postgresql will be downloaded and configured automatically for you.
+    /// This is the easiest way to setup a local postgresql instance if you don't have an existing one.
     ///
     /// Example: postgres://localhost/parcels?user=postgres&password=1234
     #[arg(long = "database-url", env = "DATABASE_URL")]
-    database_url: String,
+    database_url: Option<String>,
 
     /// The public url that people can reach this server from. Do not end the url with a '/'
     ///
-    /// Example: https://ds.mydomain.com
-    ///
     /// If unspecified, this will default to the endpoint that the client is connecting from
+    ///
+    /// Example: https://ds.mydomain.com
     #[arg(long = "gateway-url", env = "GATEWAY_URL")]
     gateway_url: Option<String>,
 
@@ -126,9 +132,16 @@ async fn main() -> Result<()> {
         anyhow::bail!("Both or none of the public and private keys needs to be specified");
     }
 
+    let redis_url = setup_redis(&args)
+        .await
+        .context("Failed to launch redis server")?;
+    let database_url = setup_postgresql(&args)
+        .await
+        .context("Failed to setup and launch postgresql server")?;
+
     // Create potentially mutable data outside of the HttpService factory, otherwise each worker thread will not share the same data globally.
     let redis_client_data = web::Data::new(
-        RedisClient::connect(args.redis_url)
+        RedisClient::connect(redis_url)
             .await
             .context("Could not connect to redis server")?,
     );
@@ -139,9 +152,9 @@ async fn main() -> Result<()> {
     );
     let epic_data = web::Data::new(Epic::new().context("Could not create epic web api client")?);
     let session_store = web::Data::new(RedisSessionStore::new(redis_client.clone(), "ds-session/"));
-    let database = web::Data::new(Database::new(&args.database_url));
+    let database = web::Data::new(Database::new(&database_url));
 
-    migrate_database(&args.database_url)
+    migrate_database(&database_url)
         .await
         .context("Could not apply pending database migrations")?;
 
@@ -241,4 +254,24 @@ async fn migrate_database(database_url: &str) -> Result<(), anyhow::Error> {
     }
 
     Ok(())
+}
+
+/// Sets up local redis server (if necessary) and returns the redis connection string.
+async fn setup_redis(args: &Options) -> Result<String, anyhow::Error> {
+    match args.redis_url.as_ref() {
+        Some(url) => Ok(url.clone()),
+        None => {
+            todo!()
+        }
+    }
+}
+
+/// Sets up local postgresql server (if necessary) and returns the database connection string.
+async fn setup_postgresql(args: &Options) -> Result<String, anyhow::Error> {
+    match args.database_url.as_ref() {
+        Some(url) => Ok(url.clone()),
+        None => {
+            todo!()
+        }
+    }
 }
