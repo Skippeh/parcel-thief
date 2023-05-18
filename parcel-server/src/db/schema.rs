@@ -268,7 +268,7 @@ diesel::table! {
     qpid_object_recycle_materials (id) {
         id -> Int8,
         object_id -> Varchar,
-        contributor -> Varchar,
+        contributor_id -> Nullable<Varchar>,
         mats_0 -> Int4,
         mats_1 -> Int4,
         mats_2 -> Int4,
@@ -428,7 +428,7 @@ diesel::joinable!(qpid_object_construction_materials -> qpid_objects (object_id)
 diesel::joinable!(qpid_object_customize_infos -> qpid_objects (object_id));
 diesel::joinable!(qpid_object_extra_infos -> qpid_objects (object_id));
 diesel::joinable!(qpid_object_parking_infos -> qpid_objects (object_id));
-diesel::joinable!(qpid_object_recycle_materials -> accounts (contributor));
+diesel::joinable!(qpid_object_recycle_materials -> accounts (contributor_id));
 diesel::joinable!(qpid_object_recycle_materials -> qpid_objects (object_id));
 diesel::joinable!(qpid_object_rope_infos -> qpid_objects (object_id));
 diesel::joinable!(qpid_object_stone_infos -> qpid_objects (object_id));

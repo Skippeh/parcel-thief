@@ -15,6 +15,7 @@ use crate::db::{
         customize_info::{ChangeCustomizeInfo, CustomizeInfo, NewCustomizeInfo},
         extra_info::{ChangeExtraInfo, ExtraInfo, NewExtraInfo},
         parking_info::{ChangeParkingInfo, NewParkingInfo, ParkingInfo},
+        recycle_materials::{ChangeRecycleMaterials, NewRecycleMaterials, RecycleMaterials},
         rope_info::{NewRopeInfo, RopeInfo},
         stone_info::{ChangeStoneInfo, NewStoneInfo, StoneInfo},
         tag::{NewTag, Tag},
@@ -39,6 +40,7 @@ pub struct DbQpidObject {
     pub comment: Option<Comment>,
     pub comment_phrases: Option<Vec<Phrase>>,
     pub construction_materials: Option<Vec<ConstructionMaterials>>,
+    pub recycle_materials: Option<Vec<RecycleMaterials>>,
     pub tags: Option<Vec<Tag>>,
 }
 
@@ -290,6 +292,7 @@ impl<'db> QpidObjects<'db> {
                 comment: db_comment,
                 comment_phrases: db_comment_phrases,
                 construction_materials: None,
+                recycle_materials: None,
                 tags: None,
             })
         })
@@ -466,6 +469,7 @@ impl<'db> QpidObjects<'db> {
                 comment: None,
                 comment_phrases: None,
                 construction_materials: None,
+                recycle_materials: None,
                 tags: None,
             };
             let id = &db_object.object.id;
@@ -563,6 +567,16 @@ impl<'db> QpidObjects<'db> {
             }
 
             {
+                use crate::db::schema::qpid_object_recycle_materials::dsl;
+
+                db_object.recycle_materials = Some(
+                    dsl::qpid_object_recycle_materials
+                        .filter(dsl::object_id.eq(id))
+                        .get_results::<RecycleMaterials>(conn)?,
+                )
+            }
+
+            {
                 use crate::db::schema::qpid_object_tags::dsl;
 
                 db_object.tags = Some(
@@ -644,6 +658,37 @@ impl<'db> QpidObjects<'db> {
             .on_conflict((dsl::object_id, dsl::contributor_id))
             .do_update()
             .set(ChangeConstructionMaterials::from(&new_row))
+            .execute(conn)?;
+
+        Ok(())
+    }
+
+    pub async fn contribute_recycle_materials(
+        &self,
+        contributor_id: Option<&str>,
+        object_id: &str,
+        materials: &[i32; 6],
+    ) -> Result<(), QueryError> {
+        use crate::db::schema::qpid_object_recycle_materials::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        let new_row = NewRecycleMaterials {
+            object_id,
+            contributor_id,
+            mats_0: materials[0],
+            mats_1: materials[1],
+            mats_2: materials[2],
+            mats_3: materials[3],
+            mats_4: materials[4],
+            mats_5: materials[5],
+            recycle_time: &chrono::Utc::now().naive_utc(),
+        };
+
+        diesel::insert_into(dsl::qpid_object_recycle_materials)
+            .values(&new_row)
+            .on_conflict((dsl::object_id, dsl::contributor_id))
+            .do_update()
+            .set(ChangeRecycleMaterials::from(&new_row))
             .execute(conn)?;
 
         Ok(())
