@@ -141,6 +141,12 @@ impl<'db> Accounts<'db> {
         encountered_at: &NaiveDateTime,
     ) -> Result<(), QueryError> {
         use crate::db::schema::account_histories::dsl;
+
+        if account_id == encountered_id {
+            log::warn!("Prevented adding relationship history for the same account");
+            return Ok(());
+        }
+
         let conn = &mut *self.connection.get_pg_connection().await;
 
         diesel::insert_into(dsl::account_histories)
