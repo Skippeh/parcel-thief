@@ -19,7 +19,6 @@ enum EncryptionError {
     InvalidUtf8Body(Utf8Error),
     InvalidJsonData(serde_json::Error),
     InvalidAesData(anyhow::Error),
-    EncryptResponseError(anyhow::Error),
 }
 
 impl fmt::Display for EncryptionError {
@@ -34,25 +33,13 @@ impl fmt::Display for EncryptionError {
             EncryptionError::InvalidAesData(err) => {
                 write!(f, "The content body could not be decrypted: {:?}", err)
             }
-            EncryptionError::EncryptResponseError(err) => {
-                write!(
-                    f,
-                    "An internal error occured when encrypting response data: {}",
-                    err
-                )
-            }
         }
     }
 }
 
 impl ResponseError for EncryptionError {
     fn status_code(&self) -> actix_http::StatusCode {
-        match self {
-            EncryptionError::EncryptResponseError(_) => {
-                actix_http::StatusCode::INTERNAL_SERVER_ERROR
-            }
-            _ => actix_http::StatusCode::BAD_REQUEST,
-        }
+        actix_http::StatusCode::BAD_REQUEST
     }
 }
 
