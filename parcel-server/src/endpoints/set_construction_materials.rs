@@ -31,7 +31,7 @@ pub async fn set_construction_materials(
     };
 
     qpid_objects
-        .contribute_materials(
+        .contribute_construction_materials(
             contributor_id,
             &request.object_id,
             &request.materials,

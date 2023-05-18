@@ -625,7 +625,7 @@ impl<'db> QpidObjects<'db> {
         })
     }
 
-    pub async fn contribute_materials(
+    pub async fn contribute_construction_materials(
         &self,
         contributor_id: Option<&str>,
         object_id: &str,
