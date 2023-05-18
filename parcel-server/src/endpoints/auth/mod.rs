@@ -6,6 +6,7 @@ use actix_http::StatusCode;
 use actix_web::{
     get,
     web::{Data, Json, Query},
+    HttpRequest,
 };
 
 use chrono::{DateTime, Days, Utc};
@@ -113,7 +114,8 @@ pub async fn auth(
     epic: Data<Epic>,
     session_store: Data<RedisSessionStore>,
     db: Data<Database>,
-    gateway_url: Data<GatewayUrl>,
+    gateway_url: Data<Option<GatewayUrl>>,
+    http_request: HttpRequest,
 ) -> Result<Json<AuthResponse>, Error> {
     let provider;
     let provider_id;
@@ -220,6 +222,17 @@ pub async fn auth(
     );
     session_store.save_session(&session).await?;
 
+    let gateway_url = match gateway_url.as_ref() {
+        Some(gateway_url) => gateway_url.0.clone(),
+        None => {
+            let url = infer_gateway_url(&http_request);
+
+            log::debug!("Inferred gateway url: {}", url);
+
+            url
+        }
+    };
+
     Ok(Json(AuthResponse {
         user: UserInfo {
             id: account.id.clone(),
@@ -228,7 +241,7 @@ pub async fn auth(
         },
         session: SessionInfo {
             token: session.get_token().to_owned(),
-            gateway: gateway_url.as_ref().clone().into(),
+            gateway: gateway_url,
             properties: SessionProperties {
                 last_login: login_date.timestamp(),
             },
@@ -244,4 +257,14 @@ fn generate_session_token() -> String {
 
 fn get_session_expire_date() -> DateTime<Utc> {
     Utc::now().checked_add_days(Days::new(1)).unwrap()
+}
+
+fn infer_gateway_url(request: &HttpRequest) -> String {
+    let uri = request.uri();
+
+    format!(
+        "{}://{}",
+        uri.scheme().expect("Scheme should always be present"),
+        uri.authority().expect("Authority should always be present")
+    )
 }

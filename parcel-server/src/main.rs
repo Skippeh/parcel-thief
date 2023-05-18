@@ -70,8 +70,10 @@ struct Options {
     /// The public url that people can reach this server from. Do not end the url with a '/'.
     ///
     /// Example: https://ds.mydomain.com
+    ///
+    /// If unspecified, this will default to whatever the endpoint is that the client is connecting to.
     #[arg(long = "gateway-url", env = "GATEWAY_URL")]
-    gateway_url: String,
+    gateway_url: Option<String>,
 
     /// If set, request logs will also include decrypted request body and response.
     /// This is a lot slower than the normal logging, so don't use this in production.
@@ -123,12 +125,16 @@ async fn main() -> Result<()> {
         .await
         .context("Could not apply pending database migrations")?;
 
-    let gateway_url = format!("{}/ds", args.gateway_url);
+    let gateway_url = args.gateway_url.as_ref().map(|url| format!("{}/ds", url));
 
-    log::info!(
-        "Launching server with the public gateway url set to \"{}\"",
-        gateway_url
-    );
+    if let Some(gateway_url) = gateway_url.as_ref() {
+        log::info!(
+            "Launching server with the public gateway url set to \"{}\"",
+            gateway_url
+        );
+    } else {
+        log::info!("Launching server with the public gateway url being inferred from the incoming connection");
+    }
 
     let mut builder = HttpServer::new(move || {
         App::new()
@@ -137,7 +143,9 @@ async fn main() -> Result<()> {
             .app_data(epic_data.clone())
             .app_data(session_store.clone())
             .app_data(database.clone())
-            .app_data(web::Data::new(GatewayUrl(gateway_url.clone())))
+            .app_data(web::Data::new(
+                gateway_url.as_ref().map(|url| GatewayUrl(url.clone())),
+            ))
             .service(
                 actix_web::web::scope("/ds/e")
                     .configure(configure_endpoints)
