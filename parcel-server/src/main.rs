@@ -33,51 +33,71 @@ use crate::{data::redis_session_store::RedisSessionStore, middleware::wrap_error
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
 
+/// A custom server implementation for Death Stranding Directory's Cut.
+///
+/// It's designed for small groups of people. All objects, missions, etc, are synced between all players,
+/// so there's no chance of objects missing in one player's world unless they deleted it themselves or it's built too close to another object.
 #[derive(Parser)]
 struct Options {
+    /// The address of the network interface to bind to, usually 0.0.0.0 to bind to all interfaces
     #[arg(long = "bind_addr", default_value = "0.0.0.0", env = "BIND_ADDRESS")]
     bind_address: IpAddr,
 
+    /// The port to listen on, usually 80 or 443 depending on whether or not SSL is used
     #[arg(long = "port", default_value_t = 8080, env = "LISTEN_PORT")]
     listen_port: u16,
 
+    /// Optional path to the private key for the server's certificate. The private key should be in PKCS#8 format
+    ///
+    /// Only needed if secure/SSL connections should be used
     #[arg(long = "cert-private-key", env = "CERT_PRIVATE_KEY")]
     cert_private_key: Option<PathBuf>,
 
+    /// Optional path to the public key for the server's certificate
+    ///
+    /// Only needed if secure/SSL connections should be used
     #[arg(long = "cert-public-key", env = "CERT_PUBLIC_KEY")]
     cert_public_key: Option<PathBuf>,
 
-    /// If specified encryption will be optional. This means that the client can decide if encryption should be used for responses and decryption for requests.
+    /// If enabled encryption will be optional. This means that the client can decide if encryption should be used for responses and decryption for requests
     ///
-    /// The client decides by setting the Use-Encryption and Use-Decryption headers to true/false.
+    /// The client decides by setting the Use-Encryption and Use-Decryption headers to true/false
     ///
-    /// NOTE: Should only be used for debugging/development purposes and not for a production server.
-    #[arg(long = "opt-encryption", default_value_t = false)]
+    /// NOTE: Should only be used for debugging/development purposes and not for a production server
+    #[arg(
+        long = "opt-encryption",
+        default_value_t = false,
+        env = "OPT_ENCRYPTION"
+    )]
     optional_encryption: bool,
 
     /// The Steam web api key used for authenticating and getting user info for Steam players. The key can be found here: https://steamcommunity.com/dev/apikey
-    ///
-    /// If unspecified the STEAM_API_KEY environment variable will be used.
     #[arg(long = "steam-api-key", env = "STEAM_API_KEY")]
     steam_api_key: String,
 
-    #[arg(long = "redis-conn-string", env = "REDIS_CONNECTION_STRING")]
-    redis_connection_string: String,
+    /// The connection string to a redis database. This is where cached data and session info will be stored
+    ///
+    /// Example: redis://localhost
+    #[arg(long = "redis-url", env = "REDIS_URL")]
+    redis_url: String,
 
+    /// The connection string to a postgresql database. This is where all data will be stored
+    ///
+    /// Example: postgres://localhost/parcels?user=postgres&password=1234
     #[arg(long = "database-url", env = "DATABASE_URL")]
     database_url: String,
 
-    /// The public url that people can reach this server from. Do not end the url with a '/'.
+    /// The public url that people can reach this server from. Do not end the url with a '/'
     ///
     /// Example: https://ds.mydomain.com
     ///
-    /// If unspecified, this will default to whatever the endpoint is that the client is connecting to.
+    /// If unspecified, this will default to the endpoint that the client is connecting from
     #[arg(long = "gateway-url", env = "GATEWAY_URL")]
     gateway_url: Option<String>,
 
-    /// If set, request logs will also include decrypted request body and response.
-    /// This is a lot slower than the normal logging, so don't use this in production.
-    #[arg(long, default_value_t = false)]
+    /// If enabled request logs will also include decrypted request body and response.
+    /// This is a lot slower than normal logging so don't use this in production
+    #[arg(long, default_value_t = false, env = "DEEP_LOGGING")]
     deep_logging: bool,
 }
 
@@ -108,7 +128,7 @@ async fn main() -> Result<()> {
 
     // Create potentially mutable data outside of the HttpService factory, otherwise each worker thread will not share the same data globally.
     let redis_client_data = web::Data::new(
-        RedisClient::connect(args.redis_connection_string)
+        RedisClient::connect(args.redis_url)
             .await
             .context("Could not connect to redis server")?,
     );
@@ -196,7 +216,7 @@ fn load_rustls_config(
 
     if keys.is_empty() {
         anyhow::bail!(
-            "Could not load private keys from file. Make sure the key is of PKCS8 format."
+            "Could not load private keys from file. Make sure the key is of PKCS#8 format."
         );
     }
 
