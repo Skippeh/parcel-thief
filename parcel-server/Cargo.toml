@@ -38,3 +38,5 @@ dotenv = "0.15.0"
 itertools = "0.10.5"
 pg-embed = { version = "0.7.1" }
 embedded_redis_client = "0.1.0"
+lazy_static = "1.4.0"
+portpicker = "0.1.1"

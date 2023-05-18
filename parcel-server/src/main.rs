@@ -1,5 +1,6 @@
 mod data;
 mod db;
+mod embedded_pg;
 mod endpoints;
 mod middleware;
 mod response_error;
@@ -38,7 +39,7 @@ pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
 /// It's designed for small groups of people. All objects, missions, etc, are synced between all players,
 /// so there's no chance of objects missing in one player's world unless they deleted it themselves or it's built too close to another object.
 #[derive(Parser)]
-struct Options {
+pub struct Options {
     /// The address of the network interface to bind to, usually 0.0.0.0 to bind to all interfaces
     #[arg(long = "bind_addr", default_value = "0.0.0.0", env = "BIND_ADDRESS")]
     bind_address: IpAddr,
@@ -135,7 +136,7 @@ async fn main() -> Result<()> {
     let redis_url = setup_redis(&args)
         .await
         .context("Failed to launch redis server")?;
-    let database_url = setup_postgresql(&args)
+    let database_url = embedded_pg::setup_postgresql(&args)
         .await
         .context("Failed to setup and launch postgresql server")?;
 
@@ -259,16 +260,6 @@ async fn migrate_database(database_url: &str) -> Result<(), anyhow::Error> {
 /// Sets up local redis server (if necessary) and returns the redis connection string.
 async fn setup_redis(args: &Options) -> Result<String, anyhow::Error> {
     match args.redis_url.as_ref() {
-        Some(url) => Ok(url.clone()),
-        None => {
-            todo!()
-        }
-    }
-}
-
-/// Sets up local postgresql server (if necessary) and returns the database connection string.
-async fn setup_postgresql(args: &Options) -> Result<String, anyhow::Error> {
-    match args.database_url.as_ref() {
         Some(url) => Ok(url.clone()),
         None => {
             todo!()
