@@ -122,11 +122,16 @@ impl EmbeddedSoftware for Postgres {
     }
 
     async fn stop(&mut self) -> Result<(), Self::StopError> {
-        self.0.stop_db().await?;
-
-        log::info!("Note: if you get an error about postmaster.pid file not existing you can safely ignore it");
-
-        Ok(())
+        match self.0.stop_db().await {
+            Ok(_) => Ok(()),
+            Err(err) => {
+                if err.source.is_none() && err.message.is_none() {
+                    Ok(())
+                } else {
+                    Err(err.into())
+                }
+            }
+        }
     }
 }
 
