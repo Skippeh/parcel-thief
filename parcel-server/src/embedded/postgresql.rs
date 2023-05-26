@@ -67,6 +67,7 @@ pub async fn stop_postgresql() -> Result<(), anyhow::Error> {
 
     match server {
         Some(server) => {
+            log::info!("Stopping PostgreSQL server...");
             server.stop().await?;
             Ok(())
         }
