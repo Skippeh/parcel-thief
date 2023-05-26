@@ -463,3 +463,6 @@ $RECYCLE.BIN/
 
 # Ignore env files
 *.env
+
+# Ignore runtime generated files from parcel-server
+parcel-server/data
