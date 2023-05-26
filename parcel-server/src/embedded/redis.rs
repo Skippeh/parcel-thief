@@ -43,6 +43,8 @@ pub async fn setup_redis(args: &Options) -> Result<String, anyhow::Error> {
 
             // wait for 3 seconds to allow redis to start
             tokio::time::sleep(std::time::Duration::from_secs(3)).await;
+
+            Ok(format!("redis://127.0.0.1:{}", instance.listen_port))
         }
     }
 }
