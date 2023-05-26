@@ -1,6 +1,6 @@
 mod data;
 mod db;
-mod embedded_pg;
+mod embedded;
 mod endpoints;
 mod middleware;
 mod response_error;
@@ -127,16 +127,18 @@ impl From<GatewayUrl> for String {
 async fn main() -> Result<()> {
     dotenv::dotenv().ok();
     let args = Options::parse();
-    env_logger::init_from_env(env_logger::Env::new().default_filter_or("error,warn,info,debug"));
+    env_logger::init_from_env(
+        env_logger::Env::new().default_filter_or("parcel_server=info,warn,error"),
+    );
 
     if args.cert_private_key.is_some() != args.cert_public_key.is_some() {
         anyhow::bail!("Both or none of the public and private keys needs to be specified");
     }
 
-    let redis_url = setup_redis(&args)
+    let redis_url = embedded::redis::setup_redis(&args)
         .await
         .context("Failed to launch redis server")?;
-    let database_url = embedded_pg::setup_postgresql(&args)
+    let database_url = embedded::postgresql::setup_postgresql(&args)
         .await
         .context("Failed to setup and launch postgresql server")?;
 
@@ -193,7 +195,7 @@ async fn main() -> Result<()> {
             )
             .service(endpoints::auth::auth)
             .service(endpoints::auth::me::me)
-            .wrap(wrap_errors::WrapErrors::default())
+            .wrap(wrap_errors::WrapErrors)
             .wrap(actix_web::middleware::Logger::default())
     });
 
@@ -208,7 +210,27 @@ async fn main() -> Result<()> {
         builder = builder.bind((args.bind_address, args.listen_port))?;
     }
 
-    builder.run().await.map_err(|err| err.into())
+    let result = builder.run().await.map_err(|err| err.into());
+
+    // Stop embedded programs if they're running
+    let stop_redis_result = embedded::redis::stop_redis().await;
+    let stop_pg_result = embedded::postgresql::stop_postgresql().await;
+
+    if let Err(err) = &stop_redis_result {
+        log::error!("Could not gracefully stop redis server: {}", err);
+    }
+
+    if let Err(err) = &stop_pg_result {
+        log::error!("Could not gracefully stop postgresql server: {}", err);
+    }
+
+    if stop_redis_result.is_err() || stop_pg_result.is_err() {
+        log::info!(
+            "Note: both postgresql and redis servers have been shutdown even if there are errors above"
+        );
+    }
+
+    result
 }
 
 fn load_rustls_config(
@@ -255,14 +277,4 @@ async fn migrate_database(database_url: &str) -> Result<(), anyhow::Error> {
     }
 
     Ok(())
-}
-
-/// Sets up local redis server (if necessary) and returns the redis connection string.
-async fn setup_redis(args: &Options) -> Result<String, anyhow::Error> {
-    match args.redis_url.as_ref() {
-        Some(url) => Ok(url.clone()),
-        None => {
-            todo!()
-        }
-    }
 }
