@@ -4,11 +4,11 @@ use std::{
     io::Write,
     path::{Path, PathBuf},
     process::{Child, Stdio},
-    sync::{Arc, Mutex},
+    sync::Arc,
 };
 
 use anyhow::Context;
-use futures_util::StreamExt;
+use futures_util::{lock::Mutex, StreamExt};
 use indicatif::ProgressStyle;
 use reqwest::Client;
 use tokio::io::AsyncWriteExt;
@@ -39,7 +39,7 @@ pub async fn setup_redis(args: &Options) -> Result<String, anyhow::Error> {
             installer.setup().await?;
             let instance = installer.start().await?;
 
-            *REDIS_CLIENT.lock().unwrap() = Some(installer);
+            *REDIS_CLIENT.lock().await = Some(installer);
 
             // wait for 3 seconds to allow redis to start
             tokio::time::sleep(std::time::Duration::from_secs(3)).await;
@@ -50,7 +50,7 @@ pub async fn setup_redis(args: &Options) -> Result<String, anyhow::Error> {
 }
 
 pub async fn stop_redis() -> Result<(), anyhow::Error> {
-    let client = &mut *REDIS_CLIENT.lock().unwrap();
+    let client = &mut *REDIS_CLIENT.lock().await;
 
     match client {
         Some(installer) => {
