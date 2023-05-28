@@ -226,7 +226,7 @@ impl SetupStep for DownloadStep {
 
     async fn execute(
         &mut self,
-        software: &mut Self::Software,
+        _software: &mut Self::Software,
         state: Self::SetupState,
         progress_bar: &mut indicatif::ProgressBar,
     ) -> Result<Self::SetupState, Self::SetupError> {
