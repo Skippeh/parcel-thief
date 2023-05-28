@@ -78,8 +78,9 @@ pub struct Options {
 
     /// The connection string to a redis database. This is where cached data and session info will be stored
     ///
-    /// If unspecified then an embedded redis instance will be launched and used.
-    /// This is the easiest way to setup a redis server if you don't have an existing one.
+    /// If unspecified then a portable version of redis will be downloaded and configured automatically for you.
+    /// This is the easiest way to setup a local redis server if you don't have an existing one.
+    /// NOTE: This is only supported on 64-bit Windows, so if you're using something else you will need to setup your own redis server.
     ///
     /// Example: redis://localhost
     #[arg(long = "redis-url", env = "REDIS_URL")]
