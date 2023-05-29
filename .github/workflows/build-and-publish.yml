@@ -74,7 +74,8 @@ jobs:
           args: --release -p thief-injector --target x86_64-pc-windows-msvc
       - name: Move dist files to temp folder
         run: |
-          mkdir ${{ github.workspace }}/dist/
+          mkdir ${{ github.workspace }}/dist-server/
+          mkdir ${{ github.workspace }}/dist-thief/
           cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel-server.* ${{ github.workspace }}/dist-server/
           cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel-thief.* ${{ github.workspace }}/dist-thief/
           cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/thief-injector.* ${{ github.workspace }}/dist-thief/
