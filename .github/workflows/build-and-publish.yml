@@ -38,8 +38,9 @@ jobs:
         run: |
           $pg_lib_dir = (Resolve-Path /temp/pgsql/lib).Path
           echo $pg_lib_dir >> $env:GITHUB_PATH
-          echo $pg_lib_dir
+          echo "$env:PATH;$pg_lib_dir" >> $env:PATH
           cat $env:GITHUB_PATH
+          echo $env:PATH
       - name: Build parcel-server
         uses: actions-rs/cargo@v1
         with:
