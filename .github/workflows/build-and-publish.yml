@@ -41,7 +41,7 @@ jobs:
       - run: |
           echo $env:PATH
           get-command /temp/pgsql/lib/libpq.lib
-          get-command libpg.lib
+          get-command libpq.lib
       - name: Build parcel-server
         uses: actions-rs/cargo@v1
         with:
