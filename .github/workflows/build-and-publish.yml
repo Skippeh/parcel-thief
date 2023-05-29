@@ -77,11 +77,8 @@ jobs:
           mkdir ${{ github.workspace }}/dist-server/
           mkdir ${{ github.workspace }}/dist-thief/
           cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel-server.exe ${{ github.workspace }}/dist-server/
-          cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel-server.pdb ${{ github.workspace }}/dist-server/
           cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel-thief.dll ${{ github.workspace }}/dist-thief/
-          cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel-thief.pdb ${{ github.workspace }}/dist-thief/
           cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/thief-injector.exe ${{ github.workspace }}/dist-thief/
-          cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/thief-injector.pdb ${{ github.workspace }}/dist-thief/
       - name: Upload parcel-server artifact
         uses: actions/upload-artifact@v3
         with:
