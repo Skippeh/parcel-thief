@@ -15,20 +15,32 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable-x86_64-pc-windows-msvc
+      - name: Cache PostgreSQL
+        id: cache-pgsql
+        uses: actions/cache@v3
+        with:
+          path: /temp/pgsql
+          key: pgsql-win-x64-15.3.1
       - name: Download PostgreSQL binaries
+        if: steps.cache-pgsql.outputs.cache-hit != 'true'
         uses: suisei-cn/actions-download-file@v1.4.0
         with:
           url: https://get.enterprisedb.com/postgresql/postgresql-15.3-1-windows-x64-binaries.zip
-          target: temp/pg-dl/
+          target: /temp/pg-dl/
           filename: pg.zip
       - name: Extract PostgreSQL binaries
+        if: steps.cache-pgsql.outputs.cache-hit != 'true'
         shell: powershell
         run: |
           New-Item -Path temp/pg/ -ItemType Directory
-          Expand-Archive -Path temp/pg-dl/pg.zip -DestinationPath /temp/
+          Expand-Archive -Path /temp/pg-dl/pg.zip -DestinationPath /temp/
       - name: Add PostgreSQL lib folder to PATH
         shell: powershell
-        run: echo "/temp/pgsql/lib" >> $GITHUB_PATH
+        run: |
+          echo "/temp/pgsql/lib" >> $GITHUB_PATH
+          ls /temp
+          ls /temp/pgsql
+          ls /temp/pgsql/lib
       - name: Build parcel-server
         uses: actions-rs/cargo@v1
         with:
