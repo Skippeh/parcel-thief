@@ -15,11 +15,19 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable-x86_64-pc-windows-msvc
+      - name: Restore cargo cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - name: Install cargo toolchain (nightly)
         uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly-2023-05-21-x86_64-pc-windows-msvc
-      - name: Cache PostgreSQL
+      - name: Restore PostgreSQL cache
         id: cache-pgsql
         uses: actions/cache@v3
         with:
@@ -56,6 +64,8 @@ jobs:
           args: --release -p parcel-server --target x86_64-pc-windows-msvc
       - name: Build parcel-thief
         uses: actions-rs/cargo@v1
+        env:
+          PQ_LIB_DIR: ${{ github.workspace }}/temp/pgsql/lib
         with:
           toolchain: nightly-2023-05-21-x86_64-pc-windows-msvc
           command: build
