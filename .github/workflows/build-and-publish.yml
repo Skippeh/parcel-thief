@@ -44,6 +44,8 @@ jobs:
           get-command libpq.lib
       - name: Build parcel-server
         uses: actions-rs/cargo@v1
+        env:
+          PQ_LIB_DIR: /temp/pgsql/lib
         with:
           command: build
           args: --release -p parcel-server --target x86_64-pc-windows-msvc
