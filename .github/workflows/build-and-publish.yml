@@ -1,0 +1,43 @@
+name: Build and publish GitHub release
+
+on:
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install cargo toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable-x86_64-pc-windows-msvc
+          target: x86_64-unknown-linux-gnu
+      - name: Build parcel-server for Windows 64-bit
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release -p parcel-server --target x86_64-pc-windows-msvc
+      - name: Build parcel-server for Linux 64-bit
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release -p parcel-server --target x86_64-unknown-linux-gnu
+      - name: Build parcel-thief
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release -p parcel-thief --target x86_64-pc-windows-msvc
+      - name: Install windows nightly toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly-2023-05-21-x86_64-pc-windows-msvc # nightly needed for injector
+          override: true
+      - name: Build parcel-injector
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release -p parcel-injector --target x86_64-pc-windows-msvc
