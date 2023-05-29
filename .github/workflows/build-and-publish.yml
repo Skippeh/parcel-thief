@@ -19,7 +19,7 @@ jobs:
         id: cache-pgsql
         uses: actions/cache@v3
         with:
-          path: ${{ github.workspace }}/temp/pgsql/lib
+          path: ${{ github.workspace }}/temp/pgsql
           key: pgsql-win-x64-15.3.1
       - name: Download PostgreSQL binaries
         if: steps.cache-pgsql.outputs.cache-hit != 'true'
