@@ -50,10 +50,6 @@ jobs:
         run: |
           $pg_lib_dir = "${{ github.workspace }}/temp/pgsql/lib"
           echo "$pg_lib_dir" >> $env:GITHUB_PATH
-      - run: |
-          echo $env:PATH
-          get-command ${{ github.workspace }}/temp/pgsql/lib/libpq.lib
-          get-command libpq.lib
       - name: Build parcel-server
         uses: actions-rs/cargo@v1
         env:
