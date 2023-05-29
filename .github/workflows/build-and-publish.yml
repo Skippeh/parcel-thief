@@ -24,7 +24,7 @@ jobs:
       - name: Extract PostgreSQL binaries
         shell: powershell
         run: |
-          Create-Item -Path temp/pg/ -ItemType Directory
+          New-Item -Path temp/pg/ -ItemType Directory
           Expand-Archive -Path temp/pg-dl/pg.zip -DestinationPath /temp/pg/
       - name: Build parcel-server
         uses: actions-rs/cargo@v1
