@@ -37,10 +37,10 @@ jobs:
       - name: Add PostgreSQL lib folder to PATH
         shell: powershell
         run: |
-          echo "/temp/pgsql/lib" >> $GITHUB_PATH
-          ls /temp
-          ls /temp/pgsql
-          ls /temp/pgsql/lib
+          $pg_lib_dir = (Resolve-Path /temp/pgsql/lib).Path
+          echo $pg_lib_dir >> $GITHUB_PATH
+          echo $pg_lib_dir
+          cat $GITHUB_PATH
       - name: Build parcel-server
         uses: actions-rs/cargo@v1
         with:
