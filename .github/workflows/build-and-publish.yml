@@ -78,14 +78,21 @@ jobs:
           args: --release -p thief-injector --target x86_64-pc-windows-msvc
   build-linux:
     runs-on: ubuntu-latest
-    if: ${{ false }} # Disable job while getting windows build to work
     steps:
       - uses: actions/checkout@v3
       - name: Install cargo toolchain
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable-x86_64-unknown-linux-gnu
-      - name: Build parcel-server for Linux 64-bit
+      - name: Restore cargo cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Build parcel-server
         uses: actions-rs/cargo@v1
         with:
           command: build
