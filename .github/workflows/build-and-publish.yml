@@ -40,6 +40,7 @@ jobs:
           echo $pg_lib_dir >> $env:GITHUB_PATH
       - run: |
           echo $env:PATH
+          get-command /temp/pgsql/lib/libpq.lib
           get-command libpg.lib
       - name: Build parcel-server
         uses: actions-rs/cargo@v1
