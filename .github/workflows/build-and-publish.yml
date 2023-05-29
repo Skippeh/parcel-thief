@@ -70,12 +70,12 @@ jobs:
           toolchain: nightly-2023-05-21-x86_64-pc-windows-msvc
           command: build
           args: --release -p parcel-thief --target x86_64-pc-windows-msvc
-      - name: Build parcel-injector
+      - name: Build thief-injector
         uses: actions-rs/cargo@v1
         with:
           toolchain: nightly-2023-05-21-x86_64-pc-windows-msvc
           command: build
-          args: --release -p parcel-injector --target x86_64-pc-windows-msvc
+          args: --release -p thief-injector --target x86_64-pc-windows-msvc
   build-linux:
     runs-on: ubuntu-latest
     if: ${{ false }} # Disable job while getting windows build to work
