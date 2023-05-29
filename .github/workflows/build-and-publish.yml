@@ -25,10 +25,10 @@ jobs:
         shell: powershell
         run: |
           New-Item -Path temp/pg/ -ItemType Directory
-          Expand-Archive -Path temp/pg-dl/pg.zip -DestinationPath /temp/pg/
+          Expand-Archive -Path temp/pg-dl/pg.zip -DestinationPath /temp/
       - name: Add PostgreSQL lib folder to PATH
         shell: powershell
-        run: echo "/temp/pg/lib" >> $GITHUB_PATH
+        run: echo "/temp/pgsql/lib" >> $GITHUB_PATH
       - name: Build parcel-server
         uses: actions-rs/cargo@v1
         with:
