@@ -7,7 +7,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  build-windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -15,17 +15,24 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable-x86_64-pc-windows-msvc
-          target: x86_64-unknown-linux-gnu
-      - name: Build parcel-server for Windows 64-bit
+      - name: Download PostgreSQL binaries
+        uses: suisei-cn/actions-download-file@v1.4.0
+        with:
+          url: https://get.enterprisedb.com/postgresql/postgresql-15.3-1-windows-x64-binaries.zip
+          target: temp/pg-dl/
+          filename: pg.zip
+      - name: Extract PostgreSQL binaries
+        shell: powershell
+        run: |
+          Create-Item -Path temp/pg/ -ItemType Directory
+          Expand-Archive -Path temp/pg-dl/pg.zip -DestinationPath /temp/pg/
+      - name: Build parcel-server
         uses: actions-rs/cargo@v1
+        env:
+          PG_LIB_DIR: /temp/pg/lib
         with:
           command: build
           args: --release -p parcel-server --target x86_64-pc-windows-msvc
-      - name: Build parcel-server for Linux 64-bit
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release -p parcel-server --target x86_64-unknown-linux-gnu
       - name: Build parcel-thief
         uses: actions-rs/cargo@v1
         with:
@@ -41,3 +48,16 @@ jobs:
         with:
           command: build
           args: --release -p parcel-injector --target x86_64-pc-windows-msvc
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install cargo toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable-x86_64-unknown-linux-gnu
+      - name: Build parcel-server for Linux 64-bit
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release -p parcel-server --target x86_64-unknown-linux-gnu
