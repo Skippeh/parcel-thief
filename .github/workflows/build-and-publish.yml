@@ -72,31 +72,22 @@ jobs:
           toolchain: nightly-2023-05-21-x86_64-pc-windows-msvc
           command: build
           args: --release -p thief-injector --target x86_64-pc-windows-msvc
-      - name: Compress parcel-server artifact files
-        run: |
-          $options = @{
-            Path = "${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel-server.exe", `
-            "${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel-server.pdb"
-            CompressionLevel = "Fastest"
-            DestinationPath = "${{ github.workspace }}/dist/parcel-server_x86_64-pc-windows-msvc.zip"
-          }
-          Compress-Archive $options
-      - name: Compress parcel-thief and thief-injector artifact files
-        run: |
-          $options = @{
-            Path = "${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/thief-injector.exe", `
-            "${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/thief-injector.pdb", `
-            "${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel-thief.dll", `
-            "${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel-thief.pdb"
-            CompressionLevel = "Fastest"
-            DestinationPath = "${{ github.workspace }}/dist/parcel-thief_x86_64-pc-windows-msvc.zip"
-          }
-          Compress-Archive $options
       - name: Upload parcel-server artifact
         uses: actions/upload-artifact@v3
         with:
-          path: dist/parcel-server_x86_64-pc-windows-msvc.zip
+          path: |
+            target/x86_64-pc-windows-msvc/release/parcel-server.exe
+            target/x86_64-pc-windows-msvc/release/parcel-server.pdb
           name: parcel-server_x86_64-pc-windows-msvc
+      - name: Upload parcel-thief artifact
+        uses: actions/upload-artifact@v3
+        with:
+          path: |
+            target/x86_64-pc-windows-msvc/release/thief-injector.exe
+            target/x86_64-pc-windows-msvc/release/thief-injector.pdb
+            target/x86_64-pc-windows-msvc/release/parcel-thief.dll
+            target/x86_64-pc-windows-msvc/release/parcel-thief.pdb
+          name: parcel-thief_x86_64-pc-windows-msvc
       - name: Upload parcel-thief artifact
         uses: actions/upload-artifact@v3
         with:
@@ -122,12 +113,8 @@ jobs:
         with:
           command: build
           args: --release -p parcel-server --target x86_64-unknown-linux-gnu
-      - name: Compress artifact files
-        run: |
-          mkdir dist
-          tar -czf dist/parcel-server_x86_64-unknown-linux-gnu.tar.gz target/x86_64-unknown-linux-gnu/release/parcel-server
-      - name: Upload artifact
+      - name: Upload parcel-server artifact
         uses: actions/upload-artifact@v3
         with:
           name: parcel-server_x86_64-unknown-linux-gnu
-          path: dist/parcel-server_x86_64-unknown-linux-gnu.tar.gz
+          path: target/x86_64-unknown-linux-gnu/release/parcel-server
