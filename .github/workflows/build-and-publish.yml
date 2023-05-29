@@ -40,11 +40,11 @@ jobs:
           echo $pg_lib_dir >> $env:GITHUB_PATH
           echo $pg_lib_dir
           cat $env:GITHUB_PATH
-      #- name: Build parcel-server
-      #  uses: actions-rs/cargo@v1
-      #  with:
-      #    command: build
-      #    args: --release -p parcel-server --target x86_64-pc-windows-msvc
+      - name: Build parcel-server
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release -p parcel-server --target x86_64-pc-windows-msvc
       #- name: Build parcel-thief
       #  uses: actions-rs/cargo@v1
       #  with:
