@@ -32,37 +32,37 @@ jobs:
         if: steps.cache-pgsql.outputs.cache-hit != 'true'
         shell: powershell
         run: |
-          New-Item -Path temp/pg/ -ItemType Directory
           Expand-Archive -Path /temp/pg-dl/pg.zip -DestinationPath /temp/
       - name: Add PostgreSQL lib folder to PATH
         shell: powershell
         run: |
           $pg_lib_dir = (Resolve-Path /temp/pgsql/lib).Path
-          echo $pg_lib_dir >> $GITHUB_PATH
+          echo $pg_lib_dir >> $env:GITHUB_PATH
           echo $pg_lib_dir
-          cat $GITHUB_PATH
-      - name: Build parcel-server
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release -p parcel-server --target x86_64-pc-windows-msvc
-      - name: Build parcel-thief
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release -p parcel-thief --target x86_64-pc-windows-msvc
-      - name: Install windows nightly toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly-2023-05-21-x86_64-pc-windows-msvc # nightly needed for injector
-          override: true
-      - name: Build parcel-injector
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release -p parcel-injector --target x86_64-pc-windows-msvc
+          cat $env:GITHUB_PATH
+      #- name: Build parcel-server
+      #  uses: actions-rs/cargo@v1
+      #  with:
+      #    command: build
+      #    args: --release -p parcel-server --target x86_64-pc-windows-msvc
+      #- name: Build parcel-thief
+      #  uses: actions-rs/cargo@v1
+      #  with:
+      #    command: build
+      #    args: --release -p parcel-thief --target x86_64-pc-windows-msvc
+      #- name: Install windows nightly toolchain
+      #  uses: actions-rs/toolchain@v1
+      #  with:
+      #    toolchain: nightly-2023-05-21-x86_64-pc-windows-msvc # nightly needed for injector
+      #    override: true
+      #- name: Build parcel-injector
+      #  uses: actions-rs/cargo@v1
+      #  with:
+      #    command: build
+      #    args: --release -p parcel-injector --target x86_64-pc-windows-msvc
   build-linux:
     runs-on: ubuntu-latest
+    if: ${{ false }} # Disable job while getting windows build to work
     steps:
       - uses: actions/checkout@v3
       - name: Install cargo toolchain
