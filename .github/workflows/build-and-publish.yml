@@ -76,6 +76,7 @@ jobs:
         run: |
           mkdir ${{ github.workspace }}/dist-server/
           mkdir ${{ github.workspace }}/dist-thief/
+          ls ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release
           cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel-server.exe ${{ github.workspace }}/dist-server/
           cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel-thief.dll ${{ github.workspace }}/dist-thief/
           cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/thief-injector.exe ${{ github.workspace }}/dist-thief/
