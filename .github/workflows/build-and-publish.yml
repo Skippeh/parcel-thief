@@ -72,26 +72,22 @@ jobs:
           toolchain: nightly-2023-05-21-x86_64-pc-windows-msvc
           command: build
           args: --release -p thief-injector --target x86_64-pc-windows-msvc
+      - name: Move dist files to temp folder
+        run: |
+          mkdir ${{ github.workspace }}/dist/
+          cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel-server.* ${{ github.workspace }}/dist-server/
+          cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel-thief.* ${{ github.workspace }}/dist-thief/
+          cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/thief-injector.* ${{ github.workspace }}/dist-thief/
       - name: Upload parcel-server artifact
         uses: actions/upload-artifact@v3
         with:
-          path: |
-            target/x86_64-pc-windows-msvc/release/parcel-server.exe
-            target/x86_64-pc-windows-msvc/release/parcel-server.pdb
+          path: dist-server/*
           name: parcel-server_x86_64-pc-windows-msvc
       - name: Upload parcel-thief artifact
         uses: actions/upload-artifact@v3
         with:
-          path: |
-            target/x86_64-pc-windows-msvc/release/thief-injector.exe
-            target/x86_64-pc-windows-msvc/release/thief-injector.pdb
-            target/x86_64-pc-windows-msvc/release/parcel-thief.dll
-            target/x86_64-pc-windows-msvc/release/parcel-thief.pdb
+          path: dist-thief/*
           name: parcel-thief_x86_64-pc-windows-msvc
-      - name: Upload parcel-thief artifact
-        uses: actions/upload-artifact@v3
-        with:
-          path: dist/parcel-thief_x86_64-pc-windows-msvc.zip
   build-linux:
     runs-on: ubuntu-latest
     steps:
