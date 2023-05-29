@@ -19,7 +19,7 @@ jobs:
         id: cache-pgsql
         uses: actions/cache@v3
         with:
-          path: /temp/pgsql
+          path: ${{ github.workspace }}/temp/pgsql/lib
           key: pgsql-win-x64-15.3.1
       - name: Download PostgreSQL binaries
         if: steps.cache-pgsql.outputs.cache-hit != 'true'
@@ -32,20 +32,20 @@ jobs:
         if: steps.cache-pgsql.outputs.cache-hit != 'true'
         shell: powershell
         run: |
-          Expand-Archive -Path /temp/pg-dl/pg.zip -DestinationPath /temp/
+          Expand-Archive -Path /temp/pg-dl/pg.zip -DestinationPath ${{ github.workspace }}/temp/
       - name: Add PostgreSQL lib folder to PATH
         shell: powershell
         run: |
-          $pg_lib_dir = (Resolve-Path /temp/pgsql/lib).Path
-          echo $pg_lib_dir >> $env:GITHUB_PATH
+          $pg_lib_dir = "${{ github.workspace }}/temp/pgsql/lib"
+          echo "$pg_lib_dir" >> $env:GITHUB_PATH
       - run: |
           echo $env:PATH
-          get-command /temp/pgsql/lib/libpq.lib
+          get-command ${{ github.workspace }}/temp/pgsql/lib/libpq.lib
           get-command libpq.lib
       - name: Build parcel-server
         uses: actions-rs/cargo@v1
         env:
-          PQ_LIB_DIR: /temp/pgsql/lib
+          PQ_LIB_DIR: ${{ github.workspace }}/temp/pgsql/lib
         with:
           command: build
           args: --release -p parcel-server --target x86_64-pc-windows-msvc
