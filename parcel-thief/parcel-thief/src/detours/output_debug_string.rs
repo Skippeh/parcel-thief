@@ -5,7 +5,7 @@ use std::{
 };
 
 use anyhow::Context;
-use detour::static_detour;
+use retour::static_detour;
 use windows::{
     s, w,
     Win32::System::LibraryLoader::{GetModuleHandleW, GetProcAddress},

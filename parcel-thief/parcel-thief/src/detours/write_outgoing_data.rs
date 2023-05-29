@@ -1,5 +1,5 @@
-use detour::static_detour;
 use parcel_common::aes;
+use retour::static_detour;
 
 use crate::{
     ds_string::DsString,

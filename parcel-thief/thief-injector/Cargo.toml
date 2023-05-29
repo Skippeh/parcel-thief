@@ -5,13 +5,13 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
-dll-syringe = "0.15.0"
+dll-syringe = { git = "https://github.com/OpenByteDev/dll-syringe.git" }
 tokio = { version = "1.25.0", features = ["full"] }
 clap = { version = "4.1.4", features = ["derive"] }
 crossterm = { version = "0.26.0", features = ["event-stream"] }
 futures = "0.3.26"
 notify = { version = "5.1.0", default-features = false, features = [
-    "macos_kqueue"
+    "macos_kqueue",
 ] }
 notify-debouncer-mini = { version = "*", default-features = false }
 anyhow = "1.0.69"
