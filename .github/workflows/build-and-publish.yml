@@ -99,7 +99,7 @@ jobs:
       - name: Install linux dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y musl-tools libssl-dev
+          sudo apt-get install -y musl-tools
       - name: Install cargo toolchain
         uses: actions-rs/toolchain@v1
         with:
