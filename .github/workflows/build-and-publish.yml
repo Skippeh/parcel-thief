@@ -93,7 +93,7 @@ jobs:
           path: dist-thief/*
           name: parcel-thief_x86_64-pc-windows-msvc
   build-linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
       - name: Install cargo toolchain
