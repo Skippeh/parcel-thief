@@ -992,29 +992,6 @@ dependencies = [
 [[package]]
 name = "dll-syringe"
 version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d033373624f6b27ece2c6e96f5962198870d8f9542614ce6e2eabdd89ccf177"
-dependencies = [
- "bincode",
- "cstr",
- "goblin",
- "iced-x86",
- "konst",
- "num_enum",
- "path-absolutize",
- "same-file",
- "serde",
- "shrinkwraprs",
- "stopwatch2",
- "sysinfo",
- "thiserror",
- "widestring",
- "winapi 0.3.9",
-]
-
-[[package]]
-name = "dll-syringe"
-version = "0.15.0"
 source = "git+https://github.com/OpenByteDev/dll-syringe.git#0508b0f2e029d52c588bd6c2fbf8658e866fd9a0"
 dependencies = [
  "bincode",
@@ -1523,19 +1500,6 @@ dependencies = [
  "rustls 0.21.1",
  "tokio",
  "tokio-rustls 0.24.0",
-]
-
-[[package]]
-name = "hyper-tls"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d6183ddfa99b85da61a140bea0efc93fdf56ceaa041b37d553518030827f9905"
-dependencies = [
- "bytes",
- "hyper",
- "native-tls",
- "tokio",
- "tokio-native-tls",
 ]
 
 [[package]]
@@ -2465,8 +2429,7 @@ checksum = "478c572c3d73181ff3c2539045f6eb99e5491218eae919370993b890cdbdd98e"
 [[package]]
 name = "pg-embed"
 version = "0.7.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6816c076d6ddf0a99543f5fe62d8b9667c16d70fbb3454dc3184b16337ae6f3f"
+source = "git+https://github.com/Skippeh/pg-embed.git#1099138bb2add17aa4312e22cbdd576c6341e082"
 dependencies = [
  "archiver-rs",
  "async-trait",
@@ -2735,12 +2698,10 @@ dependencies = [
  "http-body",
  "hyper",
  "hyper-rustls",
- "hyper-tls",
  "ipnet",
  "js-sys",
  "log",
  "mime",
- "native-tls",
  "once_cell",
  "percent-encoding",
  "pin-project-lite",
@@ -2750,7 +2711,6 @@ dependencies = [
  "serde_json",
  "serde_urlencoded",
  "tokio",
- "tokio-native-tls",
  "tokio-rustls 0.24.0",
  "tokio-util",
  "tower-service",
@@ -2800,7 +2760,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
- "dll-syringe 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "dll-syringe",
  "rtti-exporter-dll",
 ]
 
@@ -3426,7 +3386,7 @@ dependencies = [
  "anyhow",
  "clap",
  "crossterm",
- "dll-syringe 0.15.0 (git+https://github.com/OpenByteDev/dll-syringe.git)",
+ "dll-syringe",
  "futures",
  "notify 5.2.0",
  "notify-debouncer-mini",
