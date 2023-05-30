@@ -96,10 +96,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Install musl-tools
+      - name: Install linux dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y musl-tools
+          sudo apt-get install -y musl-tools libssl-dev
       - name: Install cargo toolchain
         uses: actions-rs/toolchain@v1
         with:
