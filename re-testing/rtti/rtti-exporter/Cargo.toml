@@ -7,5 +7,5 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.68"
 clap = { version = "4.1.4", features = ["derive"] }
-dll-syringe = "0.15.0"
+dll-syringe = { git = "https://github.com/OpenByteDev/dll-syringe.git" }
 rtti-exporter-dll = { path = "../rtti-exporter-dll" }
