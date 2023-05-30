@@ -58,6 +58,9 @@ impl DbQpidObject {
         result.construction_materials_contributions = self
             .construction_materials
             .map(|i| i.into_iter().map(|mats| mats.into_api_type()).collect());
+        result.recycle_materials_contributions = self
+            .recycle_materials
+            .map(|i| i.into_iter().map(|mats| mats.into_api_type()).collect());
         result.tags = self.tags.map(|i| i.into_iter().map(|t| t.tag).collect());
 
         if let Some(comment) = self.comment {

@@ -79,7 +79,7 @@ impl QpidObject {
             object_type: self.object_type,
             updated_time: self.updated_time.timestamp_millis(),
             construction_materials_contributions: None,
-            recycle_materials: None,
+            recycle_materials_contributions: None,
             priority: false,
             baggages: None,
             comments: None,
