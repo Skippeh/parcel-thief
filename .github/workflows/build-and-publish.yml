@@ -96,10 +96,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Install musl-tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools
       - name: Install cargo toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable-x86_64-unknown-linux-gnu
+          toolchain: stable-x86_64-unknown-linux-musl
       - name: Restore cargo cache
         uses: actions/cache@v3
         with:
@@ -112,9 +116,9 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --release -p parcel-server --target x86_64-unknown-linux-gnu
+          args: --release -p parcel-server --target x86_64-unknown-linux-musl
       - name: Upload parcel-server artifact
         uses: actions/upload-artifact@v3
         with:
-          name: parcel-server_x86_64-unknown-linux-gnu
-          path: target/x86_64-unknown-linux-gnu/release/parcel-server
+          name: parcel-server_x86_64-unknown-linux-musl
+          path: target/x86_64-unknown-linux-musl/release/parcel-server
