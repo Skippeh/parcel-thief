@@ -10,6 +10,7 @@ use std::{
 use anyhow::{Context, Result};
 use dll_syringe::{process::OwnedProcess, Syringe};
 
+#[allow(clippy::lines_filter_map_ok)]
 pub fn inject_process_and_export(exe_path: &Path, dll_path: &Path) -> Result<()> {
     let mut exe_directory = exe_path.to_owned();
     exe_directory.pop();
