@@ -250,7 +250,7 @@ where
     DB: Backend,
     i32: FromSql<Integer, DB>,
 {
-    fn from_sql(bytes: diesel::backend::RawValue<'_, DB>) -> diesel::deserialize::Result<Self> {
+    fn from_sql(bytes: DB::RawValue<'_>) -> diesel::deserialize::Result<Self> {
         match i32::from_sql(bytes)? {
             0 => Ok(ObjectType::M),
             1 => Ok(ObjectType::Z),
@@ -308,7 +308,7 @@ pub struct Object {
     #[serde(rename = "mt", skip_serializing_if = "Option::is_none")]
     pub construction_materials_contributions: Option<Vec<ConstructionMaterials>>,
     #[serde(rename = "rmt", skip_serializing_if = "Option::is_none")]
-    pub recycle_materials: Option<Vec<RecycleMaterials>>,
+    pub recycle_materials_contributions: Option<Vec<RecycleMaterials>>,
     #[serde(rename = "bgs", skip_serializing_if = "Option::is_none")]
     pub baggages: Option<Vec<Baggage>>,
     #[serde(rename = "cm", skip_serializing_if = "Option::is_none")]

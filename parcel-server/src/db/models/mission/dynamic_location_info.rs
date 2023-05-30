@@ -37,7 +37,7 @@ where
     DB: Backend,
     i16: FromSql<Int2, DB>,
 {
-    fn from_sql(bytes: diesel::backend::RawValue<'_, DB>) -> diesel::deserialize::Result<Self> {
+    fn from_sql(bytes: DB::RawValue<'_>) -> diesel::deserialize::Result<Self> {
         match i16::from_sql(bytes)? {
             0 => Ok(Self::Start),
             1 => Ok(Self::End),

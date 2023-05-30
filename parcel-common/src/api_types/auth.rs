@@ -88,7 +88,7 @@ where
     DB: Backend,
     i32: FromSql<Integer, DB>,
 {
-    fn from_sql(bytes: diesel::backend::RawValue<'_, DB>) -> diesel::deserialize::Result<Self> {
+    fn from_sql(bytes: DB::RawValue<'_>) -> diesel::deserialize::Result<Self> {
         match i32::from_sql(bytes)? {
             0 => Ok(Provider::Steam),
             1 => Ok(Provider::Epic),
