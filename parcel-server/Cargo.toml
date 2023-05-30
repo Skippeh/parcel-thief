@@ -37,7 +37,7 @@ diesel = { version = "2.0.3", features = ["postgres"] }
 diesel_migrations = "2.0.0"
 dotenv = "0.15.0"
 itertools = "0.10.5"
-pg-embed = { version = "0.7.1" }
+pg-embed = { git = "https://github.com/Skippeh/pg-embed.git" }
 lazy_static = "1.4.0"
 portpicker = "0.1.1"
 indicatif = "0.17.3"
