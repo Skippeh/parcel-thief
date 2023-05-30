@@ -1,3 +1,4 @@
+#![allow(clippy::type_complexity)] // PG_SERVER static variable is complex and should be refactored at Some Point™ (aka probably never)
 use std::{path::PathBuf, sync::Arc};
 
 use anyhow::Context;
