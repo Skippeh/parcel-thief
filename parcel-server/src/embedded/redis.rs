@@ -83,8 +83,6 @@ pub enum SetupError {
     DownloadError(reqwest::Error),
     #[error("Could not extract files: {0}")]
     ExtractError(anyhow::Error),
-    #[error("Not implemented")]
-    NotImplemented,
     #[error("Support for embedded Redis server is not implemented for the running operating system. Please provide a connection url to a running redis server")]
     UnsupportedOs,
     #[error("IO error: {0}")]
