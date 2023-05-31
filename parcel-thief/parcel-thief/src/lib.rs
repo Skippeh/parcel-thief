@@ -32,8 +32,7 @@ lazy_static! {
     static ref PARCEL_THIEF: ParcelThief = ParcelThief::default();
     pub static ref GAME_VERSION: Arc<RwLock<GameVersion>> =
         Arc::new(RwLock::new(GameVersion::Steam));
-    pub static ref SERVER_AUTH_URL: Arc<RwLock<String>> =
-        Arc::new(RwLock::new("http://localhost/auth/ds".into()));
+    pub static ref SERVER_AUTH_URL: Arc<RwLock<String>> = Arc::new(RwLock::new("".into()));
     pub static ref LAUNCH_OPTIONS: Arc<RwLock<LaunchOptions>> =
         Arc::new(RwLock::new(LaunchOptions::default()));
 }
