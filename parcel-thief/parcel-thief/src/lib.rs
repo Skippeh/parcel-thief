@@ -29,7 +29,7 @@ pub enum GameVersion {
 }
 
 lazy_static! {
-    static ref PARCEL_THIEF: ParcelThief = ParcelThief::default();
+    static ref PARCEL_THIEF: ParcelThief = ParcelThief;
     pub static ref GAME_VERSION: Arc<RwLock<GameVersion>> =
         Arc::new(RwLock::new(GameVersion::Steam));
     pub static ref SERVER_AUTH_URL: Arc<RwLock<String>> = Arc::new(RwLock::new("".into()));
@@ -46,15 +46,14 @@ pub struct LaunchOptions {
     server_url: Option<Uri>,
     #[arg(long = "parcel-console", default_value_t = false)]
     console: bool,
+    #[arg(long = "parcel-debug", default_value_t = false)]
+    debug: bool,
 }
 
-#[derive(Default)]
-pub struct ParcelThief {}
+pub struct ParcelThief;
 
 impl ParcelThief {
     pub unsafe fn start(&self) -> anyhow::Result<()> {
-        println!("ParcelThief::start");
-
         match LaunchOptions::try_parse() {
             Ok(opts) => *LAUNCH_OPTIONS.write().unwrap() = opts,
             Err(err) => anyhow::bail!(err.to_string()),
@@ -64,8 +63,36 @@ impl ParcelThief {
             AllocConsole();
         }
 
+        {
+            let opts = LAUNCH_OPTIONS.read().unwrap();
+            fern::Dispatch::new()
+                .format(|out, message, record| {
+                    out.finish(format_args!(
+                        "[{} {} {}] {}",
+                        chrono::Local::now().format("%Y-%m-%dT%H:%M:%S"),
+                        record.level(),
+                        record.target(),
+                        message
+                    ))
+                })
+                .level(log::LevelFilter::Warn)
+                .level_for(
+                    "parcel_thief",
+                    if opts.debug {
+                        log::LevelFilter::Debug
+                    } else {
+                        log::LevelFilter::Info
+                    },
+                )
+                .chain(std::io::stdout())
+                .chain(fern::log_file("parcel-thief.log")?)
+                .apply()?;
+        }
+
+        log::trace!("ParcelThief::start");
+
         if let Some(url) = load_server_url().context("Could not load or parse server url")? {
-            println!("Using server url: {}", url);
+            log::info!("Using server url: {}", url);
             *SERVER_AUTH_URL.write().unwrap() = url;
         } else {
             const err_message: &str = "\
@@ -75,7 +102,7 @@ Could not find server url, make sure at least one of these exist:
   - PARCEL_SERVER_URL environment variable\
             ";
 
-            println!("{}", err_message);
+            log::error!("{}", err_message);
             let _ = msgbox::create("Error", err_message, msgbox::IconType::Error);
 
             anyhow::bail!("Server url not found");
@@ -84,17 +111,17 @@ Could not find server url, make sure at least one of these exist:
         *GAME_VERSION.write().unwrap() =
             find_game_version().context("Could not figure out game version")?;
 
-        println!("Detected game version: {:?}", GAME_VERSION.read().unwrap());
+        log::debug!("Detected game version: {:?}", GAME_VERSION.read().unwrap());
 
         offsets::map_offsets().context("Failed to map offsets")?;
 
-        println!("Mapped offsets");
+        log::trace!("Mapped offsets");
 
         detours::load().context("Could not load detours")?;
 
         {
             let server_url = SERVER_AUTH_URL.read().unwrap();
-            println!("Setting auth url: {}", server_url);
+            log::debug!("Setting auth url: {}", server_url);
             auth::load(&server_url);
         }
 
@@ -102,12 +129,10 @@ Could not find server url, make sure at least one of these exist:
     }
 
     pub unsafe fn stop(&self) -> anyhow::Result<()> {
-        println!("ParcelThief::stop");
+        log::trace!("ParcelThief::stop");
 
         detours::unload().context("Could not unload detours")?;
         auth::unload();
-
-        println!("no longer gaming");
 
         if LAUNCH_OPTIONS.read().unwrap().console {
             FreeConsole();
@@ -205,7 +230,7 @@ pub extern "system" fn DllMain(_module: HINSTANCE, call_reason: u32, _reserved: 
             match PARCEL_THIEF.start() {
                 Ok(_) => 1,
                 Err(err) => {
-                    println!("Did not attach successfully: {:?}", err);
+                    log::error!("Did not attach successfully: {:?}", err);
                     let _ = msgbox::create(
                         "Injection failed",
                         &format!("{:?}", err),
@@ -220,7 +245,7 @@ pub extern "system" fn DllMain(_module: HINSTANCE, call_reason: u32, _reserved: 
             match PARCEL_THIEF.stop() {
                 Ok(_) => 1,
                 Err(err) => {
-                    println!("Did not detach successfully: {:?}", err);
+                    log::error!("Did not detach successfully: {:?}", err);
                     let _ = msgbox::create(
                         "Ejection failed",
                         &format!("{:?}", err),

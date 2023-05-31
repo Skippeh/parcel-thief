@@ -19,6 +19,9 @@ enum-display-derive = "0.1.1"
 clap = { version = "4.1.4", features = ["derive", "env"] }
 http = "0.2.9"
 msgbox = "0.7.0"
+log = "0.4.17"
+fern = "0.6.2"
+chrono = "0.4.25"
 
 [dependencies.tokio]
 version = "1.25.0"

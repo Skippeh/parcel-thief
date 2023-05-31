@@ -52,10 +52,12 @@ pub unsafe fn unhook() -> Result<(), anyhow::Error> {
 
 fn output_debug_string_a_detour(c_str: *const char) {
     unsafe {
-        let log_c_str = CStr::from_ptr(c_str as _);
-        let log_str = log_c_str.to_string_lossy();
-        print!("{log_str}");
-        std::io::stdout().flush().ok();
+        if log::log_enabled!(log::Level::Trace) {
+            let log_c_str = CStr::from_ptr(c_str as _);
+            let log_str = log_c_str.to_string_lossy();
+            print!("{log_str}");
+            std::io::stdout().flush().ok();
+        }
 
         OUTPUT_DEBUG_STRING_A_HOOK.call(c_str);
     }
@@ -63,10 +65,13 @@ fn output_debug_string_a_detour(c_str: *const char) {
 
 fn output_debug_string_w_detour(utf16_str: *const u16) {
     unsafe {
-        let log_os_str = u16_ptr_to_string(utf16_str);
-        let log_str = log_os_str.to_string_lossy();
-        print!("{log_str}");
-        std::io::stdout().flush().ok();
+        if log::log_enabled!(log::Level::Trace) {
+            let log_os_str = u16_ptr_to_string(utf16_str);
+            let log_str = log_os_str.to_string_lossy();
+            print!("{log_str}");
+            std::io::stdout().flush().ok();
+        }
+
         OUTPUT_DEBUG_STRING_W_HOOK.call(utf16_str);
     }
 }

@@ -250,7 +250,7 @@ where
 
         let absolute_addr = self.get_absolute_addr(relative_addr)?;
         self.mapped_offsets.insert(name, absolute_addr);
-        println!(
+        log::debug!(
             "Mapped {} to 0x{:X?} (0x{:X?})",
             name, absolute_addr, relative_addr
         );
