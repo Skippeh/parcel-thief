@@ -9,7 +9,7 @@ edition = "2021"
 clap = { version = "4.1.11", features = ["derive"] }
 anyhow = "1.0.70"
 binary-reader = "0.4.5"
-chrono = "0.4.24"
+chrono = "0.4.25"
 rust-ini = "0.18.0"
 percent-encoding = "2.2.0"
 murmurhash3 = "0.0.5"
