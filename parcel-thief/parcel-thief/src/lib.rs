@@ -6,10 +6,7 @@ use std::sync::{Arc, RwLock};
 
 use anyhow::Context;
 use clap::Parser;
-use http::{
-    uri::{Parts, PathAndQuery},
-    Uri,
-};
+use http::{uri::PathAndQuery, Uri};
 use lazy_static::lazy_static;
 use windows::Win32::{
     Foundation::HINSTANCE,
@@ -70,7 +67,7 @@ impl ParcelThief {
 
         if let Some(url) = load_server_url().context("Could not load or parse server url")? {
             println!("Using server url: {}", url);
-            *SERVER_AUTH_URL.write().unwrap() = url.to_string();
+            *SERVER_AUTH_URL.write().unwrap() = url;
         } else {
             const err_message: &str = "\
 Could not find server url, make sure at least one of these exist:
