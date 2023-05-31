@@ -5,7 +5,7 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
-anyhow = "1.0.68"
+anyhow = "1.0.69"
 thiserror = "1.0.38"
 actix-web = { version = "4.3.0", features = ["rustls"] }
 actix-http = "3.3.0"
@@ -41,5 +41,5 @@ pg-embed = { git = "https://github.com/Skippeh/pg-embed.git" }
 lazy_static = "1.4.0"
 portpicker = "0.1.1"
 indicatif = "0.17.3"
-tokio = "1.26.0"
+tokio = { version = "1.25.0", features = ["full"] }
 zip = "0.6.4"

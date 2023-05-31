@@ -7,7 +7,7 @@ edition = "2021"
 [dependencies]
 dll-syringe = { git = "https://github.com/OpenByteDev/dll-syringe.git" }
 tokio = { version = "1.25.0", features = ["full"] }
-clap = { version = "4.1.4", features = ["derive"] }
+clap = { version = "4.1.4", features = ["derive", "env"] }
 crossterm = { version = "0.26.0", features = ["event-stream"] }
 futures = "0.3.26"
 notify = { version = "5.1.0", default-features = false, features = [
