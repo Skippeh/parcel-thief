@@ -47,6 +47,9 @@ lazy_static! {
 #[derive(Default, Parser)]
 pub struct LaunchOptions {
     #[arg(long = "parcel-server-url")]
+    server_url: Option<Uri>,
+    #[arg(long = "parcel-console", default_value_t = false)]
+    console: bool,
 }
 
 #[derive(Default)]
@@ -54,12 +57,16 @@ pub struct ParcelThief {}
 
 impl ParcelThief {
     pub unsafe fn start(&self) -> anyhow::Result<()> {
-        AllocConsole();
         println!("ParcelThief::start");
 
         match LaunchOptions::try_parse() {
             Ok(opts) => *LAUNCH_OPTIONS.write().unwrap() = opts,
             Err(err) => anyhow::bail!(err.to_string()),
+        }
+
+        if LAUNCH_OPTIONS.read().unwrap().console {
+            AllocConsole();
+        }
 
         if let Some(url) = load_server_url().context("Could not load or parse server url")? {
             println!("Using server url: {}", url);
@@ -106,7 +113,9 @@ Could not find server url, make sure at least one of these exist:
 
         println!("no longer gaming");
 
-        FreeConsole();
+        if LAUNCH_OPTIONS.read().unwrap().console {
+            FreeConsole();
+        }
 
         Ok(())
     }
