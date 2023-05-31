@@ -3,8 +3,8 @@ use crate::{
     offsets::{LocationOffset, OFFSETS},
 };
 
-pub unsafe fn load() {
-    set_auth_url("http://localhost/auth/ds");
+pub unsafe fn load(server_url: &str) {
+    set_auth_url(server_url);
 }
 
 pub unsafe fn unload() {
