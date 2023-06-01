@@ -260,11 +260,7 @@ fn get_session_expire_date() -> DateTime<Utc> {
 }
 
 fn infer_gateway_url(request: &HttpRequest) -> String {
-    let uri = request.uri();
+    let uri = request.connection_info();
 
-    format!(
-        "{}://{}",
-        uri.scheme().expect("Scheme should always be present"),
-        uri.authority().expect("Authority should always be present")
-    )
+    format!("{}://{}/ds", uri.scheme(), uri.host())
 }
