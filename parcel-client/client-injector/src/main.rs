@@ -18,7 +18,7 @@ use watcher::FileWatcher;
 
 #[derive(Parser)]
 struct Options {
-    #[clap(default_value = "parcel_thief.dll")]
+    #[clap(default_value = "parcel_client.dll")]
     dll_path: PathBuf,
 }
 

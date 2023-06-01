@@ -732,6 +732,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2da6da31387c7e4ef160ffab6d5e7f00c42626fe39aea70a7b0f1773f7dd6c1b"
 
 [[package]]
+name = "client-injector"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "crossterm",
+ "dll-syringe",
+ "futures",
+ "notify 5.2.0",
+ "notify-debouncer-mini",
+ "tokio",
+]
+
+[[package]]
 name = "cocoa"
 version = "0.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2608,6 +2622,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "parcel-client"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "clap",
+ "enum-display-derive",
+ "fern",
+ "http",
+ "lazy_static",
+ "libc",
+ "log",
+ "memchr",
+ "msgbox",
+ "parcel-common",
+ "patternscan",
+ "retour",
+ "thiserror",
+ "tokio",
+ "windows 0.44.0",
+]
+
+[[package]]
 name = "parcel-common"
 version = "0.1.0"
 dependencies = [
@@ -2705,29 +2742,6 @@ dependencies = [
  "tokio",
  "validator",
  "zip 0.6.6",
-]
-
-[[package]]
-name = "parcel-thief"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "chrono",
- "clap",
- "enum-display-derive",
- "fern",
- "http",
- "lazy_static",
- "libc",
- "log",
- "memchr",
- "msgbox",
- "parcel-common",
- "patternscan",
- "retour",
- "thiserror",
- "tokio",
- "windows 0.44.0",
 ]
 
 [[package]]
@@ -3817,20 +3831,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be55cf8942feac5c765c2c993422806843c9a9a45d4d5c407ad6dd2ea95eb9b6"
 dependencies = [
  "winapi-util",
-]
-
-[[package]]
-name = "thief-injector"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "crossterm",
- "dll-syringe",
- "futures",
- "notify 5.2.0",
- "notify-debouncer-mini",
- "tokio",
 ]
 
 [[package]]

@@ -58,40 +58,40 @@ jobs:
           toolchain: stable-x86_64-pc-windows-msvc
           command: build
           args: --release -p parcel-server --target x86_64-pc-windows-msvc
-      - name: Build parcel-thief
+      - name: Build parcel-client
         uses: actions-rs/cargo@v1
         env:
           PQ_LIB_DIR: ${{ github.workspace }}/temp/pgsql/lib
         with:
           toolchain: nightly-2023-05-21-x86_64-pc-windows-msvc
           command: build
-          args: --release -p parcel-thief --target x86_64-pc-windows-msvc
-      - name: Build thief-injector
+          args: --release -p parcel-client --target x86_64-pc-windows-msvc
+      - name: Build client-injector
         uses: actions-rs/cargo@v1
         with:
           toolchain: nightly-2023-05-21-x86_64-pc-windows-msvc
           command: build
-          args: --release -p thief-injector --target x86_64-pc-windows-msvc
+          args: --release -p client-injector --target x86_64-pc-windows-msvc
       - name: Move dist files to temp folder
         run: |
           mkdir ${{ github.workspace }}/dist-server/
-          mkdir ${{ github.workspace }}/dist-thief/
+          mkdir ${{ github.workspace }}/dist-client/
           cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel-server.exe ${{ github.workspace }}/dist-server/
           cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel_server.pdb ${{ github.workspace }}/dist-server/
-          cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel_thief.dll ${{ github.workspace }}/dist-thief/
-          cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel_thief.pdb ${{ github.workspace }}/dist-thief/
-          cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/thief-injector.exe ${{ github.workspace }}/dist-thief/
-          cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/thief_injector.pdb ${{ github.workspace }}/dist-thief/
+          cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel_client.dll ${{ github.workspace }}/dist-client/
+          cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel_client.pdb ${{ github.workspace }}/dist-client/
+          cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/client-injector.exe ${{ github.workspace }}/dist-client/
+          cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/client_injector.pdb ${{ github.workspace }}/dist-client/
       - name: Upload parcel-server artifact
         uses: actions/upload-artifact@v3
         with:
           path: dist-server/*
           name: parcel-server_x86_64-pc-windows-msvc
-      - name: Upload parcel-thief artifact
+      - name: Upload parcel-client artifact
         uses: actions/upload-artifact@v3
         with:
-          path: dist-thief/*
-          name: parcel-thief_x86_64-pc-windows-msvc
+          path: dist-client/*
+          name: parcel-client_x86_64-pc-windows-msvc
   build-linux:
     runs-on: ubuntu-20.04
     steps:
@@ -132,16 +132,16 @@ jobs:
         with:
           name: parcel-server_x86_64-unknown-linux-gnu
           path: ./parcel-server_x86_64-unknown-linux-gnu
-      - name: Download windows parcel-thief artifact
+      - name: Download windows parcel-client artifact
         uses: actions/download-artifact@v3
         with:
-          name: parcel-thief_x86_64-pc-windows-msvc
-          path: ./parcel-thief_x86_64-pc-windows-msvc
+          name: parcel-client_x86_64-pc-windows-msvc
+          path: ./parcel-client_x86_64-pc-windows-msvc
       - name: Create release zip files
         run: |
           zip -r ./parcel-server_x86_64-pc-windows-msvc.zip ./parcel-server_x86_64-pc-windows-msvc
           zip -r ./parcel-server_x86_64-unknown-linux-gnu.zip ./parcel-server_x86_64-unknown-linux-gnu
-          zip -r ./parcel-thief_x86_64-pc-windows-msvc.zip ./parcel-thief_x86_64-pc-windows-msvc
+          zip -r ./parcel-client_x86_64-pc-windows-msvc.zip ./parcel-client_x86_64-pc-windows-msvc
       - name: Create GitHub release
         uses: softprops/action-gh-release@v1
         with:
@@ -153,4 +153,4 @@ jobs:
           files: |
             ./parcel-server_x86_64-pc-windows-msvc.zip
             ./parcel-server_x86_64-unknown-linux-gnu.zip
-            ./parcel-thief_x86_64-pc-windows-msvc.zip
+            ./parcel-client_x86_64-pc-windows-msvc.zip

@@ -29,7 +29,7 @@ pub enum GameVersion {
 }
 
 lazy_static! {
-    static ref PARCEL_THIEF: ParcelThief = ParcelThief;
+    static ref PARCEL_CLIENT: ParcelClient = ParcelClient;
     pub static ref GAME_VERSION: Arc<RwLock<GameVersion>> =
         Arc::new(RwLock::new(GameVersion::Steam));
     pub static ref SERVER_AUTH_URL: Arc<RwLock<String>> = Arc::new(RwLock::new("".into()));
@@ -50,9 +50,9 @@ pub struct LaunchOptions {
     debug: bool,
 }
 
-pub struct ParcelThief;
+pub struct ParcelClient;
 
-impl ParcelThief {
+impl ParcelClient {
     pub unsafe fn start(&self) -> anyhow::Result<()> {
         match LaunchOptions::try_parse() {
             Ok(opts) => *LAUNCH_OPTIONS.write().unwrap() = opts,
@@ -77,7 +77,7 @@ impl ParcelThief {
                 })
                 .level(log::LevelFilter::Warn)
                 .level_for(
-                    "parcel_thief",
+                    "parcel_client",
                     if opts.debug {
                         log::LevelFilter::Debug
                     } else {
@@ -85,11 +85,11 @@ impl ParcelThief {
                     },
                 )
                 .chain(std::io::stdout())
-                .chain(fern::log_file("parcel-thief.log")?)
+                .chain(fern::log_file("parcel-client.log")?)
                 .apply()?;
         }
 
-        log::trace!("ParcelThief::start");
+        log::trace!("ParcelClient::start");
 
         if let Some(url) = load_server_url().context("Could not load or parse server url")? {
             log::info!("Using server url: {}", url);
@@ -129,7 +129,7 @@ Could not find server url, make sure at least one of these exist:
     }
 
     pub unsafe fn stop(&self) -> anyhow::Result<()> {
-        log::trace!("ParcelThief::stop");
+        log::trace!("ParcelClient::stop");
 
         detours::unload().context("Could not unload detours")?;
         auth::unload();
@@ -227,7 +227,7 @@ unsafe fn load_server_url() -> Result<Option<String>, anyhow::Error> {
 pub extern "system" fn DllMain(_module: HINSTANCE, call_reason: u32, _reserved: u32) -> u32 {
     if call_reason == DLL_PROCESS_ATTACH {
         unsafe {
-            match PARCEL_THIEF.start() {
+            match PARCEL_CLIENT.start() {
                 Ok(_) => 1,
                 Err(err) => {
                     log::error!("Did not attach successfully: {:?}", err);
@@ -242,7 +242,7 @@ pub extern "system" fn DllMain(_module: HINSTANCE, call_reason: u32, _reserved: 
         }
     } else if call_reason == DLL_PROCESS_DETACH {
         unsafe {
-            match PARCEL_THIEF.stop() {
+            match PARCEL_CLIENT.stop() {
                 Ok(_) => 1,
                 Err(err) => {
                     log::error!("Did not detach successfully: {:?}", err);

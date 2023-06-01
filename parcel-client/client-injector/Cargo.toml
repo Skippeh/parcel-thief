@@ -1,5 +1,5 @@
 [package]
-name = "thief-injector"
+name = "client-injector"
 version = "0.1.0"
 edition = "2021"
 
