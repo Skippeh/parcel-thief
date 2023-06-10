@@ -35,11 +35,11 @@ impl SessionStore {
         let result = Self {
             file_path: file_path.to_owned(),
             sessions: moka::future::CacheBuilder::new(u64::MAX)
-                .time_to_idle(Duration::from_secs(60 * 60 * 12))
+                .time_to_live(Duration::from_secs(60 * 60 * 24))
                 .name("Sessions")
                 .build(),
             provider_lookup: moka::future::CacheBuilder::new(u64::MAX)
-                .time_to_idle(Duration::from_secs(60 * 60 * 12))
+                .time_to_live(Duration::from_secs(60 * 60 * 24))
                 .name("ProviderLookup")
                 .build(),
         };
