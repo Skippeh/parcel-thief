@@ -1,9 +1,7 @@
-#![allow(clippy::type_complexity)] // PG_SERVER static variable is complex and should be refactored at Some Point™ (aka probably never)
 use std::{path::PathBuf, sync::Arc};
 
 use anyhow::Context;
 use futures_util::lock::Mutex;
-use indicatif::ProgressBar;
 use pg_embed::{
     pg_fetch::{PgFetchSettings, PG_V15},
     postgres::{PgEmbed, PgSettings},
@@ -11,10 +9,8 @@ use pg_embed::{
 
 use crate::Options;
 
-use super::{EmbeddedSoftware, EmbeddedSoftwareInstaller, SetupStep};
-
 lazy_static::lazy_static! {
-    static ref PG_SERVER: Arc<Mutex<Option<EmbeddedSoftwareInstaller<Postgres, (), anyhow::Error, (), anyhow::Error, anyhow::Error>>>> = Arc::new(Mutex::new(None));
+    static ref PG_EMBED: Arc<Mutex<Option<PgEmbed>>> = Arc::new(Mutex::new(None));
 }
 
 const DB_NAME: &str = "parcels";
@@ -24,9 +20,9 @@ pub async fn setup_postgresql(args: &Options) -> Result<String, anyhow::Error> {
     match args.database_url.as_ref() {
         Some(url) => Ok(url.clone()),
         None => {
-            let pg = &mut *PG_SERVER.lock().await;
+            let static_pg_embed = &mut *PG_EMBED.lock().await;
 
-            match pg {
+            match static_pg_embed {
                 Some(_) => {
                     anyhow::bail!("PostgreSQL server is already running")
                 }
@@ -48,14 +44,17 @@ pub async fn setup_postgresql(args: &Options) -> Result<String, anyhow::Error> {
                         ..Default::default()
                     };
 
-                    let pg_embed = PgEmbed::new(settings, fetch_settings).await?;
-                    let mut installer = EmbeddedSoftwareInstaller::new(Postgres(pg_embed));
+                    let mut pg_embed = PgEmbed::new(settings, fetch_settings).await?;
+                    pg_embed.setup().await?;
+                    pg_embed.start_db().await?;
 
-                    installer.setup().await?;
-                    installer.start().await?;
+                    log::debug!("Creating database if it doesn't exist...");
+                    if !pg_embed.database_exists(DB_NAME).await? {
+                        pg_embed.create_database(DB_NAME).await?;
+                    }
 
-                    let url = installer.software.0.full_db_uri(DB_NAME);
-                    pg.replace(installer);
+                    let url = pg_embed.full_db_uri(DB_NAME);
+                    static_pg_embed.replace(pg_embed);
                     Ok(url)
                 }
             }
@@ -64,102 +63,14 @@ pub async fn setup_postgresql(args: &Options) -> Result<String, anyhow::Error> {
 }
 
 pub async fn stop_postgresql() -> Result<(), anyhow::Error> {
-    let server = &mut *PG_SERVER.lock().await;
+    let server = &mut *PG_EMBED.lock().await;
 
     match server {
         Some(server) => {
             log::info!("Stopping PostgreSQL server...");
-            server.stop().await?;
+            server.stop_db().await?;
             Ok(())
         }
         None => Ok(()),
-    }
-}
-
-struct Postgres(PgEmbed);
-
-#[async_trait::async_trait]
-impl EmbeddedSoftware for Postgres {
-    type SetupState = ();
-    type SetupError = anyhow::Error;
-    type RunValue = ();
-    type RunError = anyhow::Error;
-    type StopError = anyhow::Error;
-
-    fn get_name(&self) -> String {
-        "PostgreSQL".into()
-    }
-
-    fn is_installed(&self) -> bool {
-        false
-    }
-
-    async fn setup(
-        &mut self,
-    ) -> (
-        Self::SetupState,
-        Vec<
-            Box<
-                dyn SetupStep<
-                    SetupState = Self::SetupState,
-                    SetupError = Self::SetupError,
-                    Software = Postgres,
-                >,
-            >,
-        >,
-    ) {
-        ((), vec![Box::new(PgSetupStep)])
-    }
-
-    async fn start(&mut self) -> Result<Self::RunValue, Self::RunError> {
-        let pg = &mut self.0;
-        pg.start_db().await?;
-
-        log::info!("Creating database if it doesn't exist...");
-        if !pg.database_exists(DB_NAME).await? {
-            pg.create_database(DB_NAME).await?;
-        }
-
-        Ok(())
-    }
-
-    async fn stop(&mut self) -> Result<(), Self::StopError> {
-        match self.0.stop_db().await {
-            Ok(_) => Ok(()),
-            Err(err) => {
-                if err.source.is_none() && err.message.is_none() {
-                    Ok(())
-                } else {
-                    Err(err.into())
-                }
-            }
-        }
-    }
-}
-
-struct PgSetupStep;
-
-#[async_trait::async_trait]
-impl SetupStep for PgSetupStep {
-    type SetupState = ();
-    type SetupError = anyhow::Error;
-    type Software = Postgres;
-
-    fn step_name(&self) -> String {
-        "Download and configure".into()
-    }
-
-    async fn execute(
-        &mut self,
-        software: &mut Self::Software,
-        _state: Self::SetupState,
-        progress_bar: &mut ProgressBar,
-    ) -> Result<Self::SetupState, Self::SetupError> {
-        progress_bar.set_length(1);
-
-        software.0.setup().await?;
-        progress_bar.finish();
-
-        Ok(())
     }
 }

@@ -23,7 +23,7 @@ use crate::{
             epic::{self, Epic},
             steam::{self, Steam},
         },
-        redis_session_store::RedisSessionStore,
+        session_store::SessionStore,
     },
     response_error::{impl_response_error, CommonResponseError},
     session::Session,
@@ -51,12 +51,6 @@ pub enum Error {
 impl From<crate::db::QueryError> for Error {
     fn from(value: crate::db::QueryError) -> Self {
         Self::InternalError(value.into())
-    }
-}
-
-impl From<redis::RedisError> for Error {
-    fn from(value: redis::RedisError) -> Self {
-        Self::InternalError(InternalError(value.into()))
     }
 }
 
@@ -112,7 +106,7 @@ pub async fn auth(
     request: Query<AuthQuery>,
     steam: Data<Steam>,
     epic: Data<Epic>,
-    session_store: Data<RedisSessionStore>,
+    session_store: Data<SessionStore>,
     db: Data<Database>,
     gateway_url: Data<Option<GatewayUrl>>,
     http_request: HttpRequest,
@@ -174,11 +168,8 @@ pub async fn auth(
 
     let login_date = Utc::now().naive_utc();
 
-    if let Some(token) = session_store
-        .find_active_session_token(provider, &provider_id)
-        .await?
-    {
-        session_store.delete_session(&token).await?;
+    if let Some(token) = session_store.find_active_session_token(provider, &provider_id) {
+        session_store.delete_session(&token).await;
     }
 
     // create account if one doesn't exist
@@ -220,7 +211,8 @@ pub async fn auth(
         generate_session_token(),
         get_session_expire_date(),
     );
-    session_store.save_session(&session).await?;
+    let token = session.get_token().to_owned();
+    session_store.save_session(session).await;
 
     let gateway_url = match gateway_url.as_ref() {
         Some(gateway_url) => gateway_url.0.clone(),
@@ -240,7 +232,7 @@ pub async fn auth(
             provider,
         },
         session: SessionInfo {
-            token: session.get_token().to_owned(),
+            token,
             gateway: gateway_url,
             properties: SessionProperties {
                 last_login: login_date.timestamp(),

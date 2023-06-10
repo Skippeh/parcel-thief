@@ -48,13 +48,11 @@ Logs are also saved in the game directory to a file called `parcel-client.log`.
    - Create a .env file in the server directory to specify environment variables for the process.
 4. Launch parcel-server.
 
-#### Redis and PostgreSQL
+#### PostgreSQL
 
-The server uses these two technologies to store data.
+The server uses PostgreSQL to store data.
 
-On Windows both of these can be automatically downloaded and configured, and start/stop with the server.
-
-On Linux only PostgreSQL has support for automatic setup, so you'll have to specify `--redis-server-url <url>`.
+If you don't have an existing server to use one will be automatically downloaded and configured, and start/stop with the server.
 
 #### Linux dependencies
 

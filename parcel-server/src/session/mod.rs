@@ -1,6 +1,5 @@
 use std::{collections::HashMap, fmt::Display};
 
-use ::redis::RedisError;
 use actix_http::{header::Header, StatusCode};
 use actix_web::{web::Data, FromRequest};
 use actix_web_httpauth::headers::authorization::{Authorization, Bearer};
@@ -10,11 +9,11 @@ use parcel_common::api_types::auth::Provider;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 use crate::{
-    data::redis_session_store::RedisSessionStore,
+    data::session_store::SessionStore,
     response_error::{impl_response_error, CommonResponseError},
 };
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Session {
     pub provider: Provider,
     pub provider_id: String,
@@ -88,14 +87,12 @@ impl Session {
 pub enum FromRequestError {
     UnknownToken,
     Unauthorized,
-    RedisError(RedisError),
 }
 
 impl Display for FromRequestError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             FromRequestError::UnknownToken => write!(f, "Unknown token"),
-            FromRequestError::RedisError(err) => write!(f, "A redis error occured: {:?}", err),
             FromRequestError::Unauthorized => write!(f, "No token specified"),
         }
     }
@@ -106,7 +103,6 @@ impl CommonResponseError for FromRequestError {
     fn get_status_code(&self) -> String {
         match self {
             FromRequestError::UnknownToken => "AU-UT",
-            FromRequestError::RedisError(_) => "SV-IT",
             FromRequestError::Unauthorized => "AU-UA",
         }
         .into()
@@ -117,14 +113,12 @@ impl CommonResponseError for FromRequestError {
             FromRequestError::UnknownToken | FromRequestError::Unauthorized => {
                 StatusCode::UNAUTHORIZED
             }
-            FromRequestError::RedisError(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 
     fn get_message(&self) -> String {
         match self {
             FromRequestError::UnknownToken => "bad token",
-            FromRequestError::RedisError(_) => "internal error",
             FromRequestError::Unauthorized => "no permission",
         }
         .into()
@@ -145,11 +139,8 @@ impl FromRequest for Session {
                 Err(_) => return Err(FromRequestError::Unauthorized),
             };
 
-            let session_store = req.app_data::<Data<RedisSessionStore>>().unwrap();
-            let session = session_store
-                .load_session(&token)
-                .await
-                .map_err(FromRequestError::RedisError)?;
+            let session_store = req.app_data::<Data<SessionStore>>().unwrap();
+            let session = session_store.load_session(&token).await;
 
             match session {
                 Some(session) => Ok(session),

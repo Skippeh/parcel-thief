@@ -22,7 +22,6 @@ use clap::Parser;
 use data::{
     database::Database,
     platforms::{epic::Epic, steam::Steam},
-    redis_client::RedisClient,
 };
 use diesel::{pg::Pg, Connection, PgConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
@@ -30,7 +29,7 @@ use endpoints::configure_endpoints;
 use rustls::{Certificate, PrivateKey};
 use rustls_pemfile::{certs, pkcs8_private_keys};
 
-use crate::{data::redis_session_store::RedisSessionStore, middleware::wrap_errors};
+use crate::{data::session_store::SessionStore, middleware::wrap_errors};
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
 
@@ -75,16 +74,6 @@ pub struct Options {
     /// The Steam web api key used for authenticating and getting user info for Steam players. The key can be found here: https://steamcommunity.com/dev/apikey
     #[arg(long = "steam-api-key", env = "STEAM_API_KEY")]
     steam_api_key: String,
-
-    /// The connection string to a redis database. This is where cached data and session info will be stored
-    ///
-    /// If unspecified then a portable version of redis will be downloaded and configured automatically for you.
-    /// This is the easiest way to setup a local redis server if you don't have an existing one.
-    /// NOTE: This is only supported on 64-bit Windows, so if you're using something else you will need to setup your own redis server.
-    ///
-    /// Example: redis://localhost
-    #[arg(long = "redis-url", env = "REDIS_URL")]
-    redis_url: Option<String>,
 
     /// The optional connection string to a postgresql database. This is where all data will be stored
     ///
@@ -136,26 +125,16 @@ async fn main() -> Result<()> {
         anyhow::bail!("Both or none of the public and private keys needs to be specified");
     }
 
-    let redis_url = embedded::redis::setup_redis(&args)
-        .await
-        .context("Failed to launch redis server")?;
     let database_url = embedded::postgresql::setup_postgresql(&args)
         .await
         .context("Failed to setup and launch postgresql server")?;
 
     // Create potentially mutable data outside of the HttpService factory, otherwise each worker thread will not share the same data globally.
-    let redis_client_data = web::Data::new(
-        RedisClient::connect(redis_url)
-            .await
-            .context("Could not connect to redis server")?,
-    );
-
-    let redis_client = redis_client_data.clone().into_inner();
     let steam_data = web::Data::new(
         Steam::new(args.steam_api_key.clone()).context("Could not create steam web api client")?,
     );
     let epic_data = web::Data::new(Epic::new().context("Could not create epic web api client")?);
-    let session_store = web::Data::new(RedisSessionStore::new(redis_client.clone(), "ds-session/"));
+    let session_store = web::Data::new(SessionStore::load_or_create(Path::new("sessions")));
     let database = web::Data::new(Database::new(&database_url));
 
     migrate_database(&database_url)
@@ -175,7 +154,6 @@ async fn main() -> Result<()> {
 
     let mut builder = HttpServer::new(move || {
         App::new()
-            .app_data(redis_client_data.clone())
             .app_data(steam_data.clone())
             .app_data(epic_data.clone())
             .app_data(session_store.clone())
@@ -214,21 +192,14 @@ async fn main() -> Result<()> {
     let result = builder.run().await.map_err(|err| err.into());
 
     // Stop embedded programs if they're running
-    let stop_redis_result = embedded::redis::stop_redis().await;
     let stop_pg_result = embedded::postgresql::stop_postgresql().await;
-
-    if let Err(err) = &stop_redis_result {
-        log::error!("Could not gracefully stop redis server: {}", err);
-    }
 
     if let Err(err) = &stop_pg_result {
         log::error!("Could not gracefully stop postgresql server: {}", err);
     }
 
-    if stop_redis_result.is_err() || stop_pg_result.is_err() {
-        log::info!(
-            "Note: both postgresql and redis servers have been shutdown even if there are errors above"
-        );
+    if stop_pg_result.is_err() {
+        log::info!("Note: postgresql server has been stopped even if there are errors above");
     }
 
     result
