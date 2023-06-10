@@ -134,7 +134,9 @@ async fn main() -> Result<()> {
         Steam::new(args.steam_api_key.clone()).context("Could not create steam web api client")?,
     );
     let epic_data = web::Data::new(Epic::new().context("Could not create epic web api client")?);
-    let session_store = web::Data::new(SessionStore::load_or_create(Path::new("sessions")));
+    let session_store =
+        web::Data::new(SessionStore::load_or_create(Path::new("data/sessions")).await);
+    let session_store_clone = session_store.clone();
     let database = web::Data::new(Database::new(&database_url));
 
     migrate_database(&database_url)
@@ -201,6 +203,8 @@ async fn main() -> Result<()> {
     if stop_pg_result.is_err() {
         log::info!("Note: postgresql server has been stopped even if there are errors above");
     }
+
+    session_store_clone.save_to_file().await?;
 
     result
 }

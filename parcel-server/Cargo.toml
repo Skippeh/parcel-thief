@@ -21,6 +21,7 @@ parcel-common = { path = "../parcel-common" }
 env_logger = "0.10.0"
 log = "0.4.17"
 futures-util = "0.3.26"
+futures = "0.3"
 reqwest = { version = "0.11.14", features = [
     "json",
     "rustls-tls",
@@ -42,3 +43,4 @@ portpicker = "0.1.1"
 tokio = { version = "1.25.0", features = ["full"] }
 zip = "0.6.4"
 moka = { version = "0.11", features = ["future"] }
+bincode = "1.3"

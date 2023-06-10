@@ -1,5 +1,10 @@
-use std::{fmt::Display, path::Path, time::Duration};
+use std::{
+    fmt::Display,
+    path::{Path, PathBuf},
+    time::Duration,
+};
 
+use bincode::Options;
 use parcel_common::api_types::auth::Provider;
 
 use crate::session::Session;
@@ -7,6 +12,7 @@ use crate::session::Session;
 pub struct SessionStore {
     sessions: moka::future::Cache<String, Session>,
     provider_lookup: moka::future::Cache<String, String>,
+    file_path: PathBuf,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -22,10 +28,12 @@ impl SessionStore {
     /// Loads or creates a new session store.
     ///
     /// If loading fails due to an IO or serialization error a new store is created.
-    pub fn load_or_create(file_path: &Path) -> Self {
+    pub async fn load_or_create(file_path: &Path) -> Self {
         // todo: try to load sessions from file
+        let sessions = load_sessions(file_path).await.unwrap_or_default();
 
-        Self {
+        let result = Self {
+            file_path: file_path.to_owned(),
             sessions: moka::future::CacheBuilder::new(u64::MAX)
                 .time_to_idle(Duration::from_secs(60 * 60 * 12))
                 .name("Sessions")
@@ -34,7 +42,29 @@ impl SessionStore {
                 .time_to_idle(Duration::from_secs(60 * 60 * 12))
                 .name("ProviderLookup")
                 .build(),
+        };
+
+        let mut futures = Vec::new();
+
+        for session in sessions {
+            futures.push(result.save_session(session));
         }
+
+        futures::future::join_all(futures).await;
+
+        result
+    }
+
+    pub async fn save_to_file(&self) -> Result<(), anyhow::Error> {
+        let sessions = self
+            .sessions
+            .iter()
+            .map(|(_, session)| session)
+            .collect::<Vec<_>>();
+
+        save_sessions(&self.file_path, &sessions).await?;
+
+        Ok(())
     }
 
     pub async fn save_session(&self, session: Session) {
@@ -92,4 +122,25 @@ impl SessionStore {
     fn get_session_reverse_lookup_key(&self, provider: Provider, provider_id: &str) -> String {
         format!("{:?}_{}", provider, provider_id)
     }
+}
+
+fn get_bincode_options() -> impl bincode::Options {
+    bincode::DefaultOptions::new()
+        .with_varint_encoding()
+        .with_little_endian()
+}
+
+async fn load_sessions(file_path: &Path) -> Result<Vec<Session>, anyhow::Error> {
+    let bincode = get_bincode_options();
+    let bytes = tokio::fs::read(file_path).await?;
+    let sessions = bincode.deserialize(&bytes)?;
+
+    Ok(sessions)
+}
+
+async fn save_sessions(file_path: &Path, sessions: &[Session]) -> Result<(), anyhow::Error> {
+    let bincode = get_bincode_options();
+    let bytes = bincode.serialize(sessions)?;
+    tokio::fs::write(file_path, bytes).await?;
+    Ok(())
 }
