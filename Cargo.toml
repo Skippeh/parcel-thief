@@ -6,7 +6,5 @@ members = [
     "parcel-client/client-injector",
     "parcel-client/parcel-client",
     "re-testing/deobfuscate_json",
-    "re-testing/rtti/rtti-exporter",
-    "re-testing/rtti/rtti-exporter-dll",
     "parcel-save-tool",
 ]
