@@ -79,7 +79,7 @@ impl AsRef<CStr> for DsString {
             let len = self.len();
             let bytes = &*std::ptr::slice_from_raw_parts(ptr, len + 1);
 
-            CStr::from_bytes_with_nul(bytes).expect("string is not null terminated")
+            CStr::from_bytes_with_nul(bytes).expect("string should be null terminated")
         }
     }
 }

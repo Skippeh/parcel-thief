@@ -199,8 +199,12 @@ unsafe fn load_server_url() -> Result<Option<String>, anyhow::Error> {
 
             let create_default_auth_path = |uri: &Uri| {
                 Uri::builder()
-                    .authority(uri.authority().expect("Missing authority").clone())
-                    .scheme(uri.scheme().expect("Missing scheme").clone())
+                    .authority(
+                        uri.authority()
+                            .expect("Authority should always be set")
+                            .clone(),
+                    )
+                    .scheme(uri.scheme().expect("Scheme should always be set").clone())
                     .path_and_query(PathAndQuery::from_static("/auth/ds"))
                     .build()
                     .expect("Uri should always be valid")
