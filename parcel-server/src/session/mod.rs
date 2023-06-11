@@ -3,7 +3,6 @@ use std::{collections::HashMap, fmt::Display};
 use actix_http::{header::Header, StatusCode};
 use actix_web::{web::Data, FromRequest};
 use actix_web_httpauth::headers::authorization::{Authorization, Bearer};
-use chrono::{DateTime, Utc};
 use futures_util::future::LocalBoxFuture;
 use parcel_common::api_types::auth::Provider;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};

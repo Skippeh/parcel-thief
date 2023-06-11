@@ -9,7 +9,7 @@ use actix_web::{
     HttpRequest,
 };
 
-use chrono::{DateTime, Days, Utc};
+use chrono::Utc;
 use parcel_common::{
     api_types::auth::{AuthResponse, Provider, SessionInfo, SessionProperties, UserInfo},
     rand,
