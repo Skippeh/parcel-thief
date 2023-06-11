@@ -67,7 +67,7 @@ Figured out from reverse engineering, the game (and thus also this project) refe
 - Road: A path created by a player walking.
 - Highway: The repairable roads that go between distribution centers and cities.
 - Qpid object: Any vehicle (trucks, bikes, etc) or object that can be built, such as ladders, postboxes, bridges, mushrooms (from peeing), or rock formations (from resting).
-- Qpid id: The id of an area in the game that is "owned" by the waystation or distribution center/city.
+- Qpid id: The id of an area in the game that is "owned" by a waystation or distribution center/city.
 - Area id/hash: The id of one of the following: Western region, Central region, and Eastern region. There is also one for the intro region, but it's unused in the server due to there not being any online activity there.
 
 Note that this list might be inconclusive and maybe even slightly incorrect.
