@@ -30,11 +30,11 @@ There are also additional launch parameters that might help with troubleshooting
 
 #### Launch parameters
 
-| Parameter           | Description                                             |
-| ------------------- | ------------------------------------------------------- |
-| --parcel-server-url | The URL of the server.                                  |
-| --parcel-console    | Shows a console while the game is running with logging. |
-| --parcel-debug      | Enable additional logging.                              |
+| Parameter                   | Description                                             |
+| --------------------------- | ------------------------------------------------------- |
+| --parcel-server-url `<url>` | The URL of the server.                                  |
+| --parcel-console            | Shows a console while the game is running with logging. |
+| --parcel-debug              | Enable additional logging.                              |
 
 Logs are also saved in the game directory to a file called `parcel-client.log`.
 
