@@ -21,24 +21,15 @@ pub struct Session {
     #[serde(skip)]
     pub token: String,
     values: HashMap<String, String>,
-    #[serde(skip)]
-    pub expire_date: DateTime<Utc>,
 }
 
 impl Session {
-    pub fn new(
-        provider: Provider,
-        provider_id: &str,
-        account_id: &str,
-        token: String,
-        expire_date: DateTime<Utc>,
-    ) -> Self {
+    pub fn new(provider: Provider, provider_id: &str, account_id: &str, token: String) -> Self {
         Self {
             provider,
             provider_id: provider_id.into(),
             account_id: account_id.into(),
             token,
-            expire_date,
             values: HashMap::new(),
         }
     }
@@ -47,10 +38,6 @@ impl Session {
     #[inline]
     pub fn get_token(&self) -> &str {
         &self.token
-    }
-
-    pub async fn set_expiration(&mut self, date_time: chrono::DateTime<Utc>) {
-        self.expire_date = date_time;
     }
 
     pub fn get<T>(&self, key: &str) -> Result<Option<T>, serde_json::Error>

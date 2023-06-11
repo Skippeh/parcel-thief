@@ -209,7 +209,6 @@ pub async fn auth(
         &provider_id,
         &account.id,
         generate_session_token(),
-        get_session_expire_date(),
     );
     let token = session.get_token().to_owned();
     session_store.save_session(session).await;
@@ -245,10 +244,6 @@ fn generate_session_token() -> String {
     const CHARS: &[u8] =
         b"aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ0123456789!\"#&/()=?\\";
     rand::generate_string(64, CHARS)
-}
-
-fn get_session_expire_date() -> DateTime<Utc> {
-    Utc::now().checked_add_days(Days::new(1)).unwrap()
 }
 
 fn infer_gateway_url(request: &HttpRequest) -> String {
