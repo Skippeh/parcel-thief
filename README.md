@@ -16,6 +16,8 @@ The server and client are both written in Rust.
 
 ### Game Installation
 
+**NOTE: Only Director's Cut is supported. Original Death Stranding is untested and is very unlikely to work.**
+
 1. Download parcel-client from [Releases](https://github.com/Skippeh/parcel-thief/releases) and
    extract the files to the directory where Death Stranding DC is installed. If you're unsure where that is you can use these steps to find out:
    - Steam: Right click the game and click `Manage -> Browe local files`.
