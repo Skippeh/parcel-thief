@@ -18,7 +18,6 @@ pub struct Session {
     pub provider: Provider,
     pub provider_id: String,
     pub account_id: String,
-    #[serde(skip)]
     pub token: String,
     values: HashMap<String, String>,
 }
