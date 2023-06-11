@@ -77,6 +77,8 @@ impl SessionStore {
         self.sessions
             .insert(self.get_session_key(&session.token), session)
             .await;
+
+        let _ = self.save_to_file().await;
     }
 
     pub async fn load_session(&self, token: &str) -> Option<Session> {
@@ -92,6 +94,8 @@ impl SessionStore {
 
             self.provider_lookup.remove(&reverse_lookup_key).await;
         }
+
+        let _ = self.save_to_file().await;
     }
 
     #[inline]
