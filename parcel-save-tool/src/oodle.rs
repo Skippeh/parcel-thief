@@ -111,6 +111,7 @@ impl From<snek::Error> for OodleError {
     }
 }
 
+#[allow(dead_code)]
 pub fn compress(
     compressor: Option<Compressor>,
     level: Option<CompressionLevel>,
@@ -124,6 +125,7 @@ pub fn compress(
     Ok(dest)
 }
 
+#[allow(dead_code)]
 pub fn compress_to(
     compressor: Option<Compressor>,
     level: Option<CompressionLevel>,

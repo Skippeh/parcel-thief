@@ -193,6 +193,7 @@ where
     }
 
     /// Translates an absolute address to an address relative to the module's base address
+    #[allow(dead_code)]
     pub fn get_relative_addr(&self, addr: usize) -> Result<usize, OffsetsError> {
         let (start, end) = self.get_module_range();
 
@@ -204,28 +205,33 @@ where
     }
 
     #[inline]
+    #[allow(dead_code)]
     pub fn get_code_section(&self) -> Option<(usize, usize)> {
         self.get_section_range(".text")
     }
 
     #[inline]
+    #[allow(dead_code)]
     pub fn get_data_section(&self) -> Option<(usize, usize)> {
         self.get_section_range(".data")
     }
 
     #[inline]
+    #[allow(dead_code)]
     pub fn get_readonly_data_section(&self) -> Option<(usize, usize)> {
         self.get_section_range(".rdata")
     }
 
     /// Returns true if the given address is within the module
     #[inline]
+    #[allow(dead_code)]
     pub fn addr_in_module(&self, addr: usize) -> bool {
         addr >= self.module_base && addr < self.module_base + self.module_size
     }
 
     /// Returns true if the given range is witin the module. Note that the upper bound check is inclusive.
     #[inline]
+    #[allow(dead_code)]
     pub fn range_in_module(&self, addr: usize, len: usize) -> bool {
         addr >= self.module_base && addr + len <= self.module_base + self.module_size
     }
@@ -238,6 +244,7 @@ where
 
     /// Returns the section's start and end address
     #[inline]
+    #[allow(dead_code)]
     pub fn get_section_range(&self, section_name: &str) -> Option<(usize, usize)> {
         self.section_ranges.get(section_name).copied()
     }
@@ -252,7 +259,9 @@ where
         self.mapped_offsets.insert(name, absolute_addr);
         log::debug!(
             "Mapped {} to 0x{:X?} (0x{:X?})",
-            name, absolute_addr, relative_addr
+            name,
+            absolute_addr,
+            relative_addr
         );
 
         Ok(())
@@ -278,6 +287,7 @@ where
         }
     }
 
+    #[allow(dead_code)]
     pub fn get_mapped_offset(&self, name: MapKey) -> usize {
         self.mapped_offsets
             .get(&name)
@@ -293,6 +303,7 @@ where
     }
 
     /// Gets the name of the section the given address resides in, if any.
+    #[allow(dead_code)]
     pub fn get_address_section(&self, addr: usize) -> Option<&str> {
         for (name, (start, end)) in &self.section_ranges {
             if &addr >= start && &addr < end {

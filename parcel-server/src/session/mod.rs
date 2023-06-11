@@ -38,6 +38,7 @@ impl Session {
         &self.token
     }
 
+    #[allow(dead_code)]
     pub fn get<T>(&self, key: &str) -> Result<Option<T>, serde_json::Error>
     where
         T: DeserializeOwned,
@@ -50,10 +51,12 @@ impl Session {
         }
     }
 
+    #[allow(dead_code)]
     pub fn get_raw(&self, key: &str) -> Option<&String> {
         self.values.get(key)
     }
 
+    #[allow(dead_code)]
     pub fn set<T>(&mut self, key: &str, val: &T) -> Result<(), serde_json::Error>
     where
         T: Serialize,
@@ -63,6 +66,7 @@ impl Session {
         Ok(())
     }
 
+    #[allow(dead_code)]
     pub fn set_raw(&mut self, key: &str, val: &str) {
         self.values.insert(key.into(), val.into());
     }

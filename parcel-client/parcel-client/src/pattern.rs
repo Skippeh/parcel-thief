@@ -11,6 +11,7 @@ pub fn find_single(
         .map(|addr| addr.map(|addr| addr + start_abs_addr))
 }
 
+#[allow(dead_code)]
 pub fn find_many(
     start_abs_addr: usize,
     search_length: usize,

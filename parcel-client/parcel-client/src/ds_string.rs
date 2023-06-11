@@ -55,6 +55,7 @@ impl DsString {
         *string_pos
     }
 
+    #[allow(dead_code)]
     pub unsafe fn dtor(ds_str: &'static Self) {
         let dtor_fn = OFFSETS
             .read()
