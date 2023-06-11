@@ -32,10 +32,6 @@ impl DsString {
         &*self_ptr.sub(16).cast::<InternalData>()
     }
 
-    pub unsafe fn empty() -> *mut Self {
-        Self::from_str("")
-    }
-
     pub unsafe fn from_str(val: &str) -> *mut Self {
         let ctor_fn = OFFSETS
             .read()

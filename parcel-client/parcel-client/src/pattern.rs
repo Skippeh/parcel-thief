@@ -31,17 +31,12 @@ struct MemoryReader {
 
 #[derive(Debug, thiserror::Error)]
 pub enum MemoryReaderError {
-    RangeOutOfBounds,
     PatternScanError(patternscan::Error),
 }
 
 impl Display for MemoryReaderError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            MemoryReaderError::RangeOutOfBounds => write!(
-                f,
-                "The address range is not within the bounds of the module"
-            ),
             MemoryReaderError::PatternScanError(err) => write!(f, "{}", err),
         }
     }
