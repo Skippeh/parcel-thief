@@ -340,9 +340,9 @@ diesel::table! {
         grid_y -> Int4,
         area_id -> Int4,
         qpid_id -> Int4,
-        object_type -> Int4,
         sub_type -> Varchar,
         updated_time -> Timestamp,
+        object_type -> Varchar,
     }
 }
 

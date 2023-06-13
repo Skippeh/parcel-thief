@@ -109,7 +109,7 @@ impl<'db> QpidObjects<'db> {
         let conn = &mut *self.connection.get_pg_connection().await;
 
         conn.transaction(|conn| {
-            let id = generate_object_id(request.object_type);
+            let id = generate_object_id(&request.object_type);
             let now = Utc::now().naive_utc();
 
             let qpid_object = NewQpidObject {
@@ -127,7 +127,7 @@ impl<'db> QpidObjects<'db> {
                 grid_y: request.grid_y,
                 area_id: request.area_hash,
                 qpid_id: request.qpid_id,
-                object_type: request.object_type,
+                object_type: &request.object_type,
                 sub_type: &request.sub_type,
                 updated_time: &now,
             };
@@ -714,7 +714,7 @@ impl<'db> QpidObjects<'db> {
 
 /// Generates a 13 character long object id.
 /// The first character will always match the object type.
-fn generate_object_id(obj_type: ObjectType) -> String {
+fn generate_object_id(obj_type: &ObjectType) -> String {
     const CHARS: &[u8] = b"aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ0123456789";
     let mut result = String::with_capacity(13);
     let object_tag = serde_json::to_string(&obj_type).unwrap();

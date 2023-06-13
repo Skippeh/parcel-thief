@@ -34,9 +34,9 @@ pub struct QpidObject {
     pub grid_y: i32,
     pub area_id: AreaHash,
     pub qpid_id: i32,
-    pub object_type: ObjectType,
     pub sub_type: String,
     pub updated_time: NaiveDateTime,
+    pub object_type: ObjectType,
 }
 
 #[derive(Debug, Insertable)]
@@ -56,7 +56,7 @@ pub struct NewQpidObject<'a> {
     pub grid_y: i32,
     pub area_id: AreaHash,
     pub qpid_id: i32,
-    pub object_type: ObjectType,
+    pub object_type: &'a ObjectType,
     pub sub_type: &'a str,
     pub updated_time: &'a NaiveDateTime,
 }

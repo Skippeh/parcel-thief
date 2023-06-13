@@ -1,8 +1,15 @@
+use std::io::Write;
+
 use diesel::{
-    backend::Backend, deserialize::FromSql, serialize::ToSql, sql_types::Integer, AsExpression,
-    FromSqlRow,
+    backend::Backend,
+    deserialize::FromSql,
+    pg::Pg,
+    serialize::{IsNull, ToSql},
+    sql_types::Text,
+    AsExpression, FromSqlRow,
 };
 use serde::{Deserialize, Serialize};
+use serde_enum_str::{Deserialize_enum_str, Serialize_enum_str};
 
 use crate::serde_util::serialize_bool_to_number;
 
@@ -142,141 +149,91 @@ pub struct CustomizeInfo {
 
 #[derive(
     Debug,
-    Deserialize,
-    Serialize,
+    Deserialize_enum_str,
+    Serialize_enum_str,
     Clone,
-    Copy,
     PartialEq,
     Eq,
-    PartialOrd,
-    Ord,
     Hash,
     FromSqlRow,
     AsExpression,
 )]
-#[diesel(sql_type = Integer)]
-#[repr(i32)]
+#[diesel(sql_type = Text)]
 pub enum ObjectType {
     #[serde(rename = "m")]
-    M = 0,
+    M,
     #[serde(rename = "z")]
-    Z = 1,
+    Z,
     #[serde(rename = "c")]
-    PowerGenerator = 2,
+    PowerGenerator,
     #[serde(rename = "p")]
-    Postbox = 3,
+    Postbox,
     #[serde(rename = "a")]
-    A = 4,
+    A,
     #[serde(rename = "r")]
-    R1 = 5,
+    R1,
     #[serde(rename = "l")]
-    Ladder = 6,
+    Ladder,
     #[serde(rename = "s")]
-    S = 7,
+    S,
     #[serde(rename = "w")]
-    Watchtower = 8,
+    Watchtower,
     #[serde(rename = "b")]
-    B1 = 9,
+    B1,
     /// Subtype holds the type of the sign.
     #[serde(rename = "t")]
-    Sign = 10,
+    Sign,
     #[serde(rename = "v")]
-    V = 11,
+    V,
     #[serde(rename = "k")]
-    K = 12,
+    K,
     #[serde(rename = "n")]
-    N = 13,
+    N,
     #[serde(rename = "h")]
-    H = 14,
+    H,
     /// A stone created from a player sleeping.
     #[serde(rename = "e")]
-    RestingStone = 15,
+    RestingStone,
     #[serde(rename = "u")]
-    U = 16,
+    U,
     #[serde(rename = "i")]
-    I = 17,
+    I,
     #[serde(rename = "o")]
-    O = 18,
+    O,
     /// A mushroom created from a player peeing.
     #[serde(rename = "x")]
-    PeeMushroom = 19,
+    PeeMushroom,
     #[serde(rename = "B")]
-    B2 = 20,
+    B2,
     #[serde(rename = "R")]
-    R2 = 21,
+    R2,
     #[serde(rename = "S")]
-    S2 = 22,
+    S2,
+
+    #[serde(other)]
+    Unknown(String),
 }
 
-impl<DB> ToSql<Integer, DB> for ObjectType
-where
-    DB: Backend,
-    i32: ToSql<Integer, DB>,
-{
+impl ToSql<Text, Pg> for ObjectType {
     fn to_sql<'b>(
         &'b self,
-        out: &mut diesel::serialize::Output<'b, '_, DB>,
+        out: &mut diesel::serialize::Output<'b, '_, Pg>,
     ) -> diesel::serialize::Result {
-        match self {
-            ObjectType::M => 0.to_sql(out),
-            ObjectType::Z => 1.to_sql(out),
-            ObjectType::PowerGenerator => 2.to_sql(out),
-            ObjectType::Postbox => 3.to_sql(out),
-            ObjectType::A => 4.to_sql(out),
-            ObjectType::R1 => 5.to_sql(out),
-            ObjectType::Ladder => 6.to_sql(out),
-            ObjectType::S => 7.to_sql(out),
-            ObjectType::Watchtower => 8.to_sql(out),
-            ObjectType::B1 => 9.to_sql(out),
-            ObjectType::Sign => 10.to_sql(out),
-            ObjectType::V => 11.to_sql(out),
-            ObjectType::K => 12.to_sql(out),
-            ObjectType::N => 13.to_sql(out),
-            ObjectType::H => 14.to_sql(out),
-            ObjectType::RestingStone => 15.to_sql(out),
-            ObjectType::U => 16.to_sql(out),
-            ObjectType::I => 17.to_sql(out),
-            ObjectType::O => 18.to_sql(out),
-            ObjectType::PeeMushroom => 19.to_sql(out),
-            ObjectType::B2 => 20.to_sql(out),
-            ObjectType::R2 => 21.to_sql(out),
-            ObjectType::S2 => 22.to_sql(out),
-        }
+        let val_str = serde_json::to_string(self)?;
+
+        out.write_all(val_str.trim_matches('"').as_bytes())?;
+        Ok(IsNull::No)
     }
 }
 
-impl<DB> FromSql<Integer, DB> for ObjectType
+impl FromSql<Text, Pg> for ObjectType
 where
-    DB: Backend,
-    i32: FromSql<Integer, DB>,
+    String: FromSql<Text, Pg>,
 {
-    fn from_sql(bytes: DB::RawValue<'_>) -> diesel::deserialize::Result<Self> {
-        match i32::from_sql(bytes)? {
-            0 => Ok(ObjectType::M),
-            1 => Ok(ObjectType::Z),
-            2 => Ok(ObjectType::PowerGenerator),
-            3 => Ok(ObjectType::Postbox),
-            4 => Ok(ObjectType::A),
-            5 => Ok(ObjectType::R1),
-            6 => Ok(ObjectType::Ladder),
-            7 => Ok(ObjectType::S),
-            8 => Ok(ObjectType::Watchtower),
-            9 => Ok(ObjectType::B1),
-            10 => Ok(ObjectType::Sign),
-            11 => Ok(ObjectType::V),
-            12 => Ok(ObjectType::K),
-            13 => Ok(ObjectType::N),
-            14 => Ok(ObjectType::H),
-            15 => Ok(ObjectType::RestingStone),
-            16 => Ok(ObjectType::U),
-            17 => Ok(ObjectType::I),
-            18 => Ok(ObjectType::O),
-            19 => Ok(ObjectType::PeeMushroom),
-            20 => Ok(ObjectType::B2),
-            21 => Ok(ObjectType::R2),
-            22 => Ok(ObjectType::S2),
-            other => Err(format!("Unknown ObjectType variant: {}", other).into()),
-        }
+    fn from_sql(bytes: <Pg as Backend>::RawValue<'_>) -> diesel::deserialize::Result<Self> {
+        let val_str = String::from_utf8(bytes.as_bytes().to_vec())?;
+
+        Ok(serde_json::from_str(&val_str)?)
     }
 }
 
