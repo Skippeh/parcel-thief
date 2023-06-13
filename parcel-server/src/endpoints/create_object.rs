@@ -19,7 +19,7 @@ pub async fn create_object(
     // Make sure that if object_type is unknown, then it is exactly 1 character long
     // todo: return bad request error instead of internal error
     if let ObjectType::Unknown(val) = &request.object_type {
-        if val.len() != 1 {
+        if val.len() != 1 || !val.is_ascii() {
             return Err(anyhow::anyhow!("Invalid object type: {}", val).into());
         }
     }
