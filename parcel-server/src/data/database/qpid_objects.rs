@@ -718,7 +718,13 @@ fn generate_object_id(obj_type: &ObjectType) -> String {
     const CHARS: &[u8] = b"aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ0123456789";
     let mut result = String::with_capacity(13);
     let object_tag = serde_json::to_string(&obj_type).unwrap();
-    result.push_str(object_tag.trim_matches('\"'));
+    let object_tag = object_tag.trim_matches('\"');
+    result.push(
+        object_tag
+            .chars()
+            .next()
+            .expect("Object tag is never empty"),
+    );
 
     parcel_common::rand::append_generate_string(&mut result, 12, CHARS);
     result
