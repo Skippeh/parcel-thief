@@ -22,6 +22,8 @@ pub async fn create_object(
         if val.len() != 1 || !val.is_ascii() {
             return Err(anyhow::anyhow!("Invalid object type: {}", val).into());
         }
+
+        log::warn!("Creating object with unknown type: {}", val);
     }
 
     let db = database.connect()?;
