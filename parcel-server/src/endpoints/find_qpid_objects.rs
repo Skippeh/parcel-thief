@@ -3,7 +3,7 @@ use actix_web::{
     web::{Data, Json},
 };
 use parcel_common::api_types::{
-    object::QpidObjectsResponse,
+    object::{ObjectType, QpidObjectsResponse},
     requests::find_qpid_objects::{FindQpidObjectsRequest, FindQpidObjectsResponse},
 };
 
@@ -15,6 +15,15 @@ pub async fn find_qpid_objects(
     session: Session,
     database: Data<Database>,
 ) -> Result<Json<FindQpidObjectsResponse>, InternalError> {
+    // Make sure that if object_type is logged if it is unknown
+    if let Some(object) = &request.object {
+        for ty in object.counts.keys() {
+            if let ObjectType::Unknown(val) = ty {
+                log::warn!("Received unknown object type: {}", val);
+            }
+        }
+    }
+
     let conn = database.connect()?;
     let objects = conn.qpid_objects();
     let request = request.into_inner();
