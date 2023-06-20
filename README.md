@@ -103,7 +103,6 @@ Note that this list might be inconclusive and maybe even slightly incorrect.
 ## Known issues
 
 - Various missing object types, usually noticed when the game calls the `findQpidObjects` or `createObject` endpoints with unknown object types in the request. It will still work but a warning will be logged.
-- Repeatedly getting the same likes, probably caused by desync due to server storing dates in nanoseconds and client sending/receiving dates in milliseconds. Potential solution would be to round server dates to closest millisecond.
 
 ## Building
 
