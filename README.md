@@ -76,7 +76,6 @@ Note that this list might be inconclusive and maybe even slightly incorrect.
 
 ### Server
 
-- [ ] Add all remaining object types and name them if possible. There are probably a lot more of them that I haven't encountered yet. [Known object types can be found here](https://github.com/Skippeh/parcel-thief/blob/main/parcel-common/src/api_types/object.rs#L159).
 - [ ] More testing with more players doing the same missions, etc. Generally I've only been able to test with two accounts.
 
 ### Client
@@ -87,9 +86,10 @@ Note that this list might be inconclusive and maybe even slightly incorrect.
 
 ### Server
 
-- [ ] If there's a want for it, implement ranked missions and rewards. The missions seem to be hard coded in the game and the server simply refers to a group of them by season id or something, but it could still be fun.
+- [ ] Add all remaining object types and name them if possible. There are probably a lot more of them that I haven't encountered yet. [Known object types can be found here](https://github.com/Skippeh/parcel-thief/blob/main/parcel-common/src/api_types/object.rs#L159).
 - [ ] Figure out hashes for cargo types and dynamic locations such as pre-placed post boxes.
 - [ ] Figure out the qpid id for each area in the game.
+- [ ] If there's a want for it, implement ranked missions and rewards. The missions seem to be hard coded in the game and the server simply refers to a group of them by season id or something, but it could still be fun.
 - [ ] Implement the following endpoints if necessary (not sure if they're used):
   - [ ] deleteHighwayResources (there's no way to delete highway segments/resources in game)
   - [ ] deletePlayerRankingRecords (don't think there's a way to delete ranking records in game)
