@@ -1,3 +1,4 @@
+#[cfg(feature = "diesel")]
 use diesel::{
     backend::Backend, deserialize::FromSql, serialize::ToSql, sql_types::Integer, AsExpression,
     FromSqlRow,
@@ -5,21 +6,11 @@ use diesel::{
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 #[derive(
-    Debug,
-    Serialize_repr,
-    Deserialize_repr,
-    Clone,
-    Copy,
-    Eq,
-    PartialEq,
-    PartialOrd,
-    Ord,
-    Hash,
-    FromSqlRow,
-    AsExpression,
+    Debug, Serialize_repr, Deserialize_repr, Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash,
 )]
 #[repr(u32)]
-#[diesel(sql_type = Integer)]
+#[cfg_attr(feature = "diesel", derive(FromSqlRow, AsExpression))]
+#[cfg_attr(feature = "diesel", diesel(sql_type = Integer))]
 pub enum AreaHash {
     #[serde(rename = "5319")]
     EasternRegion = 5319,
@@ -29,6 +20,7 @@ pub enum AreaHash {
     WesternRegion = 21299,
 }
 
+#[cfg(feature = "diesel")]
 impl<DB> ToSql<Integer, DB> for AreaHash
 where
     DB: Backend,
@@ -46,6 +38,7 @@ where
     }
 }
 
+#[cfg(feature = "diesel")]
 impl<DB> FromSql<Integer, DB> for AreaHash
 where
     DB: Backend,

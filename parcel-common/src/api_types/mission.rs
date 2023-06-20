@@ -1,3 +1,4 @@
+#[cfg(feature = "diesel")]
 use diesel::{
     backend::Backend, deserialize::FromSql, serialize::ToSql, sql_types::Integer, AsExpression,
     FromSqlRow,
@@ -8,21 +9,9 @@ use crate::serde_util::deserialize_bool_from_number;
 
 use super::area::AreaHash;
 
-#[derive(
-    Debug,
-    Serialize,
-    Deserialize,
-    Clone,
-    Copy,
-    Eq,
-    PartialEq,
-    PartialOrd,
-    Ord,
-    Hash,
-    FromSqlRow,
-    AsExpression,
-)]
-#[diesel(sql_type = Integer)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "diesel", derive(FromSqlRow, AsExpression))]
+#[cfg_attr(feature = "diesel", diesel(sql_type = Integer))]
 #[repr(i32)]
 pub enum OnlineMissionType {
     #[serde(rename = "Unknown_online_type")]
@@ -39,6 +28,7 @@ pub enum OnlineMissionType {
     SharedLastStranding = 5,
 }
 
+#[cfg(feature = "diesel")]
 impl<DB> ToSql<Integer, DB> for OnlineMissionType
 where
     DB: Backend,
@@ -59,6 +49,7 @@ where
     }
 }
 
+#[cfg(feature = "diesel")]
 impl<DB> FromSql<Integer, DB> for OnlineMissionType
 where
     DB: Backend,
@@ -77,21 +68,9 @@ where
     }
 }
 
-#[derive(
-    Debug,
-    Serialize,
-    Deserialize,
-    Clone,
-    Copy,
-    Eq,
-    PartialEq,
-    PartialOrd,
-    Ord,
-    Hash,
-    FromSqlRow,
-    AsExpression,
-)]
-#[diesel(sql_type = Integer)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "diesel", derive(FromSqlRow, AsExpression))]
+#[cfg_attr(feature = "diesel", diesel(sql_type = Integer))]
 #[repr(i32)]
 pub enum MissionType {
     #[serde(rename = "Delivery")]
@@ -108,6 +87,7 @@ pub enum MissionType {
     Free = 5,
 }
 
+#[cfg(feature = "diesel")]
 impl<DB> ToSql<Integer, DB> for MissionType
 where
     DB: Backend,
@@ -128,6 +108,7 @@ where
     }
 }
 
+#[cfg(feature = "diesel")]
 impl<DB> FromSql<Integer, DB> for MissionType
 where
     DB: Backend,
@@ -146,21 +127,9 @@ where
     }
 }
 
-#[derive(
-    Debug,
-    Serialize,
-    Deserialize,
-    Clone,
-    Copy,
-    Eq,
-    PartialEq,
-    PartialOrd,
-    Ord,
-    Hash,
-    FromSqlRow,
-    AsExpression,
-)]
-#[diesel(sql_type = Integer)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "diesel", derive(FromSqlRow, AsExpression))]
+#[cfg_attr(feature = "diesel", diesel(sql_type = Integer))]
 #[repr(i32)]
 pub enum ProgressState {
     #[serde(rename = "Invalid")]
@@ -191,6 +160,7 @@ pub enum ProgressState {
     CompleteAutomation = 2048,
 }
 
+#[cfg(feature = "diesel")]
 impl<DB> ToSql<Integer, DB> for ProgressState
 where
     DB: Backend,
@@ -218,6 +188,7 @@ where
     }
 }
 
+#[cfg(feature = "diesel")]
 impl<DB> FromSql<Integer, DB> for ProgressState
 where
     DB: Backend,

@@ -1,5 +1,7 @@
+#[cfg(feature = "diesel")]
 use std::io::Write;
 
+#[cfg(feature = "diesel")]
 use diesel::{
     backend::Backend,
     deserialize::FromSql,
@@ -147,18 +149,9 @@ pub struct CustomizeInfo {
     pub customize_color: u32,
 }
 
-#[derive(
-    Debug,
-    Deserialize_enum_str,
-    Serialize_enum_str,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    FromSqlRow,
-    AsExpression,
-)]
-#[diesel(sql_type = Text)]
+#[derive(Debug, Deserialize_enum_str, Serialize_enum_str, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "diesel", derive(FromSqlRow, AsExpression))]
+#[cfg_attr(feature = "diesel", diesel(sql_type = Text))]
 pub enum ObjectType {
     #[serde(rename = "m")]
     M,
@@ -214,6 +207,7 @@ pub enum ObjectType {
     Unknown(String),
 }
 
+#[cfg(feature = "diesel")]
 impl ToSql<Text, Pg> for ObjectType {
     fn to_sql<'b>(
         &'b self,
@@ -226,6 +220,7 @@ impl ToSql<Text, Pg> for ObjectType {
     }
 }
 
+#[cfg(feature = "diesel")]
 impl FromSql<Text, Pg> for ObjectType
 where
     String: FromSql<Text, Pg>,

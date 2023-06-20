@@ -1,5 +1,6 @@
 use std::fmt::Display;
 
+#[cfg(feature = "diesel")]
 use diesel::{
     backend::Backend, deserialize::FromSql, serialize::ToSql, sql_types::Integer, AsExpression,
     FromSqlRow,
@@ -36,21 +37,9 @@ pub struct AuthResponse {
 }
 
 #[repr(i32)]
-#[derive(
-    Debug,
-    Deserialize,
-    Serialize,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    FromSqlRow,
-    AsExpression,
-)]
-#[diesel(sql_type = Integer)]
+#[derive(Debug, Deserialize, Serialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "diesel", derive(FromSqlRow, AsExpression))]
+#[cfg_attr(feature = "diesel", diesel(sql_type = Integer))]
 pub enum Provider {
     #[serde(rename = "steam")]
     Steam = 0,
@@ -67,6 +56,7 @@ impl Display for Provider {
     }
 }
 
+#[cfg(feature = "diesel")]
 impl<DB> ToSql<Integer, DB> for Provider
 where
     DB: Backend,
@@ -83,6 +73,7 @@ where
     }
 }
 
+#[cfg(feature = "diesel")]
 impl<DB> FromSql<Integer, DB> for Provider
 where
     DB: Backend,

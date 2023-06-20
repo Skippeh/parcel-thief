@@ -106,7 +106,7 @@ Note that this list might be inconclusive and maybe even slightly incorrect.
 
 ## Building
 
-To build `parcel-common` and `parcel-server` you need to set `PQ_LIB_DIR` to the directory of the PostgreSQL 15 lib directory. You can find an example of this by looking at the github action workflow that builds and creates a release.
+To build `parcel-server` you need to set `PQ_LIB_DIR` to the directory of the PostgreSQL 15 lib directory. You can find an example of this by looking at the github action workflow that builds and creates a release.
 
 To build `parcel-client` and `client-injector` you need to use Rust nightly.
 
