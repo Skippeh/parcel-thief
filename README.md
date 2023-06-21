@@ -1,12 +1,8 @@
-# Parcel Server for Death Stranding Director's Cut
+# Parcel - A Private Server for Death Stranding Director's Cut
 
-## About
-
-Parcel is a server for Death Stranding Director's Cut. It is designed for smaller groups of people who want to play and share their buildings and items without other players.
-
-All buildings, missions, cargo (including lost cargo and shared lockers), and highway resources are synced between all players unlike the official server where they are semi-randomly distributed.
-
-The server and client are both written in Rust.
+> Parcel is a server for Death Stranding Director's Cut. It is designed for smaller groups of people who want to play and share their buildings and items without other players.
+>
+> All buildings, missions, cargo (including lost cargo and shared lockers), and highway resources are synced between all players unlike the official server where they are semi-randomly distributed.
 
 ## Download
 
