@@ -5,7 +5,7 @@
 use std::sync::{Arc, RwLock};
 
 use anyhow::Context;
-use clap::Parser;
+use clap::{CommandFactory, Parser};
 use http::{uri::PathAndQuery, Uri};
 use lazy_static::lazy_static;
 use windows::Win32::{
@@ -41,6 +41,7 @@ lazy_static! {
 // started without any arguments specified.
 // It's also important that each arg has a "parcel" prefix to distinguish it from other args.
 #[derive(Default, Parser)]
+#[command(trailing_var_arg = true, dont_delimit_trailing_values = true)]
 pub struct LaunchOptions {
     #[arg(long = "parcel-server-url")]
     server_url: Option<Uri>,
@@ -48,6 +49,9 @@ pub struct LaunchOptions {
     console: bool,
     #[arg(long = "parcel-debug", default_value_t = false)]
     debug: bool,
+
+    #[arg(trailing_var_arg = true, allow_hyphen_values = true, num_args = 0..)]
+    _trailing: Vec<String>,
 }
 
 pub struct ParcelClient;
