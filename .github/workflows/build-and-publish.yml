@@ -60,8 +60,6 @@ jobs:
           args: --release -p parcel-server --target x86_64-pc-windows-msvc
       - name: Build parcel-client
         uses: actions-rs/cargo@v1
-        env:
-          PQ_LIB_DIR: ${{ github.workspace }}/temp/pgsql/lib
         with:
           toolchain: nightly-2023-05-21-x86_64-pc-windows-msvc
           command: build
