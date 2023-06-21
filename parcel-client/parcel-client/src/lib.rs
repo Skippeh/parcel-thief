@@ -5,7 +5,7 @@
 use std::sync::{Arc, RwLock};
 
 use anyhow::Context;
-use clap::{CommandFactory, Parser};
+use clap::Parser;
 use http::{uri::PathAndQuery, Uri};
 use lazy_static::lazy_static;
 use windows::Win32::{
