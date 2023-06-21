@@ -18,9 +18,9 @@ You can find the latest client and server version in [Releases](https://github.c
    - Epic: Right click the game and click `Manage` and then click the folder icon near the bottom next to the uninstall button.
 2. Get the server url from the person who is hosting the server and then do **one** of the following:
    - Create a text file called `parcel-server-url` in the game directory and set it to the URL of the server.
-   - Add a launch parameter in Steam or Epic for Death Stranding DC called `--parcel-server-url <url>` and set it to the URL of the server.
+   - Add a launch parameter in Steam or Epic for Death Stranding DC called `--parcel-server-url <url>` and set it to the URL of the server. (NOTE: this seems to be broken on Epic)
    - Set an environment variable called PARCEL_SERVER_URL to the URL of the server.
-3. Launch parcel-client.exe and then launch the game from Steam or Epic.
+3. Launch parcel-client.exe and wait for the game to launch.
 
 There are also additional launch parameters that might help with troubleshooting.
 
