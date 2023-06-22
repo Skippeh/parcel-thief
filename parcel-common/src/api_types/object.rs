@@ -228,7 +228,7 @@ where
     fn from_sql(bytes: <Pg as Backend>::RawValue<'_>) -> diesel::deserialize::Result<Self> {
         let val_str = String::from_utf8(bytes.as_bytes().to_vec())?;
 
-        Ok(serde_json::from_str(&val_str)?)
+        Ok(serde_json::from_str(&format!("\"{}\"", &val_str))?)
     }
 }
 
