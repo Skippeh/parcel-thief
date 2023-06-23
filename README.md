@@ -100,8 +100,8 @@ Note that this list might be inconclusive and maybe even slightly incorrect.
 ## Known issues
 
 - Various missing object types, usually noticed when the game calls the `findQpidObjects` or `createObject` endpoints with unknown object types in the request. It will still work but a warning will be logged.
-- Game does not query player profiles, most likely due to account id not being a valid hash of some sort.
-- The game does not say which player contributed shared cargo in shared lockers, and potentially more places. Likely due to account id not being a valid hash of some sort.
+- Game does not query player profiles which leads to not being able to see stats for other players (total likes for example), most likely due to account id not being a valid hash of some sort.
+- Game does not show avatars of other players, most likely due to account id not being a valid hash of some sort.
 
 ## Building
 
