@@ -113,6 +113,7 @@ diesel::table! {
         id -> Int8,
         mission_id -> Varchar,
         account_id -> Varchar,
+        updated_at -> Timestamp,
     }
 }
 

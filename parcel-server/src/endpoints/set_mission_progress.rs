@@ -30,6 +30,7 @@ pub async fn set_mission_progress(
 
         missions
             .update_mission(
+                &session.account_id,
                 &mission.id,
                 &ChangeMission {
                     qpid_delivered_location: Some(request.delivered_location_id),

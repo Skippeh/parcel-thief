@@ -19,6 +19,7 @@ use crate::db::{
             ChangeDynamicLocationInfo, DynamicLocationInfo, InfoType, NewDynamicLocationInfo,
         },
         dynamic_mission_info::{DynamicMissionInfo, NewDynamicMissionInfo},
+        relation::{NewRelation, Relation},
         supply_info::{NewSupplyInfo, SupplyInfo},
         ChangeMission, Mission, NewMission,
     },
@@ -188,6 +189,19 @@ impl<'db> Missions<'db> {
                 result.baggages = db_baggages;
             }
 
+            {
+                use crate::db::schema::mission_relations::dsl;
+                diesel::insert_into(dsl::mission_relations)
+                    .values(&NewRelation {
+                        mission_id: &id,
+                        account_id: owner_id,
+                        updated_at: &registered_time,
+                    })
+                    .execute(conn)?;
+
+                result.relations.push(owner_id.to_owned());
+            }
+
             Ok(result)
         })
     }
@@ -314,6 +328,18 @@ impl<'db> Missions<'db> {
                 }
             }
 
+            {
+                use crate::db::schema::mission_relations::dsl;
+
+                mission.relations = dsl::mission_relations
+                    .filter(dsl::mission_id.eq(&id))
+                    .order_by(dsl::updated_at.asc())
+                    .get_results::<Relation>(conn)?
+                    .into_iter()
+                    .map(|rel| rel.account_id)
+                    .collect();
+            }
+
             db_missions.push(mission);
         }
 
@@ -332,6 +358,7 @@ impl<'db> Missions<'db> {
 
     pub async fn update_mission(
         &self,
+        account_id: &str,
         mission_id: &str,
         data: &ChangeMission<'_>,
         baggages: Option<Option<&[api_types::mission::Baggage]>>,
@@ -445,6 +472,19 @@ impl<'db> Missions<'db> {
                 }
             }
 
+            // update relations
+            {
+                use crate::db::schema::mission_relations::dsl;
+                diesel::insert_into(dsl::mission_relations)
+                    .values(NewRelation {
+                        mission_id,
+                        account_id,
+                        updated_at: &Utc::now().naive_utc(),
+                    })
+                    .on_conflict_do_nothing()
+                    .execute(conn)?;
+            }
+
             Ok(())
         })
     }
@@ -460,6 +500,7 @@ pub struct DbMission {
     pub catapult_shell_info: Option<CatapultShellInfo>,
     pub baggages: Vec<Baggage>,
     pub baggage_ammo_infos: HashMap<i64, AmmoInfo>,
+    pub relations: Vec<String>,
 }
 
 impl From<Mission> for DbMission {
@@ -474,6 +515,7 @@ impl From<Mission> for DbMission {
             catapult_shell_info: None,
             baggages: Vec::default(),
             baggage_ammo_infos: HashMap::default(),
+            relations: Vec::default(),
         }
     }
 }
@@ -502,6 +544,7 @@ impl DbMission {
                 baggage
             })
             .collect();
+        api_mission.relations = self.relations;
 
         api_mission
     }
