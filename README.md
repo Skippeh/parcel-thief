@@ -73,6 +73,7 @@ Note that this list might be inconclusive and maybe even slightly incorrect.
 ### Server
 
 - [ ] More testing with more players doing the same missions, etc. Generally I've only been able to test with two accounts.
+- [ ] Account id's are some sort of hash that needs to be figured out, otherwise some non-critical things don't work properly (listed in known issues).
 
 ### Client
 
@@ -99,6 +100,8 @@ Note that this list might be inconclusive and maybe even slightly incorrect.
 ## Known issues
 
 - Various missing object types, usually noticed when the game calls the `findQpidObjects` or `createObject` endpoints with unknown object types in the request. It will still work but a warning will be logged.
+- Game does not query player profiles, most likely due to account id not being a valid hash of some sort.
+- The game does not say which player contributed shared cargo in shared lockers, and potentially more places. Likely due to account id not being a valid hash of some sort.
 
 ## Building
 
