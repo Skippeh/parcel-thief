@@ -65,7 +65,7 @@ impl<'db> Missions<'db> {
                     online_mission_type: mission.online_mission_type,
                     progress_state: ProgressState::Ready, // todo: this might be wrong
                     registered_time: &registered_time,
-                    expiration_time: &expiration_time,
+                    expiration_time: &expiration_time, // note: this isn't used yet (maybe it shouldn't be?)
                 })
                 .get_result::<Mission>(conn)?;
 
