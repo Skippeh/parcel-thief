@@ -60,7 +60,7 @@ pub enum RTTITypeHash {
     LocalizedTextResource = 0x31BE502435317445,
 }
 
-#[derive(Debug)]
+#[derive(Debug, enum_as_inner::EnumAsInner)]
 pub enum RTTIType {
     RawMaterialListItem(RawMaterialListItem),
     LocalizedTextResource(LocalizedTextResource),

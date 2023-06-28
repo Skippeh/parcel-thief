@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use uuid::Uuid;
 
-use super::string::DSString;
+use super::{string::DSString, CoreFile};
 
 pub trait ResolveRef {
     type RefType: Sized + super::Read;
@@ -51,7 +51,7 @@ impl<T: Sized + super::Read> ResolveRef for InternalRef<T> {
     type RefType = T;
 
     fn resolve_ref(&self) -> Result<Self::RefType, anyhow::Error> {
-        todo!()
+        todo!("Internal ref resolution not implemented")
     }
 }
 
@@ -59,7 +59,7 @@ impl<T: Sized + super::Read> ResolveRef for ExternalRef<T> {
     type RefType = T;
 
     fn resolve_ref(&self) -> Result<Self::RefType, anyhow::Error> {
-        todo!()
+        todo!("External ref resolution not implemented")
     }
 }
 
