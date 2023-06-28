@@ -132,6 +132,10 @@ impl CoreFile {
 
             match read_object(hash, &mut slice_reader) {
                 Ok(obj) => {
+                    if slice_reader.pos != slice_reader.length {
+                        anyhow::bail!("Did not read all bytes ({}/{})", slice_reader.pos, slice_reader.length);
+                    }
+
                     let uuid = *obj.object_uuid();
 
                     entries.push(Entry {
