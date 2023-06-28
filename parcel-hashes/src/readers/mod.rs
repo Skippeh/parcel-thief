@@ -86,7 +86,7 @@ impl RTTIType {
 
 #[derive(Debug)]
 pub struct Entry {
-    pub hash: u64,
+    pub type_hash: u64,
     pub uuid: Uuid,
     pub value: RTTIType,
 }
@@ -136,7 +136,7 @@ impl CoreFile {
                     println!("uuid: {}", uuid);
 
                     entries.push(Entry {
-                        hash,
+                        type_hash: hash,
                         uuid,
                         value: obj,
                     });
@@ -172,7 +172,7 @@ impl CoreFile {
                 anyhow::bail!("Duplicate UUID found");
             }
 
-            self.hash_lookup.entry(entry.hash).or_default().push(index);
+            self.hash_lookup.entry(entry.type_hash).or_default().push(index);
         }
 
         Ok(())
