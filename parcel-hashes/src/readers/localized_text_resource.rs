@@ -44,9 +44,9 @@ pub enum Language {
     Swedish = 15,
     #[serde(rename = "ja")]
     Japanese = 16,
-    #[serde(rename = "latamsp")]
+    #[serde(rename = "es-419")]
     Latamsp = 17,
-    #[serde(rename = "latampor")]
+    #[serde(rename = "latampor")] // latin america portuguese (not sure what the language code is)
     Latampor = 18,
     #[serde(rename = "tr")]
     Turkish = 19,
