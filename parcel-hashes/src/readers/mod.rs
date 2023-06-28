@@ -10,10 +10,11 @@ use int_enum::IntEnum;
 use uuid::Uuid;
 
 use self::{
-    core_file::CoreFile, localized_text_resource::LocalizedTextResource,
-    raw_material_list_item::RawMaterialListItem,
+    commodity_list_item::CommodityListItem, core_file::CoreFile,
+    localized_text_resource::LocalizedTextResource, raw_material_list_item::RawMaterialListItem,
 };
 
+pub mod commodity_list_item;
 pub mod core_file;
 pub mod core_object;
 pub mod game_list_item_base;
@@ -38,12 +39,14 @@ pub trait Read: Sized {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, IntEnum)]
 pub enum RTTITypeHash {
     RawMaterialListItem = 0x6543AE76010E714E,
+    CommodityListItem = 0x59441CF90AC3CF1B,
     LocalizedTextResource = 0x31BE502435317445,
 }
 
 #[derive(Debug, Clone, enum_as_inner::EnumAsInner)]
 pub enum RTTIType {
     RawMaterialListItem(RawMaterialListItem),
+    CommodityListItem(CommodityListItem),
     LocalizedTextResource(LocalizedTextResource),
 }
 
@@ -52,6 +55,15 @@ impl RTTIType {
         match self {
             // this is stupid but i don't care enough to refactor it since this project is relatively small and is only for development purposes
             RTTIType::RawMaterialListItem(item) => {
+                &item
+                    .as_ref()
+                    .as_ref()
+                    .as_ref()
+                    .as_ref()
+                    .as_ref()
+                    .object_uuid
+            }
+            RTTIType::CommodityListItem(item) => {
                 &item
                     .as_ref()
                     .as_ref()

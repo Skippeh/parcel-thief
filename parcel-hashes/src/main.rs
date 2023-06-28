@@ -7,7 +7,9 @@ use std::{
 };
 
 use clap::Parser;
-use readers::{localized_text_resource::Language, LoadContext};
+use readers::{
+    game_list_item_base::GameListItemBase, localized_text_resource::Language, LoadContext,
+};
 use serde::Serialize;
 
 #[derive(Debug, clap::Parser)]
@@ -59,6 +61,11 @@ fn read_baggages(
         load_context,
     )?);
 
+    out_baggages.append(&mut read_baggages_from_file(
+        &PathBuf::from_str("ds/catalogue/things/item.core").expect("Path should always be valid"),
+        load_context,
+    )?);
+
     Ok(())
 }
 
@@ -75,39 +82,60 @@ fn read_baggages_from_file(
             .as_raw_material_list_item()
             .expect("Entry should be a RawMaterialListItem");
 
-        let mut names = BTreeMap::new();
-        let mut descriptions = BTreeMap::new();
-
-        // load localization from ref
-        let name_res = &item.as_ref().as_ref().localized_name.value;
-        let desc_res = &item.as_ref().as_ref().localized_description.value;
-
-        if let Some(name_res) = name_res {
-            for (lang, name) in &name_res
-                .as_localized_text_resource()
-                .expect("Name should always be LocalizedTextResource")
-                .languages
-            {
-                names.insert(*lang, name.text.clone());
-            }
-        }
-
-        if let Some(desc_res) = desc_res {
-            for (lang, desc) in &desc_res
-                .as_localized_text_resource()
-                .expect("Description should always be LocalizedTextResource")
-                .languages
-            {
-                descriptions.insert(*lang, desc.text.clone());
-            }
-        }
+        let (names, descriptions) = get_names_and_descriptions(item.as_ref().as_ref());
 
         baggages.push(Baggage {
             name_hash: item.as_ref().as_ref().name_code,
             names,
             descriptions,
-        })
+        });
+    }
+
+    for item in file.get_objects(&readers::RTTITypeHash::CommodityListItem)? {
+        let item = item
+            .as_commodity_list_item()
+            .expect("Entry should be a CommodityListItem");
+
+        let (names, descriptions) = get_names_and_descriptions(item.as_ref().as_ref());
+
+        baggages.push(Baggage {
+            name_hash: item.as_ref().as_ref().name_code,
+            names,
+            descriptions,
+        });
     }
 
     Ok(baggages)
+}
+
+fn get_names_and_descriptions(
+    item: &GameListItemBase,
+) -> (BTreeMap<Language, String>, BTreeMap<Language, String>) {
+    let mut names = BTreeMap::new();
+    let mut descriptions = BTreeMap::new();
+
+    // load localization from ref
+    let name_res = &item.localized_name.value;
+    let desc_res = &item.localized_description.value;
+
+    if let Some(name_res) = name_res {
+        for (lang, name) in &name_res
+            .as_localized_text_resource()
+            .expect("Name should always be LocalizedTextResource")
+            .languages
+        {
+            names.insert(*lang, name.text.clone());
+        }
+    }
+
+    if let Some(desc_res) = desc_res {
+        for (lang, desc) in &desc_res
+            .as_localized_text_resource()
+            .expect("Description should always be LocalizedTextResource")
+            .languages
+        {
+            descriptions.insert(*lang, desc.text.clone());
+        }
+    }
+    (names, descriptions)
 }

@@ -5,8 +5,9 @@ use int_enum::IntEnum;
 use uuid::Uuid;
 
 use super::{
-    localized_text_resource::LocalizedTextResource, raw_material_list_item::RawMaterialListItem,
-    LoadContext, RTTIType, RTTITypeHash, Read, ReadRTTIType,
+    commodity_list_item::CommodityListItem, localized_text_resource::LocalizedTextResource,
+    raw_material_list_item::RawMaterialListItem, LoadContext, RTTIType, RTTITypeHash, Read,
+    ReadRTTIType,
 };
 
 #[derive(Debug)]
@@ -162,6 +163,10 @@ fn read_object(
         Ok(RTTITypeHash::LocalizedTextResource) => {
             let item = LocalizedTextResource::read(reader, context)?;
             Ok(RTTIType::LocalizedTextResource(item))
+        }
+        Ok(RTTITypeHash::CommodityListItem) => {
+            let item = CommodityListItem::read(reader, context)?;
+            Ok(RTTIType::CommodityListItem(item))
         }
         _ => anyhow::bail!("Unknown RTTI type hash"),
     }
