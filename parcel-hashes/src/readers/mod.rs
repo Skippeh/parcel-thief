@@ -133,7 +133,6 @@ impl CoreFile {
             match read_object(hash, &mut slice_reader) {
                 Ok(obj) => {
                     let uuid = *obj.object_uuid();
-                    println!("uuid: {}", uuid);
 
                     entries.push(Entry {
                         type_hash: hash,
