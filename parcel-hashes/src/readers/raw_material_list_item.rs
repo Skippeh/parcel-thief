@@ -31,7 +31,7 @@ impl super::Read for RawMaterialType {
 }
 
 impl super::ReadRTTIType for RawMaterialListItem {
-    fn rtti_type(&self) -> super::RTTITypeHash {
+    fn rtti_type() -> super::RTTITypeHash {
         super::RTTITypeHash::RawMaterialListItem
     }
 }

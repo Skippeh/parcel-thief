@@ -46,7 +46,7 @@ impl Read for ListItemColor {
 }
 
 pub trait ReadRTTIType {
-    fn rtti_type(&self) -> RTTITypeHash;
+    fn rtti_type() -> RTTITypeHash;
 }
 
 pub trait Read: Sized {

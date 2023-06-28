@@ -9,7 +9,7 @@ pub struct LocalizedTextResource {
 }
 
 impl super::ReadRTTIType for LocalizedTextResource {
-    fn rtti_type(&self) -> super::RTTITypeHash {
+    fn rtti_type() -> super::RTTITypeHash {
         super::RTTITypeHash::LocalizedTextResource
     }
 }
