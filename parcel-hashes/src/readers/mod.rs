@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs::File, ops::Deref};
+use std::{collections::HashMap, fs::File, ops::Deref, result};
 
 use binary_reader::BinaryReader;
 use int_enum::IntEnum;
@@ -164,6 +164,38 @@ impl CoreFile {
         };
         result.update_lookups()?;
         Ok(result)
+    }
+
+    pub fn find_object<T: ReadRTTIType>(&self, uuid: &Uuid) -> Result<Option<&RTTIType>, anyhow::Error> {
+        let index = self.uuid_lookup.get(uuid);
+
+        if let Some(index) = index {
+            let entry = &self.entries[*index];
+
+            if T::rtti_type().int_value() != entry.type_hash {
+                return Err(anyhow::anyhow!("Object type mismatch"))
+            }
+
+            Ok(Some(&entry.value))
+        } else {
+            Ok(None)
+        }
+    }
+
+    pub fn get_objects(&self, ty: &RTTITypeHash) -> Result<Vec<&RTTIType>, anyhow::Error> {
+        let indices = self.hash_lookup.get(&ty.int_value());
+
+        if let Some(indices) = indices {
+            let mut result = Vec::new();
+
+            for index in indices {
+                result.push(&self.entries[*index].value);
+            }
+
+            Ok(result)
+        } else {
+            Ok(Vec::default())
+        }
     }
 
     fn update_lookups(&mut self) -> Result<(), anyhow::Error> {
