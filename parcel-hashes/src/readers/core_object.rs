@@ -1,13 +1,16 @@
-use super::rtti_ref_object::RTTIRefObject;
+use super::{rtti_ref_object::RTTIRefObject, LoadContext};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CoreObject {
     base: RTTIRefObject,
 }
 
 impl super::Read for CoreObject {
-    fn read(reader: &mut binary_reader::BinaryReader) -> Result<Self, anyhow::Error> {
-        let base = RTTIRefObject::read(reader)?;
+    fn read(
+        reader: &mut binary_reader::BinaryReader,
+        context: &mut LoadContext,
+    ) -> Result<Self, anyhow::Error> {
+        let base = RTTIRefObject::read(reader, context)?;
         Ok(CoreObject { base })
     }
 }

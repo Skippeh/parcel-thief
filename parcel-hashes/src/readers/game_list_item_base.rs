@@ -1,19 +1,24 @@
-use super::{localized_text_resource::LocalizedTextResource, reference::Ref, resource::Resource};
+use super::{
+    localized_text_resource::LocalizedTextResource, reference::Ref, resource::Resource, LoadContext,
+};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct GameListItemBase {
     base: Resource,
-    pub localized_name: Option<Ref<LocalizedTextResource>>,
-    pub localized_description: Option<Ref<LocalizedTextResource>>,
+    pub localized_name: Ref<LocalizedTextResource>,
+    pub localized_description: Ref<LocalizedTextResource>,
     pub id: u32,
     pub name_code: u32,
 }
 
 impl super::Read for GameListItemBase {
-    fn read(reader: &mut binary_reader::BinaryReader) -> Result<Self, anyhow::Error> {
-        let base = Resource::read(reader)?;
-        let localized_name = Option::<Ref<LocalizedTextResource>>::read(reader)?;
-        let localized_description = Option::<Ref<LocalizedTextResource>>::read(reader)?;
+    fn read(
+        reader: &mut binary_reader::BinaryReader,
+        context: &mut LoadContext,
+    ) -> Result<Self, anyhow::Error> {
+        let base = Resource::read(reader, context)?;
+        let localized_name = Ref::<LocalizedTextResource>::read(reader, context)?;
+        let localized_description = Ref::<LocalizedTextResource>::read(reader, context)?;
         let id = reader.read_u32()?;
         let name_code = reader.read_u32()?;
 

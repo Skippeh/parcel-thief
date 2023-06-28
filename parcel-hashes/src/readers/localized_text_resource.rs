@@ -1,11 +1,13 @@
 use std::collections::HashMap;
 
-use serde::Serialize;
 use enum_iterator::all;
+use serde::Serialize;
 
-use super::resource::Resource;
+use super::{resource::Resource, LoadContext};
 
-#[derive(Debug, Serialize, enum_iterator::Sequence, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Debug, Serialize, enum_iterator::Sequence, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash,
+)]
 #[repr(i32)]
 pub enum Language {
     #[serde(rename = "unknown")]
@@ -62,13 +64,13 @@ pub enum Language {
     Hungarian = 25,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LocalizedTextResource {
     base: Resource,
     pub languages: HashMap<Language, DSLocalizedText>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct DSLocalizedText {
     pub text: String,
     pub notes: String,
@@ -82,8 +84,11 @@ impl super::ReadRTTIType for LocalizedTextResource {
 }
 
 impl super::Read for LocalizedTextResource {
-    fn read(reader: &mut binary_reader::BinaryReader) -> Result<Self, anyhow::Error> {
-        let base = Resource::read(reader)?;
+    fn read(
+        reader: &mut binary_reader::BinaryReader,
+        context: &mut LoadContext,
+    ) -> Result<Self, anyhow::Error> {
+        let base = Resource::read(reader, context)?;
         let mut languages = HashMap::new();
 
         for lang in all::<Language>() {
@@ -91,30 +96,26 @@ impl super::Read for LocalizedTextResource {
                 continue;
             }
 
-            let ds_text = DSLocalizedText::read(reader)?;
+            let ds_text = DSLocalizedText::read(reader, context)?;
             languages.insert(lang, ds_text);
         }
 
-        Ok(Self {
-            base,
-            languages,
-        })
+        Ok(Self { base, languages })
     }
 }
 
 impl super::Read for DSLocalizedText {
-    fn read(reader: &mut binary_reader::BinaryReader) -> Result<Self, anyhow::Error> {
+    fn read(
+        reader: &mut binary_reader::BinaryReader,
+        _: &mut LoadContext,
+    ) -> Result<Self, anyhow::Error> {
         let text_len = reader.read_u16()?;
-            let text = String::from_utf8(reader.read_bytes(text_len as usize)?.to_vec())?;
-            let notes_len = reader.read_u16()?;
-            let notes = String::from_utf8(reader.read_bytes(notes_len as usize)?.to_vec())?;
-            let flags = reader.read_u8()?;
+        let text = String::from_utf8(reader.read_bytes(text_len as usize)?.to_vec())?;
+        let notes_len = reader.read_u16()?;
+        let notes = String::from_utf8(reader.read_bytes(notes_len as usize)?.to_vec())?;
+        let flags = reader.read_u8()?;
 
-        Ok(Self {
-            text,
-            notes,
-            flags,
-        })
+        Ok(Self { text, notes, flags })
     }
 }
 

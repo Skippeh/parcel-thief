@@ -1,12 +1,12 @@
-use super::game_list_item_base_with_icon::GameListItemBaseWithIcon;
+use super::{game_list_item_base_with_icon::GameListItemBaseWithIcon, LoadContext};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct RawMaterialListItem {
     base: GameListItemBaseWithIcon,
     pub raw_material_type: RawMaterialType,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum RawMaterialType {
     Crystal,
     Resin,
@@ -17,7 +17,10 @@ pub enum RawMaterialType {
 }
 
 impl super::Read for RawMaterialType {
-    fn read(reader: &mut binary_reader::BinaryReader) -> Result<Self, anyhow::Error> {
+    fn read(
+        reader: &mut binary_reader::BinaryReader,
+        _: &mut LoadContext,
+    ) -> Result<Self, anyhow::Error> {
         match reader.read_u16()? {
             0 => Ok(Self::Crystal),
             1 => Ok(Self::Resin),
@@ -37,9 +40,12 @@ impl super::ReadRTTIType for RawMaterialListItem {
 }
 
 impl super::Read for RawMaterialListItem {
-    fn read(reader: &mut binary_reader::BinaryReader) -> Result<Self, anyhow::Error> {
-        let base = GameListItemBaseWithIcon::read(reader)?;
-        let raw_material_type = RawMaterialType::read(reader)?;
+    fn read(
+        reader: &mut binary_reader::BinaryReader,
+        context: &mut LoadContext,
+    ) -> Result<Self, anyhow::Error> {
+        let base = GameListItemBaseWithIcon::read(reader, context)?;
+        let raw_material_type = RawMaterialType::read(reader, context)?;
 
         Ok(Self {
             base,

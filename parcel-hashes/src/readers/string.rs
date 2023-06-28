@@ -1,9 +1,15 @@
 use std::ops::{Deref, DerefMut};
 
+use super::LoadContext;
+
+#[derive(Debug, Clone)]
 pub struct DSString(String);
 
 impl super::Read for DSString {
-    fn read(reader: &mut binary_reader::BinaryReader) -> Result<Self, anyhow::Error> {
+    fn read(
+        reader: &mut binary_reader::BinaryReader,
+        _: &mut LoadContext,
+    ) -> Result<Self, anyhow::Error> {
         let len = reader.read_u32()?;
 
         if len > 0 {

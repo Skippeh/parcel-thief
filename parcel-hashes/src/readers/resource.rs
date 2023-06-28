@@ -1,13 +1,16 @@
-use super::core_object::CoreObject;
+use super::{core_object::CoreObject, LoadContext};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Resource {
     base: CoreObject,
 }
 
 impl super::Read for Resource {
-    fn read(reader: &mut binary_reader::BinaryReader) -> Result<Self, anyhow::Error> {
-        let base = CoreObject::read(reader)?;
+    fn read(
+        reader: &mut binary_reader::BinaryReader,
+        context: &mut LoadContext,
+    ) -> Result<Self, anyhow::Error> {
+        let base = CoreObject::read(reader, context)?;
         Ok(Self { base })
     }
 }
