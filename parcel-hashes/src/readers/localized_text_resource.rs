@@ -65,7 +65,7 @@ pub enum Language {
 #[derive(Debug)]
 pub struct LocalizedTextResource {
     base: Resource,
-    languages: HashMap<Language, DSLocalizedText>,
+    pub languages: HashMap<Language, DSLocalizedText>,
 }
 
 #[derive(Debug)]
