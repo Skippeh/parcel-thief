@@ -51,8 +51,8 @@ impl<T: Sized + Read + ReadRTTIType> super::Read for Ref<T> {
             0 => Ok(Self::none()),
             // 1 = internal link, 5 = internal reference
             1 | 5 => {
-                let uuid = Uuid::from_slice_le(reader.read_bytes(16)?)?;
-                Ok(Self::none()) // todo: implement resolving internal references
+                let _uuid = Uuid::from_slice_le(reader.read_bytes(16)?)?;
+                anyhow::bail!("Internal reference parsing is not supported");
             }
             // 2 = external link, 3 = external reference
             2 | 3 => {
