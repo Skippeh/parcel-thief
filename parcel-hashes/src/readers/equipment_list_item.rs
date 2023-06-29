@@ -11,7 +11,7 @@ pub enum EquipmentType {
 impl super::Read for EquipmentType {
     fn read(
         reader: &mut binary_reader::BinaryReader,
-        context: &mut super::LoadContext,
+        _: &mut super::LoadContext,
     ) -> Result<Self, anyhow::Error> {
         Ok(match reader.read_u16()? {
             0 => Self::Suits,

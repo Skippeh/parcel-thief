@@ -13,7 +13,7 @@ impl super::Read for DSString {
         let len = reader.read_u32()?;
 
         if len > 0 {
-            let crc = reader.read_u32();
+            let _crc = reader.read_u32();
             let utf8_bytes = reader.read_bytes(len as usize)?.to_vec();
             let str = String::from_utf8(utf8_bytes)?;
 

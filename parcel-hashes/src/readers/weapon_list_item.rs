@@ -9,7 +9,7 @@ pub enum WeaponType {
 impl super::Read for WeaponType {
     fn read(
         reader: &mut binary_reader::BinaryReader,
-        context: &mut super::LoadContext,
+        _: &mut super::LoadContext,
     ) -> Result<Self, anyhow::Error> {
         Ok(match reader.read_u16()? {
             0 => Self::Main,
@@ -29,7 +29,7 @@ pub enum WeaponCategory {
 impl super::Read for WeaponCategory {
     fn read(
         reader: &mut binary_reader::BinaryReader,
-        context: &mut super::LoadContext,
+        _: &mut super::LoadContext,
     ) -> Result<Self, anyhow::Error> {
         Ok(match reader.read_u16()? {
             0 => Self::Gun,
