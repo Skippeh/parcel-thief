@@ -5,9 +5,10 @@ use int_enum::IntEnum;
 use uuid::Uuid;
 
 use super::{
-    commodity_list_item::CommodityListItem, equipment_list_item::EquipmentListItem,
-    localized_text_resource::LocalizedTextResource, raw_material_list_item::RawMaterialListItem,
-    weapon_list_item::WeaponListItem, LoadContext, RTTIType, RTTITypeHash, Read, ReadRTTIType,
+    baggage_list_item::BaggageListItem, commodity_list_item::CommodityListItem,
+    equipment_list_item::EquipmentListItem, localized_text_resource::LocalizedTextResource,
+    raw_material_list_item::RawMaterialListItem, weapon_list_item::WeaponListItem, LoadContext,
+    RTTIType, RTTITypeHash, Read, ReadRTTIType,
 };
 
 #[derive(Debug)]
@@ -49,12 +50,12 @@ impl CoreFile {
             let mut slice_reader = BinaryReader::from_u8(slice);
             slice_reader.set_endian(binary_reader::Endian::Little);
 
-            println!(
+            /*println!(
                 "Reading {} at offset {} of {} byte(s)",
                 obj_type_name,
                 reader.pos - slice_reader.length,
                 slice_reader.length
-            );
+            );*/
 
             match read_object(hash, &mut slice_reader, context) {
                 Ok(obj) => {
@@ -175,6 +176,10 @@ fn read_object(
         Ok(RTTITypeHash::EquipmentListItem) => {
             let item = EquipmentListItem::read(reader, context)?;
             Ok(RTTIType::EquipmentListItem(item))
+        }
+        Ok(RTTITypeHash::BaggageListItem) => {
+            let item = BaggageListItem::read(reader, context)?;
+            Ok(RTTIType::BaggageListItem(item))
         }
         _ => anyhow::bail!("Unknown RTTI type hash"),
     }

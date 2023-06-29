@@ -56,23 +56,37 @@ fn read_baggages(
     out_baggages: &mut Vec<Baggage>,
 ) -> Result<(), anyhow::Error> {
     out_baggages.append(&mut read_baggages_from_file(
-        &PathBuf::from_str("ds/catalogue/things/rawmaterial.core")
+        &PathBuf::from_str("ds/catalogue/baggages/baggage_equipment.core")
             .expect("Path should always be valid"),
         load_context,
     )?);
 
     out_baggages.append(&mut read_baggages_from_file(
-        &PathBuf::from_str("ds/catalogue/things/item.core").expect("Path should always be valid"),
+        &PathBuf::from_str("ds/catalogue/baggages/baggage_item.core")
+            .expect("Path should always be valid"),
         load_context,
     )?);
 
     out_baggages.append(&mut read_baggages_from_file(
-        &PathBuf::from_str("ds/catalogue/things/weapon.core").expect("Path should always be valid"),
+        &PathBuf::from_str("ds/catalogue/baggages/baggage_mission.core")
+            .expect("Path should always be valid"),
         load_context,
     )?);
 
     out_baggages.append(&mut read_baggages_from_file(
-        &PathBuf::from_str("ds/catalogue/things/equipment.core")
+        &PathBuf::from_str("ds/catalogue/baggages/baggage_rawmaterial.core")
+            .expect("Path should always be valid"),
+        load_context,
+    )?);
+
+    out_baggages.append(&mut read_baggages_from_file(
+        &PathBuf::from_str("ds/catalogue/baggages/baggage_special.core")
+            .expect("Path should always be valid"),
+        load_context,
+    )?);
+
+    out_baggages.append(&mut read_baggages_from_file(
+        &PathBuf::from_str("ds/catalogue/baggages/baggage_weapon.core")
             .expect("Path should always be valid"),
         load_context,
     )?);
@@ -88,7 +102,7 @@ fn read_baggages_from_file(
     let file = load_context.load_file(path)?;
 
     // Add all RawMaterialListItems
-    for item in file.get_objects(&readers::RTTITypeHash::RawMaterialListItem)? {
+    /*for item in file.get_objects(&readers::RTTITypeHash::RawMaterialListItem)? {
         let item = item
             .as_raw_material_list_item()
             .expect("Entry should be a RawMaterialListItem");
@@ -100,45 +114,18 @@ fn read_baggages_from_file(
             names,
             descriptions,
         });
-    }
+    }*/
 
-    for item in file.get_objects(&readers::RTTITypeHash::CommodityListItem)? {
+    // Add all BaggageListItems
+    for item in file.get_objects(&readers::RTTITypeHash::BaggageListItem)? {
         let item = item
-            .as_commodity_list_item()
-            .expect("Entry should be a CommodityListItem");
+            .as_baggage_list_item()
+            .expect("Entry should be a BaggageListItem");
 
-        let (names, descriptions) = get_names_and_descriptions(item.as_ref().as_ref());
+        let (names, descriptions) = get_names_and_descriptions(item.as_ref());
 
         baggages.push(Baggage {
-            name_hash: item.as_ref().as_ref().name_code,
-            names,
-            descriptions,
-        });
-    }
-
-    for item in file.get_objects(&readers::RTTITypeHash::WeaponListItem)? {
-        let item = item
-            .as_weapon_list_item()
-            .expect("Entry should be a WeaponListItem");
-
-        let (names, descriptions) = get_names_and_descriptions(item.as_ref().as_ref());
-
-        baggages.push(Baggage {
-            name_hash: item.as_ref().as_ref().name_code,
-            names,
-            descriptions,
-        });
-    }
-
-    for item in file.get_objects(&readers::RTTITypeHash::EquipmentListItem)? {
-        let item = item
-            .as_equipment_list_item()
-            .expect("Entry should be a EquipmentListItem");
-
-        let (names, descriptions) = get_names_and_descriptions(item.as_ref().as_ref());
-
-        baggages.push(Baggage {
-            name_hash: item.as_ref().as_ref().name_code,
+            name_hash: item.as_ref().name_code,
             names,
             descriptions,
         });

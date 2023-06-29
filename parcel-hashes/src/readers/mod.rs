@@ -10,11 +10,13 @@ use int_enum::IntEnum;
 use uuid::Uuid;
 
 use self::{
-    commodity_list_item::CommodityListItem, core_file::CoreFile,
-    equipment_list_item::EquipmentListItem, localized_text_resource::LocalizedTextResource,
-    raw_material_list_item::RawMaterialListItem, weapon_list_item::WeaponListItem,
+    baggage_list_item::BaggageListItem, commodity_list_item::CommodityListItem,
+    core_file::CoreFile, equipment_list_item::EquipmentListItem,
+    localized_text_resource::LocalizedTextResource, raw_material_list_item::RawMaterialListItem,
+    weapon_list_item::WeaponListItem,
 };
 
+mod baggage_list_item;
 pub mod commodity_list_item;
 pub mod core_file;
 pub mod core_object;
@@ -45,6 +47,7 @@ pub enum RTTITypeHash {
     CommodityListItem = 0x59441CF90AC3CF1B,
     WeaponListItem = 0xED0E1221E8D4D3A3,
     EquipmentListItem = 0xA6078EBE103EDA4C,
+    BaggageListItem = 0x72CB5ED4F1C815EE,
     LocalizedTextResource = 0x31BE502435317445,
 }
 
@@ -54,6 +57,7 @@ pub enum RTTIType {
     CommodityListItem(CommodityListItem),
     WeaponListItem(WeaponListItem),
     EquipmentListItem(EquipmentListItem),
+    BaggageListItem(BaggageListItem),
     LocalizedTextResource(LocalizedTextResource),
 }
 
@@ -96,6 +100,9 @@ impl RTTIType {
                     .as_ref()
                     .as_ref()
                     .object_uuid
+            }
+            RTTIType::BaggageListItem(item) => {
+                &item.as_ref().as_ref().as_ref().as_ref().object_uuid
             }
             RTTIType::LocalizedTextResource(item) => &item.as_ref().as_ref().as_ref().object_uuid,
         }

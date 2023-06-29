@@ -4,19 +4,6 @@ use uuid::Uuid;
 
 use super::{string::DSString, LoadContext, RTTIType, Read, ReadRTTIType};
 
-pub trait ResolveRef {
-    type RefType: Sized + Read + ReadRTTIType;
-
-    fn resolve_ref(&self, context: &mut LoadContext) -> Result<Option<RTTIType>, anyhow::Error>;
-}
-
-#[derive(Debug)]
-pub enum RefKind {
-    None, // Means reference is unset (null)
-    Link,
-    Reference,
-}
-
 #[derive(Debug, Clone)]
 pub struct Ref<T: Sized + Read + ReadRTTIType> {
     pub value: Option<Box<RTTIType>>,
@@ -72,5 +59,45 @@ impl<T: Sized + Read + ReadRTTIType> super::Read for Ref<T> {
             }
             _ => anyhow::bail!("Unknown reference kind: {}", kind),
         }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct UnresolvedRef<T: Sized + Read> {
+    pub uuid: Option<Uuid>,
+    pub path: Option<String>,
+    _data_type: PhantomData<T>,
+}
+
+impl<T: Sized + Read> Read for UnresolvedRef<T> {
+    fn read(
+        reader: &mut binary_reader::BinaryReader,
+        context: &mut LoadContext,
+    ) -> Result<Self, anyhow::Error> {
+        let kind = reader.read_u8()?;
+        let uuid;
+        let path;
+
+        match kind {
+            0 => {
+                uuid = None;
+                path = None;
+            }
+            1 | 5 => {
+                uuid = Some(Uuid::from_slice_le(reader.read_bytes(16)?)?);
+                path = None;
+            }
+            2 | 3 => {
+                uuid = Some(Uuid::from_slice_le(reader.read_bytes(16)?)?);
+                path = Some(DSString::read(reader, context)?.into());
+            }
+            _ => anyhow::bail!("Unknown reference kind: {}", kind),
+        }
+
+        Ok(Self {
+            uuid,
+            path,
+            _data_type: PhantomData,
+        })
     }
 }
