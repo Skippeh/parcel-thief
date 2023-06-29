@@ -11,13 +11,14 @@ use uuid::Uuid;
 
 use self::{
     commodity_list_item::CommodityListItem, core_file::CoreFile,
-    localized_text_resource::LocalizedTextResource, raw_material_list_item::RawMaterialListItem,
-    weapon_list_item::WeaponListItem,
+    equipment_list_item::EquipmentListItem, localized_text_resource::LocalizedTextResource,
+    raw_material_list_item::RawMaterialListItem, weapon_list_item::WeaponListItem,
 };
 
 pub mod commodity_list_item;
 pub mod core_file;
 pub mod core_object;
+mod equipment_list_item;
 pub mod game_list_item_base;
 pub mod game_list_item_base_with_icon;
 pub mod localized_text_resource;
@@ -43,6 +44,7 @@ pub enum RTTITypeHash {
     RawMaterialListItem = 0x6543AE76010E714E,
     CommodityListItem = 0x59441CF90AC3CF1B,
     WeaponListItem = 0xED0E1221E8D4D3A3,
+    EquipmentListItem = 0xA6078EBE103EDA4C,
     LocalizedTextResource = 0x31BE502435317445,
 }
 
@@ -51,6 +53,7 @@ pub enum RTTIType {
     RawMaterialListItem(RawMaterialListItem),
     CommodityListItem(CommodityListItem),
     WeaponListItem(WeaponListItem),
+    EquipmentListItem(EquipmentListItem),
     LocalizedTextResource(LocalizedTextResource),
 }
 
@@ -77,6 +80,15 @@ impl RTTIType {
                     .object_uuid
             }
             RTTIType::WeaponListItem(item) => {
+                &item
+                    .as_ref()
+                    .as_ref()
+                    .as_ref()
+                    .as_ref()
+                    .as_ref()
+                    .object_uuid
+            }
+            RTTIType::EquipmentListItem(item) => {
                 &item
                     .as_ref()
                     .as_ref()

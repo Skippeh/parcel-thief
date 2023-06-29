@@ -71,6 +71,12 @@ fn read_baggages(
         load_context,
     )?);
 
+    out_baggages.append(&mut read_baggages_from_file(
+        &PathBuf::from_str("ds/catalogue/things/equipment.core")
+            .expect("Path should always be valid"),
+        load_context,
+    )?);
+
     Ok(())
 }
 
@@ -121,7 +127,21 @@ fn read_baggages_from_file(
             name_hash: item.as_ref().as_ref().name_code,
             names,
             descriptions,
-        })
+        });
+    }
+
+    for item in file.get_objects(&readers::RTTITypeHash::EquipmentListItem)? {
+        let item = item
+            .as_equipment_list_item()
+            .expect("Entry should be a EquipmentListItem");
+
+        let (names, descriptions) = get_names_and_descriptions(item.as_ref().as_ref());
+
+        baggages.push(Baggage {
+            name_hash: item.as_ref().as_ref().name_code,
+            names,
+            descriptions,
+        });
     }
 
     Ok(baggages)
