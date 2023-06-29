@@ -50,6 +50,12 @@ pub struct WeaponListItem {
     pub param_2: u16,
 }
 
+impl super::ReadRTTIType for WeaponListItem {
+    fn rtti_type() -> super::RTTITypeHash {
+        super::RTTITypeHash::WeaponListItem
+    }
+}
+
 impl super::Read for WeaponListItem {
     fn read(
         reader: &mut binary_reader::BinaryReader,

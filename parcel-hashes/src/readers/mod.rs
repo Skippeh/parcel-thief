@@ -42,16 +42,16 @@ pub trait Read: Sized {
 pub enum RTTITypeHash {
     RawMaterialListItem = 0x6543AE76010E714E,
     CommodityListItem = 0x59441CF90AC3CF1B,
-    LocalizedTextResource = 0x31BE502435317445,
     WeaponListItem = 0xED0E1221E8D4D3A3,
+    LocalizedTextResource = 0x31BE502435317445,
 }
 
 #[derive(Debug, Clone, enum_as_inner::EnumAsInner)]
 pub enum RTTIType {
     RawMaterialListItem(RawMaterialListItem),
     CommodityListItem(CommodityListItem),
-    LocalizedTextResource(LocalizedTextResource),
     WeaponListItem(WeaponListItem),
+    LocalizedTextResource(LocalizedTextResource),
 }
 
 impl RTTIType {
