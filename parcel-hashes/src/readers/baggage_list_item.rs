@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 use super::{
     game_list_item_base::GameListItemBase, game_list_item_base_with_icon::GameListItemBaseWithIcon,
     reference::UnresolvedRef,
@@ -31,7 +33,8 @@ impl super::Read for BaggageAttribute {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
+#[serde(rename_all = "camelCase")]
 #[repr(u8)]
 pub enum BaggageCaseType {
     Normal,
@@ -85,7 +88,8 @@ impl super::Read for BaggageCaseType {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
+#[serde(rename_all = "camelCase")]
 #[repr(u8)]
 pub enum ContentsDamageType {
     Normal,
@@ -119,7 +123,8 @@ impl super::Read for ContentsDamageType {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
+#[serde(rename_all = "camelCase")]
 #[repr(u8)]
 pub enum ContentsType {
     Commodity,
@@ -145,7 +150,8 @@ impl super::Read for ContentsType {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
+#[serde(rename_all = "camelCase")]
 #[repr(u8)]
 pub enum VolumeType {
     Small,
@@ -175,18 +181,18 @@ impl super::Read for VolumeType {
 pub struct BaggageListItem {
     base: GameListItemBase,
     pub attribute_of_baggage: BaggageAttribute,
-    pub case_type: BaggageCaseType,
-    pub contents_damage_type: ContentsDamageType,
-    pub contents_type: ContentsType,
-    pub volume_type: VolumeType,
+    pub type_case: BaggageCaseType,
+    pub type_contents_damage: ContentsDamageType,
+    pub type_contents: ContentsType,
+    pub type_volume: VolumeType,
     pub contents: UnresolvedRef<GameListItemBaseWithIcon>,
     pub amount: u32,
     pub sub_amount: u32,
     pub weight: f32,
-    pub contents_durability: u32,
-    pub case_durability: u32,
-    pub initial_contents_durability: u32,
-    pub initial_case_durability: u32,
+    pub durability_contents: u32,
+    pub durability_case: u32,
+    pub initial_durability_contents: u32,
+    pub initial_durability_case: u32,
     pub mission_id: u32,
     pub rarity: u8,
 }
@@ -221,18 +227,18 @@ impl super::Read for BaggageListItem {
         Ok(Self {
             base,
             attribute_of_baggage,
-            case_type,
-            contents_damage_type,
-            contents_type,
-            volume_type,
+            type_case: case_type,
+            type_contents_damage: contents_damage_type,
+            type_contents: contents_type,
+            type_volume: volume_type,
             contents,
             amount,
             sub_amount,
             weight,
-            contents_durability,
-            case_durability,
-            initial_contents_durability,
-            initial_case_durability,
+            durability_contents: contents_durability,
+            durability_case: case_durability,
+            initial_durability_contents: initial_contents_durability,
+            initial_durability_case: initial_case_durability,
             mission_id,
             rarity,
         })

@@ -16,11 +16,11 @@ use self::{
     weapon_list_item::WeaponListItem,
 };
 
-mod baggage_list_item;
+pub mod baggage_list_item;
 pub mod commodity_list_item;
 pub mod core_file;
 pub mod core_object;
-mod equipment_list_item;
+pub mod equipment_list_item;
 pub mod game_list_item_base;
 pub mod game_list_item_base_with_icon;
 pub mod localized_text_resource;

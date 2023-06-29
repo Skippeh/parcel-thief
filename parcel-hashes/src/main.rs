@@ -8,7 +8,12 @@ use std::{
 
 use clap::Parser;
 use readers::{
-    game_list_item_base::GameListItemBase, localized_text_resource::Language, LoadContext,
+    baggage_list_item::{
+        BaggageCaseType, BaggageListItem, ContentsDamageType, ContentsType, VolumeType,
+    },
+    game_list_item_base::GameListItemBase,
+    localized_text_resource::Language,
+    LoadContext,
 };
 use serde::Serialize;
 
@@ -20,19 +25,59 @@ struct Options {
 }
 
 #[derive(Debug, Serialize, Default)]
+#[serde(rename_all = "camelCase")]
 struct Output {
     baggages: Vec<Baggage>,
     qpid_areas: Vec<QpidArea>,
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 struct Baggage {
     pub name_hash: u32,
+    pub metadata: BaggageMetaData,
     pub names: BTreeMap<Language, String>,
     pub descriptions: BTreeMap<Language, String>,
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct BaggageMetaData {
+    pub type_case: BaggageCaseType,
+    pub type_contents_damage: ContentsDamageType,
+    pub type_contents: ContentsType,
+    pub type_volume: VolumeType,
+    pub amount: u32,
+    pub sub_amount: u32,
+    pub weight: f32,
+    pub durability_contents: u32,
+    pub durability_case: u32,
+    pub initial_durability_contents: u32,
+    pub initial_durability_case: u32,
+    pub mission_id: u32,
+}
+
+impl From<&BaggageListItem> for BaggageMetaData {
+    fn from(value: &BaggageListItem) -> Self {
+        Self {
+            type_case: value.type_case,
+            type_contents_damage: value.type_contents_damage,
+            type_contents: value.type_contents,
+            type_volume: value.type_volume,
+            amount: value.amount,
+            sub_amount: value.sub_amount,
+            weight: value.weight,
+            durability_contents: value.durability_contents,
+            durability_case: value.durability_case,
+            initial_durability_contents: value.initial_durability_contents,
+            initial_durability_case: value.initial_durability_case,
+            mission_id: value.mission_id,
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 struct QpidArea {
     pub qpid_id: u32,
     pub names: BTreeMap<Language, String>,
@@ -101,21 +146,6 @@ fn read_baggages_from_file(
     let mut baggages = Vec::new();
     let file = load_context.load_file(path)?;
 
-    // Add all RawMaterialListItems
-    /*for item in file.get_objects(&readers::RTTITypeHash::RawMaterialListItem)? {
-        let item = item
-            .as_raw_material_list_item()
-            .expect("Entry should be a RawMaterialListItem");
-
-        let (names, descriptions) = get_names_and_descriptions(item.as_ref().as_ref());
-
-        baggages.push(Baggage {
-            name_hash: item.as_ref().as_ref().name_code,
-            names,
-            descriptions,
-        });
-    }*/
-
     // Add all BaggageListItems
     for item in file.get_objects(&readers::RTTITypeHash::BaggageListItem)? {
         let item = item
@@ -123,11 +153,13 @@ fn read_baggages_from_file(
             .expect("Entry should be a BaggageListItem");
 
         let (names, descriptions) = get_names_and_descriptions(item.as_ref());
+        let metadata = item.into();
 
         baggages.push(Baggage {
             name_hash: item.as_ref().name_code,
             names,
             descriptions,
+            metadata,
         });
     }
 
