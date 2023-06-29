@@ -6,8 +6,8 @@ use uuid::Uuid;
 
 use super::{
     commodity_list_item::CommodityListItem, localized_text_resource::LocalizedTextResource,
-    raw_material_list_item::RawMaterialListItem, LoadContext, RTTIType, RTTITypeHash, Read,
-    ReadRTTIType,
+    raw_material_list_item::RawMaterialListItem, weapon_list_item::WeaponListItem, LoadContext,
+    RTTIType, RTTITypeHash, Read, ReadRTTIType,
 };
 
 #[derive(Debug)]
@@ -167,6 +167,10 @@ fn read_object(
         Ok(RTTITypeHash::CommodityListItem) => {
             let item = CommodityListItem::read(reader, context)?;
             Ok(RTTIType::CommodityListItem(item))
+        }
+        Ok(RTTITypeHash::WeaponListItem) => {
+            let item = WeaponListItem::read(reader, context)?;
+            Ok(RTTIType::WeaponListItem(item))
         }
         _ => anyhow::bail!("Unknown RTTI type hash"),
     }

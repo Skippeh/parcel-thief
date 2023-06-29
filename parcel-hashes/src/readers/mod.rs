@@ -12,6 +12,7 @@ use uuid::Uuid;
 use self::{
     commodity_list_item::CommodityListItem, core_file::CoreFile,
     localized_text_resource::LocalizedTextResource, raw_material_list_item::RawMaterialListItem,
+    weapon_list_item::WeaponListItem,
 };
 
 pub mod commodity_list_item;
@@ -26,6 +27,7 @@ pub mod resource;
 pub mod rtti_object;
 pub mod rtti_ref_object;
 pub mod string;
+pub mod weapon_list_item;
 
 pub trait ReadRTTIType {
     fn rtti_type() -> RTTITypeHash;
@@ -41,6 +43,7 @@ pub enum RTTITypeHash {
     RawMaterialListItem = 0x6543AE76010E714E,
     CommodityListItem = 0x59441CF90AC3CF1B,
     LocalizedTextResource = 0x31BE502435317445,
+    WeaponListItem = 0xED0E1221E8D4D3A3,
 }
 
 #[derive(Debug, Clone, enum_as_inner::EnumAsInner)]
@@ -48,6 +51,7 @@ pub enum RTTIType {
     RawMaterialListItem(RawMaterialListItem),
     CommodityListItem(CommodityListItem),
     LocalizedTextResource(LocalizedTextResource),
+    WeaponListItem(WeaponListItem),
 }
 
 impl RTTIType {
@@ -64,6 +68,15 @@ impl RTTIType {
                     .object_uuid
             }
             RTTIType::CommodityListItem(item) => {
+                &item
+                    .as_ref()
+                    .as_ref()
+                    .as_ref()
+                    .as_ref()
+                    .as_ref()
+                    .object_uuid
+            }
+            RTTIType::WeaponListItem(item) => {
                 &item
                     .as_ref()
                     .as_ref()
