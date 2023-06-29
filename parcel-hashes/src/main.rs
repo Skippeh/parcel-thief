@@ -16,6 +16,7 @@ use readers::{
     LoadContext,
 };
 use serde::Serialize;
+use uuid::Uuid;
 
 #[derive(Debug, clap::Parser)]
 struct Options {
@@ -35,7 +36,8 @@ struct Output {
 #[serde(rename_all = "camelCase")]
 struct Baggage {
     pub name_hash: u32,
-    pub metadata: BaggageMetaData,
+    pub object_metadata: ObjectMetaData,
+    pub baggage_metadata: BaggageMetaData,
     pub names: BTreeMap<Language, String>,
     pub descriptions: BTreeMap<Language, String>,
 }
@@ -55,6 +57,12 @@ struct BaggageMetaData {
     pub initial_durability_contents: u32,
     pub initial_durability_case: u32,
     pub mission_id: u32,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ObjectMetaData {
+    pub uuid: String,
 }
 
 impl From<&BaggageListItem> for BaggageMetaData {
@@ -147,19 +155,23 @@ fn read_baggages_from_file(
     let file = load_context.load_file(path)?;
 
     // Add all BaggageListItems
-    for item in file.get_objects(&readers::RTTITypeHash::BaggageListItem)? {
-        let item = item
+    for rtti_item in file.get_objects(&readers::RTTITypeHash::BaggageListItem)? {
+        let item = rtti_item
             .as_baggage_list_item()
             .expect("Entry should be a BaggageListItem");
 
         let (names, descriptions) = get_names_and_descriptions(item.as_ref());
-        let metadata = item.into();
+        let baggage_metadata = item.into();
+        let object_metadata = ObjectMetaData {
+            uuid: rtti_item.object_uuid().to_string(),
+        };
 
         baggages.push(Baggage {
             name_hash: item.as_ref().name_code,
             names,
             descriptions,
-            metadata,
+            baggage_metadata,
+            object_metadata,
         });
     }
 
