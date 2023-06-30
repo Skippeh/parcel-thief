@@ -1,3 +1,5 @@
+use std::ops::{Deref, DerefMut};
+
 use binary_reader::BinaryReader;
 
 use super::{game_list_item_base::GameListItemBase, string::DSString, LoadContext};
@@ -51,14 +53,16 @@ impl super::Read for GameListItemBaseWithIcon {
     }
 }
 
-impl AsRef<GameListItemBase> for GameListItemBaseWithIcon {
-    fn as_ref(&self) -> &GameListItemBase {
+impl Deref for GameListItemBaseWithIcon {
+    type Target = GameListItemBase;
+
+    fn deref(&self) -> &Self::Target {
         &self.base
     }
 }
 
-impl AsMut<GameListItemBase> for GameListItemBaseWithIcon {
-    fn as_mut(&mut self) -> &mut GameListItemBase {
+impl DerefMut for GameListItemBaseWithIcon {
+    fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.base
     }
 }

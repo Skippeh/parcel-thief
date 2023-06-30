@@ -64,47 +64,12 @@ pub enum RTTIType {
 impl RTTIType {
     pub fn object_uuid(&self) -> &Uuid {
         match self {
-            // this is stupid but i don't care enough to refactor it since this project is relatively small and is only for development purposes
-            RTTIType::RawMaterialListItem(item) => {
-                &item
-                    .as_ref()
-                    .as_ref()
-                    .as_ref()
-                    .as_ref()
-                    .as_ref()
-                    .object_uuid
-            }
-            RTTIType::CommodityListItem(item) => {
-                &item
-                    .as_ref()
-                    .as_ref()
-                    .as_ref()
-                    .as_ref()
-                    .as_ref()
-                    .object_uuid
-            }
-            RTTIType::WeaponListItem(item) => {
-                &item
-                    .as_ref()
-                    .as_ref()
-                    .as_ref()
-                    .as_ref()
-                    .as_ref()
-                    .object_uuid
-            }
-            RTTIType::EquipmentListItem(item) => {
-                &item
-                    .as_ref()
-                    .as_ref()
-                    .as_ref()
-                    .as_ref()
-                    .as_ref()
-                    .object_uuid
-            }
-            RTTIType::BaggageListItem(item) => {
-                &item.as_ref().as_ref().as_ref().as_ref().object_uuid
-            }
-            RTTIType::LocalizedTextResource(item) => &item.as_ref().as_ref().as_ref().object_uuid,
+            RTTIType::RawMaterialListItem(item) => &item.object_uuid,
+            RTTIType::CommodityListItem(item) => &item.object_uuid,
+            RTTIType::WeaponListItem(item) => &item.object_uuid,
+            RTTIType::EquipmentListItem(item) => &item.object_uuid,
+            RTTIType::BaggageListItem(item) => &item.object_uuid,
+            RTTIType::LocalizedTextResource(item) => &item.object_uuid,
         }
     }
 }

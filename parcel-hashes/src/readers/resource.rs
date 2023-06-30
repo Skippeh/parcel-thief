@@ -1,3 +1,5 @@
+use std::ops::{Deref, DerefMut};
+
 use super::{core_object::CoreObject, LoadContext};
 
 #[derive(Debug, Clone)]
@@ -15,14 +17,16 @@ impl super::Read for Resource {
     }
 }
 
-impl AsRef<CoreObject> for Resource {
-    fn as_ref(&self) -> &CoreObject {
+impl Deref for Resource {
+    type Target = CoreObject;
+
+    fn deref(&self) -> &Self::Target {
         &self.base
     }
 }
 
-impl AsMut<CoreObject> for Resource {
-    fn as_mut(&mut self) -> &mut CoreObject {
+impl DerefMut for Resource {
+    fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.base
     }
 }

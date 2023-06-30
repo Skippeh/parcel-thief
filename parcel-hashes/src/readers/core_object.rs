@@ -1,3 +1,5 @@
+use std::ops::{Deref, DerefMut};
+
 use super::{rtti_ref_object::RTTIRefObject, LoadContext};
 
 #[derive(Debug, Clone)]
@@ -15,14 +17,16 @@ impl super::Read for CoreObject {
     }
 }
 
-impl AsRef<RTTIRefObject> for CoreObject {
-    fn as_ref(&self) -> &RTTIRefObject {
+impl Deref for CoreObject {
+    type Target = RTTIRefObject;
+
+    fn deref(&self) -> &Self::Target {
         &self.base
     }
 }
 
-impl AsMut<RTTIRefObject> for CoreObject {
-    fn as_mut(&mut self) -> &mut RTTIRefObject {
+impl DerefMut for CoreObject {
+    fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.base
     }
 }

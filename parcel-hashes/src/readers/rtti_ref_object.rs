@@ -1,3 +1,5 @@
+use std::ops::{Deref, DerefMut};
+
 use uuid::Uuid;
 
 use super::{rtti_object::RTTIObject, LoadContext};
@@ -23,14 +25,16 @@ impl super::Read for RTTIRefObject {
     }
 }
 
-impl AsRef<RTTIObject> for RTTIRefObject {
-    fn as_ref(&self) -> &RTTIObject {
+impl Deref for RTTIRefObject {
+    type Target = RTTIObject;
+
+    fn deref(&self) -> &Self::Target {
         &self.base
     }
 }
 
-impl AsMut<RTTIObject> for RTTIRefObject {
-    fn as_mut(&mut self) -> &mut RTTIObject {
+impl DerefMut for RTTIRefObject {
+    fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.base
     }
 }

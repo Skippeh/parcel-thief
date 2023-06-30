@@ -1,3 +1,5 @@
+use std::ops::{Deref, DerefMut};
+
 use super::{
     localized_text_resource::LocalizedTextResource, reference::Ref, resource::Resource, LoadContext,
 };
@@ -32,14 +34,16 @@ impl super::Read for GameListItemBase {
     }
 }
 
-impl AsRef<Resource> for GameListItemBase {
-    fn as_ref(&self) -> &Resource {
+impl Deref for GameListItemBase {
+    type Target = Resource;
+
+    fn deref(&self) -> &Self::Target {
         &self.base
     }
 }
 
-impl AsMut<Resource> for GameListItemBase {
-    fn as_mut(&mut self) -> &mut Resource {
+impl DerefMut for GameListItemBase {
+    fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.base
     }
 }

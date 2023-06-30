@@ -1,4 +1,7 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    ops::{Deref, DerefMut},
+};
 
 use enum_iterator::all;
 use serde::Serialize;
@@ -119,14 +122,16 @@ impl super::Read for DSLocalizedText {
     }
 }
 
-impl AsRef<Resource> for LocalizedTextResource {
-    fn as_ref(&self) -> &Resource {
+impl Deref for LocalizedTextResource {
+    type Target = Resource;
+
+    fn deref(&self) -> &Self::Target {
         &self.base
     }
 }
 
-impl AsMut<Resource> for LocalizedTextResource {
-    fn as_mut(&mut self) -> &mut Resource {
+impl DerefMut for LocalizedTextResource {
+    fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.base
     }
 }

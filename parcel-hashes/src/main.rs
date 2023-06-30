@@ -16,7 +16,6 @@ use readers::{
     LoadContext,
 };
 use serde::Serialize;
-use uuid::Uuid;
 
 #[derive(Debug, clap::Parser)]
 struct Options {
@@ -160,14 +159,14 @@ fn read_baggages_from_file(
             .as_baggage_list_item()
             .expect("Entry should be a BaggageListItem");
 
-        let (names, descriptions) = get_names_and_descriptions(item.as_ref());
+        let (names, descriptions) = get_names_and_descriptions(item);
         let baggage_metadata = item.into();
         let object_metadata = ObjectMetaData {
             uuid: rtti_item.object_uuid().to_string(),
         };
 
         baggages.push(Baggage {
-            name_hash: item.as_ref().name_code,
+            name_hash: item.name_code,
             names,
             descriptions,
             baggage_metadata,

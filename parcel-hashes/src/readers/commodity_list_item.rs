@@ -1,3 +1,5 @@
+use std::ops::{Deref, DerefMut};
+
 use super::{game_list_item_base_with_icon::GameListItemBaseWithIcon, LoadContext};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -90,14 +92,16 @@ impl super::Read for CommodityListItem {
     }
 }
 
-impl AsRef<GameListItemBaseWithIcon> for CommodityListItem {
-    fn as_ref(&self) -> &GameListItemBaseWithIcon {
+impl Deref for CommodityListItem {
+    type Target = GameListItemBaseWithIcon;
+
+    fn deref(&self) -> &Self::Target {
         &self.base
     }
 }
 
-impl AsMut<GameListItemBaseWithIcon> for CommodityListItem {
-    fn as_mut(&mut self) -> &mut GameListItemBaseWithIcon {
+impl DerefMut for CommodityListItem {
+    fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.base
     }
 }

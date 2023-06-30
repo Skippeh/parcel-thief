@@ -1,3 +1,5 @@
+use std::ops::{Deref, DerefMut};
+
 use serde::Serialize;
 
 use super::{
@@ -245,14 +247,16 @@ impl super::Read for BaggageListItem {
     }
 }
 
-impl AsRef<GameListItemBase> for BaggageListItem {
-    fn as_ref(&self) -> &GameListItemBase {
+impl Deref for BaggageListItem {
+    type Target = GameListItemBase;
+
+    fn deref(&self) -> &Self::Target {
         &self.base
     }
 }
 
-impl AsMut<GameListItemBase> for BaggageListItem {
-    fn as_mut(&mut self) -> &mut GameListItemBase {
+impl DerefMut for BaggageListItem {
+    fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.base
     }
 }
