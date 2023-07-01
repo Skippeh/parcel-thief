@@ -2,10 +2,7 @@ use std::ops::{Deref, DerefMut};
 
 use serde::Serialize;
 
-use super::{
-    game_list_item_base::GameListItemBase, game_list_item_base_with_icon::GameListItemBaseWithIcon,
-    reference::UnresolvedRef,
-};
+use super::{game_list_item_base::GameListItemBase, reference::UnresolvedRef};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(u8)]
