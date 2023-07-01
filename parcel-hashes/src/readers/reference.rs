@@ -52,10 +52,7 @@ impl<T: Sized + Read + ReadRTTIType> super::Read for Ref<T> {
                     .find_object::<T>(&uuid)?
                     .map(|object| Box::new(object.clone()));
 
-                Ok(Self {
-                    value: object,
-                    _data_type: PhantomData,
-                })
+                Ok(Self::new(object))
             }
             _ => anyhow::bail!("Unknown reference kind: {}", kind),
         }
