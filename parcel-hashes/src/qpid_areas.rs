@@ -89,6 +89,12 @@ pub fn read_qpid_areas(
                     }
 
                     let names = get_names(delivery_point);
+
+                    // If there's no localization text for this area it's probably not relevant
+                    if names.is_empty() {
+                        continue;
+                    }
+
                     let metadata = QpidAreaMetaData {
                         order_in_list: delivery_point.order_in_list,
                         construction_type: delivery_point.delivery_point_type,
