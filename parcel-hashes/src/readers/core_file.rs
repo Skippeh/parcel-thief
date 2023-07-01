@@ -6,6 +6,7 @@ use uuid::Uuid;
 
 use super::{
     baggage_list_item::BaggageListItem, commodity_list_item::CommodityListItem,
+    delivery_point_info_resource::DeliveryPointInfoResource,
     equipment_list_item::EquipmentListItem, localized_text_resource::LocalizedTextResource,
     raw_material_list_item::RawMaterialListItem, weapon_list_item::WeaponListItem, LoadContext,
     RTTIType, RTTITypeHash, Read, ReadRTTIType,
@@ -50,23 +51,8 @@ impl CoreFile {
             let mut slice_reader = BinaryReader::from_u8(slice);
             slice_reader.set_endian(binary_reader::Endian::Little);
 
-            /*println!(
-                "Reading {} at offset {} of {} byte(s)",
-                obj_type_name,
-                reader.pos - slice_reader.length,
-                slice_reader.length
-            );*/
-
             match read_object(hash, &mut slice_reader, context) {
                 Ok(obj) => {
-                    if slice_reader.pos != slice_reader.length {
-                        anyhow::bail!(
-                            "Did not read all bytes ({}/{})",
-                            slice_reader.pos,
-                            slice_reader.length
-                        );
-                    }
-
                     let uuid = *obj.object_uuid();
 
                     entries.push(Entry {
@@ -76,10 +62,13 @@ impl CoreFile {
                     });
                 }
                 Err(err) => {
-                    println!(
-                        "Could not read object {obj_type_name}: {err} (offset after read: {})",
-                        (reader.pos - slice_reader.length) + slice_reader.pos
-                    );
+                    // Don't log unknown type hashes to avoid log spam
+                    if !err.to_string().contains("Unknown RTTI type hash") {
+                        println!(
+                            "Could not read object {obj_type_name}: {err} (offset after read: {})",
+                            (reader.pos - slice_reader.length) + slice_reader.pos
+                        );
+                    }
                 }
             }
         }
@@ -180,6 +169,10 @@ fn read_object(
         Ok(RTTITypeHash::BaggageListItem) => {
             let item = BaggageListItem::read(reader, context)?;
             Ok(RTTIType::BaggageListItem(item))
+        }
+        Ok(RTTITypeHash::DeliveryPointInfoResource) => {
+            let item = DeliveryPointInfoResource::read(reader, context)?;
+            Ok(RTTIType::DeliveryPointInfoResource(item))
         }
         _ => anyhow::bail!("Unknown RTTI type hash"),
     }

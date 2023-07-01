@@ -1,4 +1,9 @@
-use std::{marker::PhantomData, path::PathBuf, str::FromStr};
+use std::{
+    marker::PhantomData,
+    ops::{Deref, DerefMut},
+    path::PathBuf,
+    str::FromStr,
+};
 
 use uuid::Uuid;
 
@@ -59,14 +64,27 @@ impl<T: Sized + Read + ReadRTTIType> super::Read for Ref<T> {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct UnresolvedRef<T: Sized + Read> {
-    pub uuid: Option<Uuid>,
-    pub path: Option<String>,
-    _data_type: PhantomData<T>,
+impl<T: Sized + Read + ReadRTTIType> Deref for Ref<T> {
+    type Target = Option<Box<RTTIType>>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.value
+    }
 }
 
-impl<T: Sized + Read> Read for UnresolvedRef<T> {
+impl<T: Sized + Read + ReadRTTIType> DerefMut for Ref<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.value
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct UnresolvedRef {
+    pub uuid: Option<Uuid>,
+    pub path: Option<String>,
+}
+
+impl Read for UnresolvedRef {
     fn read(
         reader: &mut binary_reader::BinaryReader,
         context: &mut LoadContext,
@@ -91,10 +109,6 @@ impl<T: Sized + Read> Read for UnresolvedRef<T> {
             _ => anyhow::bail!("Unknown reference kind: {}", kind),
         }
 
-        Ok(Self {
-            uuid,
-            path,
-            _data_type: PhantomData,
-        })
+        Ok(Self { uuid, path })
     }
 }

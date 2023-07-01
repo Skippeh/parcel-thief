@@ -187,7 +187,7 @@ pub struct BaggageListItem {
     pub type_contents_damage: ContentsDamageType,
     pub type_contents: ContentsType,
     pub type_volume: VolumeType,
-    pub contents: UnresolvedRef<GameListItemBaseWithIcon>,
+    pub contents: UnresolvedRef, // Ref<GameListItemBaseWithIcon>
     pub amount: u32,
     pub sub_amount: u32,
     pub weight: f32,
