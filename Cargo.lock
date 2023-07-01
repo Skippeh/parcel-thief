@@ -2763,7 +2763,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "parcel-hashes"
+name = "parcel-data-export"
 version = "0.1.0"
 dependencies = [
  "anyhow",

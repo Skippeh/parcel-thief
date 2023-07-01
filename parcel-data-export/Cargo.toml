@@ -1,5 +1,5 @@
 [package]
-name = "parcel-hashes"
+name = "parcel-data-export"
 version = "0.1.0"
 edition = "2021"
 

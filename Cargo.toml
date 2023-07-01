@@ -7,5 +7,5 @@ members = [
     "parcel-client/parcel-client",
     "re-testing/deobfuscate_json",
     "parcel-save-tool",
-    "parcel-hashes",
+    "parcel-data-export",
 ]
