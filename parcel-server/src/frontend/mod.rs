@@ -5,7 +5,7 @@ use rust_embed::{EmbeddedFile, RustEmbed};
 #[folder = "frontend/dist/"]
 struct FrontendFiles;
 
-#[get("/frontend/{_:.*}")]
+#[get("{_:.*}")]
 pub async fn frontend(path: web::Path<String>) -> HttpResponse {
     match FrontendFiles::get(&path) {
         Some(content) => response_from_embedded_file(&path, &content),
@@ -22,7 +22,7 @@ pub async fn frontend(path: web::Path<String>) -> HttpResponse {
     }
 }
 
-#[get("/frontend")]
+#[get("")]
 pub async fn frontend_index() -> HttpResponse {
     match FrontendFiles::get("index.html") {
         Some(content) => response_from_embedded_file("index.html", &content),

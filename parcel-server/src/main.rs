@@ -179,8 +179,11 @@ async fn main() -> Result<()> {
             )
             .service(endpoints::auth::auth)
             .service(endpoints::auth::me::me)
-            .service(frontend::frontend_index)
-            .service(frontend::frontend)
+            .service(
+                actix_web::web::scope("/frontend")
+                    .service(frontend::frontend_index)
+                    .service(frontend::frontend),
+            )
             .wrap(NormalizePath::trim())
             .wrap(actix_web::middleware::Logger::default())
     });
