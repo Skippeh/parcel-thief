@@ -1,4 +1,4 @@
-use actix_web::{get, web, HttpResponse, Responder};
+use actix_web::{get, web, HttpResponse};
 use rust_embed::{EmbeddedFile, RustEmbed};
 
 #[derive(RustEmbed)]
@@ -32,10 +32,6 @@ pub async fn frontend_index() -> HttpResponse {
 
 fn response_from_embedded_file(path: &str, file: &EmbeddedFile) -> HttpResponse {
     HttpResponse::Ok()
-        .content_type(
-            mime_guess::from_path(&path)
-                .first_or_octet_stream()
-                .as_ref(),
-        )
+        .content_type(mime_guess::from_path(path).first_or_octet_stream().as_ref())
         .body(file.data.to_vec())
 }
