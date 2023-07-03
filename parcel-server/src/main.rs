@@ -27,7 +27,6 @@ use data::{
 };
 use diesel::{pg::Pg, Connection, PgConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
-use endpoints::configure_endpoints;
 use rustls::{Certificate, PrivateKey};
 use rustls_pemfile::{certs, pkcs8_private_keys};
 
@@ -167,7 +166,7 @@ async fn main() -> Result<()> {
             ))
             .service(
                 actix_web::web::scope("/ds/e")
-                    .configure(configure_endpoints)
+                    .configure(endpoints::configure_endpoints)
                     .wrap(middleware::deep_logger::DeepLogger {
                         enabled: args.deep_logging,
                     })
@@ -179,11 +178,7 @@ async fn main() -> Result<()> {
             )
             .service(endpoints::auth::auth)
             .service(endpoints::auth::me::me)
-            .service(
-                actix_web::web::scope("/frontend")
-                    .service(frontend::frontend_index)
-                    .service(frontend::frontend),
-            )
+            .service(actix_web::web::scope("/frontend").configure(frontend::configure_endpoints))
             .wrap(NormalizePath::trim())
             .wrap(actix_web::middleware::Logger::default())
     });

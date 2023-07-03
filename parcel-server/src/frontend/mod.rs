@@ -1,9 +1,17 @@
-use actix_web::{get, web, HttpResponse};
+use actix_web::{
+    get,
+    web::{self, ServiceConfig},
+    HttpResponse,
+};
 use rust_embed::{EmbeddedFile, RustEmbed};
 
 #[derive(RustEmbed)]
 #[folder = "frontend/dist/"]
 struct FrontendFiles;
+
+pub fn configure_endpoints(cfg: &mut ServiceConfig) {
+    cfg.service(frontend).service(frontend_index);
+}
 
 #[get("{_:.*}")]
 pub async fn frontend(path: web::Path<String>) -> HttpResponse {
