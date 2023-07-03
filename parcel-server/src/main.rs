@@ -2,6 +2,7 @@ mod data;
 mod db;
 mod embedded;
 mod endpoints;
+mod frontend;
 mod middleware;
 mod response_error;
 mod session;
@@ -14,6 +15,7 @@ use std::{
 };
 
 use actix_web::{
+    middleware::NormalizePath,
     web::{self},
     App, HttpServer,
 };
@@ -177,6 +179,8 @@ async fn main() -> Result<()> {
             .service(endpoints::auth::auth)
             .service(endpoints::auth::me::me)
             .wrap(wrap_errors::WrapErrors)
+            .service(frontend::frontend_index)
+            .service(frontend::frontend)
             .wrap(actix_web::middleware::Logger::default())
     });
 

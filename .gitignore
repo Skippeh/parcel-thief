@@ -465,3 +465,8 @@ $RECYCLE.BIN/
 
 # Ignore runtime generated files from parcel-server
 parcel-server/data
+
+# Ignore node/parcel files
+parcel-server/frontend/.parcel-cache
+parcel-server/frontend/dist
+parcel-server/frontend/node_modules
