@@ -174,11 +174,11 @@ async fn main() -> Result<()> {
                     // Make sure this is last middleware so that the data is decrypted before doing anything else that interacts with the encrypted data
                     .wrap(middleware::encryption::DataEncryption {
                         optional_encryption: args.optional_encryption,
-                    }),
+                    })
+                    .wrap(wrap_errors::WrapErrors),
             )
             .service(endpoints::auth::auth)
             .service(endpoints::auth::me::me)
-            .wrap(wrap_errors::WrapErrors)
             .service(frontend::frontend_index)
             .service(frontend::frontend)
             .wrap(actix_web::middleware::Logger::default())
