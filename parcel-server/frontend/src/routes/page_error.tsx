@@ -1,5 +1,13 @@
 import * as React from "react";
 import { isRouteErrorResponse, useRouteError } from "react-router-dom";
+import { styled } from "styled-components";
+
+const Wrapper = styled.div`
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
 
 const PageError = () => {
   const error = useRouteError();
@@ -22,10 +30,12 @@ const PageError = () => {
   }
 
   return (
-    <div>
-      <p>An unexpected error occurred.</p>
-      <p>{errorMessage}</p>
-    </div>
+    <Wrapper>
+      <div>
+        <strong>An unexpected error occurred.</strong>
+        <p>{errorMessage}</p>
+      </div>
+    </Wrapper>
   );
 };
 

@@ -1,18 +1,22 @@
 import * as React from "react";
-import { createBrowserRouter } from "react-router-dom";
-import Login from "./login";
+import { Outlet, Route, createBrowserRouter, redirect } from "react-router-dom";
+import Login from "./pages/login";
 import PageError from "./page_error";
-
-const Index = () => {
-  return <div>index</div>;
-};
+import Layout from "./layout";
+import Home from "./pages/home";
 
 export default createBrowserRouter(
   [
     {
       path: "/",
-      element: <Index />,
+      element: <Layout />,
       errorElement: <PageError />,
+      children: [
+        {
+          path: "",
+          element: <Home />,
+        },
+      ],
     },
     {
       path: "/login",

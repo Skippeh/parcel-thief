@@ -3,6 +3,16 @@
   src: local("Open Sans"), url(fonts/OpenSans-Regular.ttf);
 }
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   font-family: "Open Sans";
   color: rgb(245, 245, 245);

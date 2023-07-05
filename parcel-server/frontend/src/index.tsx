@@ -2,6 +2,7 @@ import * as React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./app";
 import styled from "styled-components";
+import "normalize.css";
 
 const rootElement = document.getElementById("root");
 
