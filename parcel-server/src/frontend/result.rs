@@ -10,4 +10,13 @@ pub struct ApiResponse<T: Serialize> {
     pub data: T,
 }
 
+impl<T: Serialize> ApiResponse<T> {
+    pub fn ok(data: T) -> Json<Self> {
+        Json(Self {
+            status_code: 200,
+            data,
+        })
+    }
+}
+
 pub type ApiResult<T> = Result<Json<ApiResponse<T>>, ApiError>;

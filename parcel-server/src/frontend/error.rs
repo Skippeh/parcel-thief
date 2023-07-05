@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use actix_http::StatusCode;
 use actix_web::{web::BufMut, ResponseError};
 

@@ -10,7 +10,7 @@ pub struct AuthRequest {
 #[serde(rename_all = "camelCase")]
 pub struct InitAuthResponse {
     pub token: String,
-    pub oauth_url: String,
+    pub redirect_url: String,
 }
 
 #[derive(Debug, serde::Deserialize)]
@@ -25,3 +25,7 @@ pub struct CheckAuthResponse {
     pub auth_token: Option<String>,
     pub error: Option<String>,
 }
+
+#[derive(Debug, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SteamAuthCallbackResponse {}
