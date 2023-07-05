@@ -1,3 +1,7 @@
+mod api;
+mod error;
+mod result;
+
 use actix_web::{
     get,
     web::{self, ServiceConfig},
@@ -10,7 +14,9 @@ use rust_embed::{EmbeddedFile, RustEmbed};
 struct FrontendFiles;
 
 pub fn configure_endpoints(cfg: &mut ServiceConfig) {
-    cfg.service(frontend).service(frontend_index);
+    cfg.service(actix_web::web::scope("api").configure(api::configure_endpoints))
+        .service(frontend)
+        .service(frontend_index);
 }
 
 #[get("{_:.*}")]
