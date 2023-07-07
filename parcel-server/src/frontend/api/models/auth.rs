@@ -9,7 +9,6 @@ pub struct AuthRequest {
 #[derive(Debug, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InitAuthResponse {
-    pub token: String,
     pub redirect_url: String,
 }
 
@@ -19,11 +18,17 @@ pub struct CheckAuthRequest {
     pub token: String,
 }
 
-#[derive(Debug, serde::Serialize)]
+#[derive(Debug, serde::Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct CheckAuthResponse {
-    pub auth_token: Option<String>,
-    pub error: Option<String>,
+pub enum CheckAuthResponse {
+    Success {
+        auth_token: String,
+        display_name: String,
+        avatar_url: String,
+    },
+    Failure {
+        error: String,
+    },
 }
 
 #[derive(Debug, serde::Serialize)]

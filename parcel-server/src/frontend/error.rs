@@ -1,7 +1,7 @@
-use std::fmt::Display;
-
 use actix_http::StatusCode;
 use actix_web::{web::BufMut, ResponseError};
+
+use crate::db::QueryError;
 
 #[derive(Debug, thiserror::Error)]
 pub enum ApiError {
@@ -25,6 +25,12 @@ impl From<diesel::ConnectionError> for ApiError {
 
 impl From<diesel::result::Error> for ApiError {
     fn from(err: diesel::result::Error) -> Self {
+        ApiError::Internal(err.into())
+    }
+}
+
+impl From<QueryError> for ApiError {
+    fn from(err: QueryError) -> Self {
         ApiError::Internal(err.into())
     }
 }

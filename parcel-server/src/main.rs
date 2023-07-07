@@ -27,6 +27,7 @@ use data::{
 };
 use diesel::{pg::Pg, Connection, PgConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+use frontend::api::endpoints::auth::FrontendAuthCache;
 use rustls::{Certificate, PrivateKey};
 use rustls_pemfile::{certs, pkcs8_private_keys};
 
@@ -139,6 +140,10 @@ async fn main() -> Result<()> {
         web::Data::new(SessionStore::load_or_create(Path::new("data/sessions")).await);
     let session_store_clone = session_store.clone();
     let database = web::Data::new(Database::new(&database_url));
+    let frontend_auth_cache = web::Data::new(FrontendAuthCache::with_time_to_live_secs(
+        "FrontendAuthCache",
+        60 * 2,
+    ));
 
     migrate_database(&database_url)
         .await
@@ -164,6 +169,7 @@ async fn main() -> Result<()> {
             .app_data(web::Data::new(
                 gateway_url.as_ref().map(|url| GatewayUrl(url.clone())),
             ))
+            .app_data(frontend_auth_cache.clone())
             .service(
                 actix_web::web::scope("/ds/e")
                     .configure(endpoints::configure_endpoints)
