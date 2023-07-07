@@ -10,6 +10,17 @@ export interface InitAuthResponse {
   redirectUrl: string;
 }
 
+export interface CheckAuthResponse {
+  success?: {
+    authToken: string;
+    displayName: string;
+    avatarUrl: string;
+  };
+  failure?: {
+    error: string;
+  };
+}
+
 export async function login(
   provider: Provider
 ): Promise<ApiResponse<InitAuthResponse>> {
@@ -18,5 +29,21 @@ export async function login(
   };
 
   const response = await callApi<InitAuthResponse>("auth", "POST", requestData);
+  return response;
+}
+
+export async function checkAuthResult(
+  callbackToken: string
+): Promise<ApiResponse<CheckAuthResponse>> {
+  const requestData = {
+    callbackToken,
+  };
+
+  const response = await callApi<CheckAuthResponse>(
+    "auth/check",
+    "POST",
+    requestData
+  );
+
   return response;
 }

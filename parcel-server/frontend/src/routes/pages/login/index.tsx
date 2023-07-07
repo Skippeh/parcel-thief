@@ -7,6 +7,7 @@ import {
   Provider as ProviderType,
 } from "../../../services/auth_service";
 import * as AuthService from "../../../services/auth_service";
+import { useLocation } from "react-router-dom";
 
 const Wrapper = styled.div`
   height: 100%;
@@ -52,19 +53,17 @@ const Provider = styled.a`
 
 enum LoginState {
   WaitingForLoginOption,
-  WaitingForInitAuthResponse,
-  WaitingForProviderLogin,
+  WaitingForAuthResponse,
   Failed,
 }
 
 const Login = () => {
   const [state, setState] = React.useState(LoginState.WaitingForLoginOption);
   const [error, setError] = React.useState<string | null>(null);
-  const [initAuthResponse, setInitAuthResponse] =
-    React.useState<InitAuthResponse | null>(null);
+  const location = useLocation();
 
   const login = async (provider: ProviderType) => {
-    setState(LoginState.WaitingForInitAuthResponse);
+    setState(LoginState.WaitingForAuthResponse);
     let response = await AuthService.login(provider);
 
     if (response.error != null) {
@@ -73,11 +72,42 @@ const Login = () => {
       return;
     }
 
-    setState(LoginState.WaitingForProviderLogin);
-    setInitAuthResponse(response.data);
-
     window.location.href = response.data!.redirectUrl;
   };
+
+  React.useEffect(() => {
+    // If we're in the initial state check if callback_token query parameter is present
+    if (state == LoginState.WaitingForLoginOption) {
+      let params = new URLSearchParams(location.search);
+      let callbackToken = params.get("callback_token");
+
+      if (callbackToken == null) {
+        return;
+      }
+
+      setState(LoginState.WaitingForAuthResponse);
+
+      (async () => {
+        var checkResponse = await AuthService.checkAuthResult(callbackToken);
+
+        if (
+          checkResponse.error != null ||
+          checkResponse.data?.failure != null
+        ) {
+          if (checkResponse.error != null) {
+            setError(checkResponse.error);
+          } else {
+            setError(checkResponse.data!.failure!.error);
+          }
+
+          setState(LoginState.Failed);
+        } else if (checkResponse.data?.success != null) {
+          const data = checkResponse.data.success;
+          console.log(data);
+        }
+      })();
+    }
+  }, [state]);
 
   const renderCurrentState = () => {
     switch (state) {
@@ -93,8 +123,7 @@ const Login = () => {
           </Content>
         );
       }
-      case LoginState.WaitingForInitAuthResponse:
-      case LoginState.WaitingForProviderLogin: {
+      case LoginState.WaitingForAuthResponse: {
         return <Content>Waiting for login response...</Content>;
       }
       case LoginState.Failed: {

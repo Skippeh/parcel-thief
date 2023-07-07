@@ -15,7 +15,7 @@ pub struct InitAuthResponse {
 #[derive(Debug, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CheckAuthRequest {
-    pub token: String,
+    pub callback_token: String,
 }
 
 #[derive(Debug, serde::Serialize, Clone)]
@@ -30,7 +30,3 @@ pub enum CheckAuthResponse {
         error: String,
     },
 }
-
-#[derive(Debug, serde::Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SteamAuthCallbackResponse {}

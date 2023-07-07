@@ -13,14 +13,26 @@ export async function callApi<T>(
   method: string,
   requestData: any | null
 ): Promise<ApiResponse<T>> {
-  let response = await fetch(getApiUrl(route), {
-    method,
-    body: requestData == null ? null : JSON.stringify(requestData),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  let apiResponse: ApiResponse<T>;
 
-  let apiResponse = response.json() as unknown as ApiResponse<T>;
+  try {
+    const response = await fetch(getApiUrl(route), {
+      method,
+      body: requestData == null ? null : JSON.stringify(requestData),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    apiResponse = response.json() as unknown as ApiResponse<T>;
+  } catch (err) {
+    console.error("Api request failed:", err);
+    apiResponse = {
+      data: null,
+      statusCode: -1,
+      error: "Could not send api request",
+    };
+  }
+
   return apiResponse;
 }
