@@ -4,13 +4,19 @@ use actix_web::{
     HttpRequest,
 };
 use anyhow::Context;
+use chrono::Utc;
+use jwt::SignWithKey;
 use parcel_common::api_types::auth::Provider;
 use steam_auth::{Redirector, Verifier};
 
 use crate::{
-    data::{database::Database, memory_cache::MemoryCache, platforms::steam::Steam},
+    data::{
+        database::Database, jwt::JwtSecret, memory_cache::MemoryCache, platforms::steam::Steam,
+    },
     frontend::{
-        api::models::auth::{AuthRequest, CheckAuthRequest, CheckAuthResponse, InitAuthResponse},
+        api::models::auth::{
+            AuthRequest, CheckAuthRequest, CheckAuthResponse, InitAuthResponse, JwtPayload,
+        },
         error::ApiError,
         result::{ApiResponse, ApiResult},
     },
@@ -63,6 +69,7 @@ pub async fn steam_callback(
     database: Data<Database>,
     steam: Data<Steam>,
     auth_cache: Data<FrontendAuthCache>,
+    jwt_secret: Data<JwtSecret>,
 ) -> Result<Redirect, ApiError> {
     let (request, verifier) =
         Verifier::from_querystring(&request.query_string()).map_err(anyhow::Error::msg)?;
@@ -95,16 +102,32 @@ pub async fn steam_callback(
 
             match account {
                 Some(account) => {
-                    // todo
-                    CheckAuthResponse::Failure {
-                        error: "not implemented".into(),
+                    let user_summary = steam
+                        .get_player_summaries(&[&steam_id])
+                        .await?
+                        .remove(&steam_id)
+                        .context("Failed to get user summary")?;
+
+                    let payload = JwtPayload {
+                        expires_at: (Utc::now() + chrono::Duration::days(7)).timestamp(),
+                        account_id: account.id.clone(),
+                    };
+
+                    let auth_token = payload
+                        .sign_with_key(jwt_secret.as_ref())
+                        .map_err(anyhow::Error::msg)?;
+
+                    CheckAuthResponse::Success {
+                        auth_token,
+                        avatar_url: user_summary.avatar_full,
+                        name: user_summary.name,
                     }
                 }
                 None => {
                     // set error to account not found
                     // or should the account be created?
                     CheckAuthResponse::Failure {
-                        error: "account not found".into(),
+                        error: "Account not found, log in to the game server first".into(),
                     }
                 }
             }

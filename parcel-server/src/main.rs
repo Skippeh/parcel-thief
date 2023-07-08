@@ -23,6 +23,7 @@ use anyhow::{Context, Result};
 use clap::Parser;
 use data::{
     database::Database,
+    jwt::JwtSecret,
     platforms::{epic::Epic, steam::Steam},
 };
 use diesel::{pg::Pg, Connection, PgConnection};
@@ -144,6 +145,11 @@ async fn main() -> Result<()> {
         "FrontendAuthCache",
         60 * 2,
     ));
+    let jwt_secret = web::Data::new(
+        JwtSecret::load_or_generate_secret()
+            .await
+            .context("Failed to load jwt secret")?,
+    );
 
     migrate_database(&database_url)
         .await
@@ -170,6 +176,7 @@ async fn main() -> Result<()> {
                 gateway_url.as_ref().map(|url| GatewayUrl(url.clone())),
             ))
             .app_data(frontend_auth_cache.clone())
+            .app_data(jwt_secret.clone())
             .service(
                 actix_web::web::scope("/ds/e")
                     .configure(endpoints::configure_endpoints)

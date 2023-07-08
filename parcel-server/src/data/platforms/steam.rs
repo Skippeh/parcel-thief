@@ -10,7 +10,7 @@ const URL_AUTH_USER_TICKET: &str =
 const URL_GET_PLAYER_SUMMARIES: &str =
     "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/";
 
-pub type SteamId = i64;
+pub type SteamId = u64;
 
 #[derive(Debug, Deserialize)]
 struct ApiResponse<T> {
@@ -97,18 +97,21 @@ struct ReqPlayerSummary {
     steam_id: String,
     #[serde(rename = "personaname")]
     name: String,
+    #[serde(rename = "avatar")]
+    avatar_small: String,
+    #[serde(rename = "avatarmedium")]
+    avatar_medium: String,
+    #[serde(rename = "avatarfull")]
+    avatar_full: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct PlayerSummary {
     pub steam_id: SteamId,
     pub name: String,
-}
-
-impl PlayerSummary {
-    pub fn new(steam_id: SteamId, name: String) -> Self {
-        Self { steam_id, name }
-    }
+    pub avatar_small: String,
+    pub avatar_medium: String,
+    pub avatar_full: String,
 }
 
 #[derive(Debug)]
@@ -245,7 +248,16 @@ impl Steam {
                         for player in data.players {
                             let steam_id = player.steam_id.parse::<SteamId>()?;
 
-                            hashmap.insert(steam_id, PlayerSummary::new(steam_id, player.name));
+                            hashmap.insert(
+                                steam_id,
+                                PlayerSummary {
+                                    steam_id,
+                                    name: player.name,
+                                    avatar_small: player.avatar_small,
+                                    avatar_medium: player.avatar_medium,
+                                    avatar_full: player.avatar_full,
+                                },
+                            );
                         }
 
                         Ok(hashmap)
