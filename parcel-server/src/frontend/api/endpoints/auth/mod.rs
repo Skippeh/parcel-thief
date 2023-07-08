@@ -110,7 +110,7 @@ pub async fn steam_callback(
 
                     let payload = JwtPayload {
                         expires_at: (Utc::now() + chrono::Duration::days(7)).timestamp(),
-                        account_id: account.id.clone(),
+                        account_id: account.id,
                     };
 
                     let auth_token = payload
