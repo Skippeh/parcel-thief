@@ -2,12 +2,9 @@ import * as React from "react";
 import styled from "styled-components";
 import steamIcon from "./icons/steam.png";
 import epicIcon from "./icons/epic.png";
-import {
-  InitAuthResponse,
-  Provider as ProviderType,
-} from "../../../services/auth_service";
+import { Provider as ProviderType } from "../../../services/auth_service";
 import * as AuthService from "../../../services/auth_service";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import useSession from "../../../hooks/use_session";
 import { UserPermissions } from "../../../context/session_context";
 
@@ -62,7 +59,7 @@ enum LoginState {
 const Login = () => {
   const [state, setState] = React.useState(LoginState.WaitingForLoginOption);
   const [error, setError] = React.useState<string | null>(null);
-  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const session = useSession();
   const navigate = useNavigate();
 
@@ -82,8 +79,8 @@ const Login = () => {
   React.useEffect(() => {
     // If we're in the initial state check if callback_token query parameter is present
     if (state == LoginState.WaitingForLoginOption) {
-      let params = new URLSearchParams(location.search);
-      let callbackToken = params.get("callback_token");
+      //let callbackToken = params.get("callback_token");
+      let callbackToken = searchParams.get("callback_token");
 
       if (callbackToken == null) {
         return;
