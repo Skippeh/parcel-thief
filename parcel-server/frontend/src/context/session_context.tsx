@@ -1,11 +1,11 @@
 import * as React from "react";
 import { createContext, useState } from "react";
 
-enum UserPermissions {
+export enum UserPermissions {
   None = 0,
 }
 
-interface User {
+export interface User {
   name: string;
   avatarUrl: string;
   permissions: UserPermissions;

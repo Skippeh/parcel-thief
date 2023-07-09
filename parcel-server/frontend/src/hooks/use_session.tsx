@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { SessionContext } from "../context/session_context";
+import { SessionContext, User } from "../context/session_context";
 
 const useSession = () => {
   const session = useContext(SessionContext);
@@ -12,8 +12,17 @@ const useSession = () => {
   const getAuthToken = () => session.authToken;
   const isLoggedIn = () => session.user != null && session.authToken != null;
   const logout = () => session.setUserAndToken(null, null);
+  const setSession = (user: User, authToken: string) =>
+    session.setUserAndToken(
+      {
+        name: user.name,
+        avatarUrl: user.avatarUrl,
+        permissions: user.permissions,
+      },
+      authToken
+    );
 
-  return { getUser, getAuthToken, isLoggedIn, logout };
+  return { getUser, getAuthToken, isLoggedIn, logout, setSession };
 };
 
 export default useSession;

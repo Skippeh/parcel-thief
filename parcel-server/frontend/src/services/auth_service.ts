@@ -13,7 +13,7 @@ export interface InitAuthResponse {
 export interface CheckAuthResponse {
   success?: {
     authToken: string;
-    displayName: string;
+    name: string;
     avatarUrl: string;
   };
   failure?: {

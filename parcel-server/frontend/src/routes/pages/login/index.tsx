@@ -7,7 +7,9 @@ import {
   Provider as ProviderType,
 } from "../../../services/auth_service";
 import * as AuthService from "../../../services/auth_service";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import useSession from "../../../hooks/use_session";
+import { UserPermissions } from "../../../context/session_context";
 
 const Wrapper = styled.div`
   height: 100%;
@@ -61,6 +63,8 @@ const Login = () => {
   const [state, setState] = React.useState(LoginState.WaitingForLoginOption);
   const [error, setError] = React.useState<string | null>(null);
   const location = useLocation();
+  const session = useSession();
+  const navigate = useNavigate();
 
   const login = async (provider: ProviderType) => {
     setState(LoginState.WaitingForAuthResponse);
@@ -103,7 +107,16 @@ const Login = () => {
           setState(LoginState.Failed);
         } else if (checkResponse.data?.success != null) {
           const data = checkResponse.data.success;
-          console.log(data);
+
+          session.setSession(
+            {
+              name: data.name,
+              avatarUrl: data.avatarUrl,
+              permissions: UserPermissions.None,
+            },
+            data.authToken
+          );
+          navigate("/", { replace: true });
         }
       })();
     }
