@@ -7,7 +7,7 @@ import {
   Provider as ProviderType,
 } from "../../../services/auth_service";
 import * as AuthService from "../../../services/auth_service";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const Wrapper = styled.div`
   height: 100%;
@@ -132,6 +132,9 @@ const Login = () => {
             <div>
               <p>Failed to login:</p>
               <p>{error}</p>
+              <Link to="/login" reloadDocument={true}>
+                Try again
+              </Link>
             </div>
           </Content>
         );
