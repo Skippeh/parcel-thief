@@ -4,7 +4,7 @@ import Login from "./pages/login";
 import PageError from "./page_error";
 import Layout from "./layout";
 import Home from "./pages/home";
-import ProtectedRoute from "./protected_route";
+import ProtectedContent from "./protected_content";
 
 export default createBrowserRouter(
   [
@@ -15,7 +15,7 @@ export default createBrowserRouter(
       children: [
         {
           path: "",
-          element: <ProtectedRoute />,
+          element: <ProtectedContent />,
           children: [
             // Protected routes that don't require any special permissions go here
             {

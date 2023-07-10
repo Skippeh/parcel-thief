@@ -15,11 +15,11 @@ function hasPermissions(
 }
 
 /**
- * This route can be used to limit access to a specific route or child components.
+ * This component can be used to limit access to a specific route or child components.
  *
  * If used without any children, an Outlet will be rendered to show any sub routes.
  */
-const ProtectedRoute: React.FC<Props> = ({ children, permissions }) => {
+const ProtectedContent: React.FC<Props> = ({ children, permissions }) => {
   const { getUser } = useSession();
   const navigate = useNavigate();
 
@@ -52,4 +52,4 @@ const ProtectedRoute: React.FC<Props> = ({ children, permissions }) => {
   return children == null ? <Outlet /> : children;
 };
 
-export default ProtectedRoute;
+export default ProtectedContent;
