@@ -11,16 +11,16 @@ const useSession = () => {
   const getUser = () => session.user;
   const getAuthToken = () => session.authToken;
   const isLoggedIn = () => session.user != null && session.authToken != null;
-  const logout = () => session.setUserAndToken(null, null);
+  const logout = () => session.setUserAndToken(null);
   const setSession = (user: User, authToken: string) =>
-    session.setUserAndToken(
-      {
+    session.setUserAndToken({
+      user: {
         name: user.name,
         avatarUrl: user.avatarUrl,
         permissions: user.permissions,
       },
-      authToken
-    );
+      authToken,
+    });
 
   return { getUser, getAuthToken, isLoggedIn, logout, setSession };
 };
