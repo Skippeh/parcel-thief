@@ -32,7 +32,18 @@ export const SessionContextProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
   const storage = useStorage<SavedSession>("session", "session");
-  const savedSession = storage.get();
+  let savedSession = storage.get();
+
+  if (savedSession != null) {
+    // check if session is expired
+    const jwtToken = decodeJwtPayload(savedSession?.authToken);
+    const expireDate = new Date(jwtToken.expiresAt * 1000);
+
+    if (new Date() >= expireDate) {
+      savedSession = null;
+      storage.remove();
+    }
+  }
 
   let [user, setUser] = useState<User | null>(savedSession?.user || null);
   let [authToken, setAuthToken] = useState<string | null>(
@@ -66,3 +77,15 @@ export const SessionContextProvider: React.FC<React.PropsWithChildren> = ({
     </SessionContext.Provider>
   );
 };
+
+interface JwtPayload {
+  expiresAt: number;
+  accountId: string;
+}
+
+function decodeJwtPayload(token: string): JwtPayload {
+  const b64 = token.split(".")[1];
+  const json = atob(b64);
+
+  return JSON.parse(json);
+}
