@@ -32,6 +32,8 @@ const Wrapper = styled.div`
       & img {
         width: 100%;
         border-radius: 50%;
+        border: 1px solid #2ed9d9;
+        box-shadow: 0 0 1px 0px #2ed9d9 inset, 0 0 1px 0px #2ed9d9;
       }
     }
   }

@@ -1,7 +1,8 @@
 import * as React from "react";
+import ContentBox from "../layout/content_box";
 
 const Home = () => {
-  return <div>home</div>;
+  return <ContentBox>home</ContentBox>;
 };
 
 export default Home;

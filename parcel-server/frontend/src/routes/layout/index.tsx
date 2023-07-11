@@ -14,6 +14,7 @@ const Wrapper = styled.div`
 
 const Content = styled.div`
   grid-area: 2 / 1 / 2 / 2;
+  margin: 2rem;
 `;
 
 const Layout = () => {
