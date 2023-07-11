@@ -6,7 +6,12 @@ use actix_web::{
 use anyhow::Context;
 use chrono::Utc;
 use jwt::SignWithKey;
-use parcel_common::api_types::auth::Provider;
+use parcel_common::api_types::{
+    auth::Provider,
+    frontend::auth::{
+        AuthRequest, CheckAuthRequest, CheckAuthResponse, InitAuthResponse, JwtPayload,
+    },
+};
 use steam_auth::{Redirector, Verifier};
 
 use crate::{
@@ -14,9 +19,6 @@ use crate::{
         database::Database, jwt::JwtSecret, memory_cache::MemoryCache, platforms::steam::Steam,
     },
     frontend::{
-        api::models::auth::{
-            AuthRequest, CheckAuthRequest, CheckAuthResponse, InitAuthResponse, JwtPayload,
-        },
         error::ApiError,
         result::{ApiResponse, ApiResult},
     },

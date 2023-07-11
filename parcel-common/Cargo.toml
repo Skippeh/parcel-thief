@@ -21,7 +21,9 @@ diesel = { version = "2.0.3", features = [
 diesel_derives = { version = "2.0.2", optional = true }
 validator = { version = "0.16.0", features = ["derive"] }
 serde-enum-str = "0.3.2"
+typescript-type-def = { version = "0.5.7", optional = true }
 
 [features]
 default = ["diesel"]
 diesel = ["dep:diesel", "dep:diesel_derives"]
+ts = ["dep:typescript-type-def"]

@@ -1,5 +1,4 @@
 pub mod endpoints;
-pub mod models;
 
 use actix_web::web::ServiceConfig;
 

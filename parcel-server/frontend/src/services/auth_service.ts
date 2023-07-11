@@ -1,25 +1,10 @@
 import { ApiResponse, callApi } from ".";
-
-export enum Provider {
-  Steam = "steam",
-  Epic = "epic",
-}
-
-export interface InitAuthResponse {
-  token: string;
-  redirectUrl: string;
-}
-
-export interface CheckAuthResponse {
-  success?: {
-    authToken: string;
-    name: string;
-    avatarUrl: string;
-  };
-  failure?: {
-    error: string;
-  };
-}
+import {
+  CheckAuthRequest,
+  CheckAuthResponse,
+  InitAuthResponse,
+  Provider,
+} from "../api_types";
 
 export async function login(
   provider: Provider
@@ -35,7 +20,7 @@ export async function login(
 export async function checkAuthResult(
   callbackToken: string
 ): Promise<ApiResponse<CheckAuthResponse>> {
-  const requestData = {
+  const requestData: CheckAuthRequest = {
     callbackToken,
   };
 

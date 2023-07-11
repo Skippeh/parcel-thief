@@ -7,6 +7,9 @@ use diesel::{
 };
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "ts")]
+use typescript_type_def::TypeDef;
+
 use crate::serde_util::deserialize_i64_from_string_or_i64;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -40,6 +43,7 @@ pub struct AuthResponse {
 #[derive(Debug, Deserialize, Serialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "diesel", derive(FromSqlRow, AsExpression))]
 #[cfg_attr(feature = "diesel", diesel(sql_type = Integer))]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
 pub enum Provider {
     #[serde(rename = "steam")]
     Steam = 0,

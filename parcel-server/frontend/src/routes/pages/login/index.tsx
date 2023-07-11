@@ -2,7 +2,7 @@ import * as React from "react";
 import styled from "styled-components";
 import steamIcon from "./icons/steam.png";
 import epicIcon from "./icons/epic.png";
-import { Provider as ProviderType } from "../../../services/auth_service";
+import { Provider as ProviderType } from "../../../api_types";
 import * as AuthService from "../../../services/auth_service";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import useSession from "../../../hooks/use_session";
@@ -90,16 +90,14 @@ const Login = () => {
       (async () => {
         var checkResponse = await AuthService.checkAuthResult(callbackToken);
 
-        if (
-          checkResponse.error != null ||
-          checkResponse.data?.failure != null
+        if (checkResponse.error != null) {
+          setError(checkResponse.error);
+          setState(LoginState.Failed);
+        } else if (
+          checkResponse.data != null &&
+          "failure" in checkResponse.data
         ) {
-          if (checkResponse.error != null) {
-            setError(checkResponse.error);
-          } else {
-            setError(checkResponse.data!.failure!.error);
-          }
-
+          setError(checkResponse.data.failure.error);
           setState(LoginState.Failed);
         } else if (checkResponse.data?.success != null) {
           const data = checkResponse.data.success;
@@ -123,10 +121,10 @@ const Login = () => {
       case LoginState.WaitingForLoginOption: {
         return (
           <Content>
-            <Provider onClick={() => login(ProviderType.Steam)}>
+            <Provider onClick={() => login("steam")}>
               <img src={steamIcon} />
             </Provider>
-            <Provider onClick={() => login(ProviderType.Epic)}>
+            <Provider onClick={() => login("epic")}>
               <img src={epicIcon} />
             </Provider>
           </Content>

@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 pub mod area;
 pub mod auth;
+pub mod frontend;
 pub mod mission;
 pub mod object;
 pub mod player_profile;

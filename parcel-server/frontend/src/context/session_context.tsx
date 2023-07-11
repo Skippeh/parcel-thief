@@ -1,6 +1,7 @@
 import * as React from "react";
 import { createContext, useState } from "react";
 import useStorage from "../hooks/use_storage";
+import { JwtPayload } from "../api_types";
 
 export enum UserPermissions {
   None = 0,
@@ -77,11 +78,6 @@ export const SessionContextProvider: React.FC<React.PropsWithChildren> = ({
     </SessionContext.Provider>
   );
 };
-
-interface JwtPayload {
-  expiresAt: number;
-  accountId: string;
-}
 
 function decodeJwtPayload(token: string): JwtPayload {
   const b64 = token.split(".")[1];
