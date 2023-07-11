@@ -23,6 +23,7 @@ const Wrapper = styled.div`
     }
 
     & .avatar {
+      height: 2rem;
       width: 2rem;
 
       & img {
