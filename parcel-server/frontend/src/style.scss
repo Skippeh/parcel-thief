@@ -17,9 +17,9 @@ body {
   font-family: "Open Sans";
   color: rgb(245, 245, 245);
   background: rgb(2, 0, 36);
-  background: linear-gradient(
-    90deg,
-    rgba(23, 26, 46, 1) 100%,
-    rgba(2, 0, 36, 1) 0%
+  background: radial-gradient(
+    circle at center top,
+    rgba(24, 27, 52, 1) 0%,
+    rgba(2, 0, 36, 1) 100%
   );
 }

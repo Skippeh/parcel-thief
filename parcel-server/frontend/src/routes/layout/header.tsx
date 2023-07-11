@@ -10,9 +10,11 @@ const Wrapper = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 1px solid rgb(36, 45, 70);
+  box-shadow: 0px 14px 36px -13px rgba(0, 0, 0, 0.3);
 
   & .user {
-    padding: 1rem;
+    padding: 0 1rem;
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -50,7 +52,7 @@ const Wrapper = styled.div`
           padding: 1rem;
 
           &.active {
-            background: #257524;
+            background: #244475;
           }
 
           &:not(.active):hover {
