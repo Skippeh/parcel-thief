@@ -79,6 +79,9 @@ const Header = () => {
           <li>
             <NavLink to="/">Home</NavLink>
           </li>
+          <li>
+            <NavLink to="/items">Items</NavLink>
+          </li>
         </ul>
       </nav>
       <div className="user">

@@ -5,6 +5,7 @@ import PageError from "./page_error";
 import Layout from "./layout";
 import Home from "./pages/home";
 import ProtectedContent from "./protected_content";
+import Items from "./pages/items";
 
 export default createBrowserRouter(
   [
@@ -21,6 +22,10 @@ export default createBrowserRouter(
             {
               path: "",
               element: <Home />,
+            },
+            {
+              path: "/items",
+              element: <Items />,
             },
           ],
         },
