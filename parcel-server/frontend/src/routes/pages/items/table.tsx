@@ -38,6 +38,7 @@ const Table = ({ items }: Props) => {
         rowData={items}
         domLayout="autoHeight"
         onGridReady={onGridReady}
+        enableCellTextSelection={true}
       />
     </div>
   );
