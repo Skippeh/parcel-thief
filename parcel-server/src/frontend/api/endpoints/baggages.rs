@@ -5,6 +5,7 @@ use parcel_common::api_types::{
     frontend::baggages::{BaggageListItem, ListSharedCargoResponse},
     mission::{MissionType, OnlineMissionType, ProgressState},
 };
+use parcel_game_data::{GameData, Language};
 
 use crate::{
     data::database::Database,
@@ -18,6 +19,7 @@ use crate::{
 pub async fn list_shared_cargo(
     _session: JwtSession,
     database: Data<Database>,
+    game_data: Data<GameData>,
 ) -> ApiResult<ListSharedCargoResponse> {
     let conn = database.connect()?;
     let missions = conn.missions(); // shared and lost cargo are saved as missions
@@ -63,11 +65,32 @@ pub async fn list_shared_cargo(
             .unwrap_or_else(|| "Deleted account".into());
 
         for baggage in mission.baggages {
+            let baggage_data = game_data.baggages.get(&(baggage.name_hash as u32));
+
+            let mut item_name = baggage_data
+                .map(|b| b.names.get(&Language::English).map(|n| n.clone()))
+                .flatten()
+                .unwrap_or_else(|| baggage.name_hash.to_string());
+
+            item_name = item_name.replace("{0}", baggage.amount.to_string().as_str());
+
+            let category = baggage_data
+                .map(|b| b.baggage_metadata.type_contents)
+                .map(|t| format!("{:?}", t))
+                .unwrap_or_else(|| "Unknown".into());
+
+            let location_name = game_data
+                .qpid_areas
+                .get(&mission.mission.qpid_id)
+                .map(|a| a.names.get(&Language::English).map(|n| n.clone()))
+                .flatten()
+                .unwrap_or_else(|| mission.mission.qpid_id.to_string());
+
             baggages.push(BaggageListItem {
-                name: baggage.name_hash.to_string(),
-                category: "todo".into(),
+                name: item_name,
+                category,
                 amount: baggage.amount,
-                location: mission.mission.qpid_id.to_string(),
+                location: location_name,
                 creator: creator.clone(),
             })
         }
