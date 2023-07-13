@@ -93,14 +93,11 @@ const Login = () => {
         if (checkResponse.error != null) {
           setError(checkResponse.error);
           setState(LoginState.Failed);
-        } else if (
-          checkResponse.data != null &&
-          "failure" in checkResponse.data
-        ) {
-          setError(checkResponse.data.failure.error);
+        } else if (checkResponse.data?.type == "failure") {
+          setError(checkResponse.data.error);
           setState(LoginState.Failed);
-        } else if (checkResponse.data?.success != null) {
-          const data = checkResponse.data.success;
+        } else if (checkResponse.data?.type == "success") {
+          const data = checkResponse.data;
 
           session.setSession(
             {

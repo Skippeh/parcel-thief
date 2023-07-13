@@ -21,7 +21,7 @@ pub struct CheckAuthRequest {
 }
 
 #[derive(Debug, serde::Serialize, TypeDef, Clone)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", tag = "type")]
 pub enum CheckAuthResponse {
     #[serde(rename_all = "camelCase")]
     Success {
