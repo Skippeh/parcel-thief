@@ -6,6 +6,7 @@ use parcel_common::api_types::{
     self,
     mission::{MissionType, OnlineMissionType, ProgressState},
     requests::{self},
+    IntoDsApiType,
 };
 
 use crate::db::{
@@ -527,27 +528,30 @@ impl From<Mission> for DbMission {
     }
 }
 
-impl DbMission {
-    pub fn into_api_type(mut self) -> api_types::mission::Mission {
-        let mut api_mission = self.mission.into_api_type();
+impl IntoDsApiType for DbMission {
+    type ApiType = api_types::mission::Mission;
 
-        api_mission.supply_info = self.supply_info.map(|si| si.into_api_type());
-        api_mission.dynamic_start_info = self.dynamic_start_info.map(|d| d.into_api_type());
-        api_mission.dynamic_end_info = self.dynamic_end_info.map(|d| d.into_api_type());
-        api_mission.dynamic_delivered_info = self.dynamic_delivered_info.map(|d| d.into_api_type());
-        api_mission.dynamic_mission_info = self.dynamic_mission_info.map(|d| d.into_api_type());
-        api_mission.catapult_shell_info = self.catapult_shell_info.map(|c| c.into_api_type());
+    fn into_ds_api_type(mut self) -> Self::ApiType {
+        let mut api_mission = self.mission.into_ds_api_type();
+
+        api_mission.supply_info = self.supply_info.map(|si| si.into_ds_api_type());
+        api_mission.dynamic_start_info = self.dynamic_start_info.map(|d| d.into_ds_api_type());
+        api_mission.dynamic_end_info = self.dynamic_end_info.map(|d| d.into_ds_api_type());
+        api_mission.dynamic_delivered_info =
+            self.dynamic_delivered_info.map(|d| d.into_ds_api_type());
+        api_mission.dynamic_mission_info = self.dynamic_mission_info.map(|d| d.into_ds_api_type());
+        api_mission.catapult_shell_info = self.catapult_shell_info.map(|c| c.into_ds_api_type());
         api_mission.baggages = self
             .baggages
             .into_iter()
             .map(|b| {
                 let id = b.id;
-                let mut baggage = b.into_api_type();
+                let mut baggage = b.into_ds_api_type();
 
                 baggage.ammo_info = self
                     .baggage_ammo_infos
                     .remove(&id)
-                    .map(|ammo| ammo.into_api_type());
+                    .map(|ammo| ammo.into_ds_api_type());
                 baggage
             })
             .collect();

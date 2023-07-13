@@ -14,7 +14,7 @@ use std::num::TryFromIntError;
 
 use chrono::NaiveDateTime;
 use diesel::{Insertable, Queryable};
-use parcel_common::api_types::{self, area::AreaHash, object::ObjectType};
+use parcel_common::api_types::{self, area::AreaHash, object::ObjectType, TryIntoDsApiType};
 
 use crate::db::schema::qpid_objects;
 
@@ -61,12 +61,15 @@ pub struct NewQpidObject<'a> {
     pub updated_time: &'a NaiveDateTime,
 }
 
-impl QpidObject {
+impl TryIntoDsApiType for QpidObject {
+    type ApiType = api_types::object::Object;
+    type Error = TryFromIntError;
+
     /// Converts self to api equivalent type. Note that all relational columns are set to None.
     ///
     /// Fails if likes is >u32::MAX (db value is stored as i64 due to postgres lacking unsigned types)
-    pub fn try_into_api_type(self) -> Result<api_types::object::Object, TryFromIntError> {
-        Ok(api_types::object::Object {
+    fn try_into_ds_api_type(self) -> Result<Self::ApiType, Self::Error> {
+        Ok(Self::ApiType {
             creator_account_id: self.creator_id,
             exponent: self.exponent,
             object_id: self.id,

@@ -2,7 +2,10 @@ use actix_web::{
     post,
     web::{Data, Json},
 };
-use parcel_common::api_types::requests::create_road::{CreateRoadRequest, CreateRoadResponse};
+use parcel_common::api_types::{
+    requests::create_road::{CreateRoadRequest, CreateRoadResponse},
+    IntoDsApiType,
+};
 
 use crate::{data::database::Database, endpoints::InternalError, session::Session};
 
@@ -19,7 +22,7 @@ pub async fn create_road(
         .create_road_from_request(&session.account_id, &request.into_inner())
         .await
         .map_err(|err| InternalError(err.into()))? // todo: replace internal error with proper error
-        .into_api_type();
+        .into_ds_api_type();
 
     Ok(Json(road))
 }

@@ -1,5 +1,5 @@
 use diesel::{AsChangeset, Insertable, Queryable};
-use parcel_common::api_types;
+use parcel_common::api_types::{self, IntoDsApiType};
 
 use crate::db::schema::qpid_object_parking_infos;
 
@@ -22,9 +22,11 @@ pub struct NewParkingInfo<'a> {
     pub is_parking: bool,
 }
 
-impl ParkingInfo {
-    pub fn into_api_type(self) -> api_types::object::ParkingInfo {
-        api_types::object::ParkingInfo {
+impl IntoDsApiType for ParkingInfo {
+    type ApiType = api_types::object::ParkingInfo;
+
+    fn into_ds_api_type(self) -> Self::ApiType {
+        Self::ApiType {
             location_id: self.location_id,
             dynamic_location_id: self.dynamic_location_id,
             current_qpid_id: self.current_qpid_id,

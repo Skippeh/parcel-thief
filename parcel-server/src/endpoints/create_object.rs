@@ -6,6 +6,7 @@ use actix_web::{
 use parcel_common::api_types::{
     object::ObjectType,
     requests::create_object::{CreateObjectRequest, CreateObjectResponse},
+    TryIntoDsApiType,
 };
 
 use crate::{data::database::Database, endpoints::InternalError, session::Session};
@@ -31,6 +32,6 @@ pub async fn create_object(
     let result = qpid_objects
         .create_from_request(&request, &session.account_id)
         .await?
-        .try_into_api_type()?;
+        .try_into_ds_api_type()?;
     Ok(Json(result))
 }

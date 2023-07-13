@@ -3,6 +3,7 @@ use diesel::{dsl::not, prelude::*};
 
 use parcel_common::api_types::{
     self, area::AreaHash, object::ObjectType, requests::create_object::CreateObjectRequest,
+    IntoDsApiType, TryIntoDsApiType,
 };
 
 use crate::db::{
@@ -44,32 +45,35 @@ pub struct DbQpidObject {
     pub tags: Option<Vec<Tag>>,
 }
 
-impl DbQpidObject {
-    pub fn try_into_api_type(self) -> Result<api_types::object::Object, anyhow::Error> {
-        let mut result = self.object.try_into_api_type()?;
+impl TryIntoDsApiType for DbQpidObject {
+    type ApiType = api_types::object::Object;
+    type Error = anyhow::Error;
 
-        result.rope_info = self.rope_info.map(|i| i.into_api_type());
-        result.stone_info = self.stone_info.map(|i| i.into_api_type());
-        result.bridge_info = self.bridge_info.map(|i| i.into_api_type());
-        result.parking_info = self.parking_info.map(|i| i.into_api_type());
-        result.vehicle_info = self.vehicle_info.map(|i| i.into_api_type());
-        result.extra_info = self.extra_info.map(|i| i.into_api_type());
-        result.customize_info = self.customize_info.map(|i| i.into_api_type());
+    fn try_into_ds_api_type(self) -> Result<Self::ApiType, Self::Error> {
+        let mut result = self.object.try_into_ds_api_type()?;
+
+        result.rope_info = self.rope_info.map(|i| i.into_ds_api_type());
+        result.stone_info = self.stone_info.map(|i| i.into_ds_api_type());
+        result.bridge_info = self.bridge_info.map(|i| i.into_ds_api_type());
+        result.parking_info = self.parking_info.map(|i| i.into_ds_api_type());
+        result.vehicle_info = self.vehicle_info.map(|i| i.into_ds_api_type());
+        result.extra_info = self.extra_info.map(|i| i.into_ds_api_type());
+        result.customize_info = self.customize_info.map(|i| i.into_ds_api_type());
         result.construction_materials_contributions = self
             .construction_materials
-            .map(|i| i.into_iter().map(|mats| mats.into_api_type()).collect());
+            .map(|i| i.into_iter().map(|mats| mats.into_ds_api_type()).collect());
         result.recycle_materials_contributions = self
             .recycle_materials
-            .map(|i| i.into_iter().map(|mats| mats.into_api_type()).collect());
+            .map(|i| i.into_iter().map(|mats| mats.into_ds_api_type()).collect());
         result.tags = self.tags.map(|i| i.into_iter().map(|t| t.tag).collect());
 
         if let Some(comment) = self.comment {
             let mut comments = Vec::with_capacity(1);
-            let mut comment = comment.try_into_api_type()?;
+            let mut comment = comment.try_into_ds_api_type()?;
 
             if let Some(mut phrases) = self.comment_phrases {
                 phrases.sort_unstable_by(|a, b| a.sort_order.cmp(&b.sort_order));
-                comment.phrases = phrases.into_iter().map(|p| p.into_api_type()).collect();
+                comment.phrases = phrases.into_iter().map(|p| p.into_ds_api_type()).collect();
             } else {
                 anyhow::bail!("No phrases specified in comment");
             }

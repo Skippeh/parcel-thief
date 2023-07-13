@@ -2,8 +2,9 @@ use actix_web::{
     post,
     web::{Data, Json},
 };
-use parcel_common::api_types::requests::update_objects_tag::{
-    UpdateObjectsTagRequest, UpdateObjectsTagResponse,
+use parcel_common::api_types::{
+    requests::update_objects_tag::{UpdateObjectsTagRequest, UpdateObjectsTagResponse},
+    TryIntoDsApiType,
 };
 
 use crate::{data::database::Database, endpoints::InternalError, session::Session};
@@ -49,7 +50,7 @@ pub async fn update_objects_tag(
             .query_object_data(response_objects)
             .await?
             .into_iter()
-            .map(|obj| obj.try_into_api_type())
+            .map(|obj| obj.try_into_ds_api_type())
             .collect::<Result<Vec<_>, _>>()?;
 
         Ok(Json(UpdateObjectsTagResponse {

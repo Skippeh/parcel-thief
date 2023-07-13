@@ -2,8 +2,9 @@ use actix_web::{
     put,
     web::{Data, Json},
 };
-use parcel_common::api_types::requests::set_mission_progress::{
-    SetMissionProgressRequest, SetMissionProgressResponse,
+use parcel_common::api_types::{
+    requests::set_mission_progress::{SetMissionProgressRequest, SetMissionProgressResponse},
+    IntoDsApiType,
 };
 
 use crate::{
@@ -60,7 +61,7 @@ pub async fn set_mission_progress(
             .pop()
             .expect("There should be exactly one item in the vec");
 
-        Ok(Json(mission.into_api_type()))
+        Ok(Json(mission.into_ds_api_type()))
     } else {
         Err(anyhow::anyhow!("Mission not found").into())
     }

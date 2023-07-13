@@ -11,6 +11,7 @@ use parcel_common::api_types::{
     self,
     area::AreaHash,
     mission::{MissionType, OnlineMissionType, ProgressState},
+    IntoDsApiType,
 };
 
 use crate::db::schema::missions;
@@ -33,10 +34,12 @@ pub struct Mission {
     pub expiration_time: NaiveDateTime,
 }
 
-impl Mission {
+impl IntoDsApiType for Mission {
+    type ApiType = api_types::mission::Mission;
+
     /// Converts self into the mission api type. All relational columns will be set to None, or empty vec.
-    pub fn into_api_type(self) -> api_types::mission::Mission {
-        api_types::mission::Mission {
+    fn into_ds_api_type(self) -> Self::ApiType {
+        Self::ApiType {
             area_hash: self.area_id,
             creator_account_id: self.creator_id,
             worker_account_id: self.worker_id,

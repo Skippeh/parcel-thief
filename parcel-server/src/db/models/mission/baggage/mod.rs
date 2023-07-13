@@ -1,7 +1,7 @@
 pub mod ammo_info;
 
 use diesel::{Identifiable, Insertable, Queryable};
-use parcel_common::api_types;
+use parcel_common::api_types::{self, IntoDsApiType};
 
 use crate::db::schema::mission_baggages;
 
@@ -19,10 +19,12 @@ pub struct Baggage {
     pub is_returned: bool,
 }
 
-impl Baggage {
+impl IntoDsApiType for Baggage {
+    type ApiType = api_types::mission::Baggage;
+
     /// Converts self into equivalent api type. Relational columns are set to None.
-    pub fn into_api_type(self) -> api_types::mission::Baggage {
-        api_types::mission::Baggage {
+    fn into_ds_api_type(self) -> Self::ApiType {
+        Self::ApiType {
             amount: self.amount,
             name_hash: self.name_hash,
             user_index: self.user_index,

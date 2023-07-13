@@ -1,5 +1,5 @@
 use diesel::{Insertable, Queryable};
-use parcel_common::api_types;
+use parcel_common::api_types::{self, IntoDsApiType};
 
 use crate::db::schema::mission_baggage_ammo_infos;
 
@@ -11,9 +11,11 @@ pub struct AmmoInfo {
     pub count: i16,
 }
 
-impl AmmoInfo {
-    pub fn into_api_type(self) -> api_types::mission::AmmoInfo {
-        api_types::mission::AmmoInfo {
+impl IntoDsApiType for AmmoInfo {
+    type ApiType = api_types::mission::AmmoInfo;
+
+    fn into_ds_api_type(self) -> Self::ApiType {
+        Self::ApiType {
             ammo_id: self.ammo_id,
             clip_count: self.clip_count,
             count: self.count,

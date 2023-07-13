@@ -5,6 +5,7 @@ use actix_web::{
 use anyhow::Context;
 use parcel_common::api_types::{
     object::Object, requests::set_construction_materials::SetConstructionMaterialsRequest,
+    TryIntoDsApiType,
 };
 
 use crate::{data::database::Database, endpoints::InternalError, session::Session};
@@ -45,7 +46,7 @@ pub async fn set_construction_materials(
         .into_iter()
         .next()
         .context("Object not found (but shouldn't ever happen at this point)")?
-        .try_into_api_type()?;
+        .try_into_ds_api_type()?;
 
     Ok(Json(object))
 }

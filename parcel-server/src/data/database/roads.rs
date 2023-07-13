@@ -2,8 +2,9 @@ use std::collections::HashMap;
 
 use base64::Engine;
 use diesel::{dsl::not, prelude::*};
-use parcel_common::api_types::requests::{
-    create_road::CreateRoadRequest, find_qpid_objects::RoadRequest,
+use parcel_common::api_types::{
+    requests::{create_road::CreateRoadRequest, find_qpid_objects::RoadRequest},
+    IntoDsApiType,
 };
 
 use crate::db::{
@@ -39,15 +40,17 @@ impl From<base64::DecodeError> for CreateRoadError {
     }
 }
 
-impl DbRoad {
-    pub fn into_api_type(self) -> parcel_common::api_types::road::Road {
+impl IntoDsApiType for DbRoad {
+    type ApiType = parcel_common::api_types::road::Road;
+
+    fn into_ds_api_type(self) -> Self::ApiType {
         let via_qpids = if !self.via_qpids.is_empty() {
             Some(self.via_qpids.into_iter().map(|vq| vq.qpid_id).collect())
         } else {
             None
         };
 
-        parcel_common::api_types::road::Road {
+        Self::ApiType {
             area_hash: self.road.area_hash,
             creator_account_id: self.road.creator_id,
             start_location_id: self.road.location_start_id,

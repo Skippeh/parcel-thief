@@ -1,6 +1,6 @@
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
-use parcel_common::api_types::auth::Provider;
+use parcel_common::api_types::{auth::Provider, IntoDsApiType};
 
 use crate::db::schema::{account_histories, account_strand_contracts, accounts};
 
@@ -31,11 +31,11 @@ pub struct AccountHistory {
     pub encountered_at: NaiveDateTime,
 }
 
-impl AccountHistory {
-    pub fn into_api_type(
-        self,
-    ) -> parcel_common::api_types::requests::get_relationships::RelationshipHistory {
-        parcel_common::api_types::requests::get_relationships::RelationshipHistory {
+impl IntoDsApiType for AccountHistory {
+    type ApiType = parcel_common::api_types::requests::get_relationships::RelationshipHistory;
+
+    fn into_ds_api_type(self) -> Self::ApiType {
+        Self::ApiType {
             last_interaction_time: self.encountered_at.timestamp_millis(),
             account_id: self.encountered_id,
         }
@@ -58,11 +58,11 @@ pub struct AccountStrandContract {
     pub created_at: NaiveDateTime,
 }
 
-impl AccountStrandContract {
-    pub fn into_api_type(
-        self,
-    ) -> parcel_common::api_types::requests::get_relationships::StrandContract {
-        parcel_common::api_types::requests::get_relationships::StrandContract {
+impl IntoDsApiType for AccountStrandContract {
+    type ApiType = parcel_common::api_types::requests::get_relationships::StrandContract;
+
+    fn into_ds_api_type(self) -> Self::ApiType {
+        Self::ApiType {
             added_time: self.created_at.timestamp_millis(),
             account_id: self.contract_account_id,
         }

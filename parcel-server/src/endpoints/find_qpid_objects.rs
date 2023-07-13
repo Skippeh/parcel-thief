@@ -5,6 +5,7 @@ use actix_web::{
 use parcel_common::api_types::{
     object::{ObjectType, QpidObjectsResponse},
     requests::find_qpid_objects::{FindQpidObjectsRequest, FindQpidObjectsResponse},
+    IntoDsApiType, TryIntoDsApiType,
 };
 
 use crate::{data::database::Database, endpoints::InternalError, session::Session};
@@ -68,7 +69,7 @@ pub async fn find_qpid_objects(
             .query_object_data(found_objects)
             .await?
             .into_iter()
-            .map(|obj| obj.try_into_api_type())
+            .map(|obj| obj.try_into_ds_api_type())
             .collect::<Result<_, _>>()?;
 
         result.normal.object_p = Some(api_objects);
@@ -91,7 +92,7 @@ pub async fn find_qpid_objects(
             )
             .await?
             .into_iter()
-            .map(|r| r.into_api_type())
+            .map(|r| r.into_ds_api_type())
             .collect();
 
         result.normal.roads = Some(found_roads);
