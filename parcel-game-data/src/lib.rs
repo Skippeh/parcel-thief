@@ -18,6 +18,6 @@ pub struct ObjectMetaData {
 #[derive(Debug, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct GameData {
-    pub baggages: HashMap<String, Baggage>,
-    pub qpid_areas: HashMap<String, QpidArea>,
+    pub baggages: HashMap<u32, Baggage>,
+    pub qpid_areas: HashMap<i32, QpidArea>,
 }
