@@ -51,6 +51,7 @@ jwt = "0.16.0"
 hmac = "0.12.1"
 sha2 = "0.10.6"
 typescript-type-def = "0.5.7"
+flagset = { version = "0.4.3", features = ["serde"] }
 
 [build-dependencies]
 typescript-type-def = "0.5.7"

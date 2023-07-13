@@ -10,6 +10,7 @@ use parcel_common::api_types::{
     auth::Provider,
     frontend::auth::{
         AuthRequest, CheckAuthRequest, CheckAuthResponse, InitAuthResponse, JwtPayload,
+        JwtPermissions,
     },
 };
 use steam_auth::{Redirector, Verifier};
@@ -123,6 +124,7 @@ pub async fn steam_callback(
                         auth_token,
                         avatar_url: user_summary.avatar_full,
                         name: user_summary.name,
+                        permissions: JwtPermissions::None,
                     }
                 }
                 None => {

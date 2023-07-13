@@ -226,16 +226,22 @@ impl<'db> Missions<'db> {
         mission_types: &[MissionType],
         exclude_accounts: &[&str],
         progress_states: &[ProgressState],
-        qpid_ids: &[i32],
+        qpid_ids: Option<&[i32]>,
     ) -> Result<Vec<Mission>, QueryError> {
         let conn = &mut *self.connection.get_pg_connection().await;
-        Ok(dsl::missions
+
+        let mut query = dsl::missions
             .filter(dsl::online_mission_type.eq_any(online_types))
             .filter(dsl::mission_type.eq_any(mission_types))
             .filter(dsl::progress_state.eq_any(progress_states))
-            .filter(dsl::qpid_id.eq_any(qpid_ids))
             .filter(not(dsl::creator_id.eq_any(exclude_accounts)))
-            .get_results(conn)?)
+            .into_boxed();
+
+        if let Some(qpid_ids) = qpid_ids {
+            query = query.filter(dsl::qpid_id.eq_any(qpid_ids));
+        }
+
+        Ok(query.get_results(conn)?)
     }
 
     pub async fn get_ordered_missions(&self, account_id: &str) -> Result<Vec<Mission>, QueryError> {
@@ -490,6 +496,7 @@ impl<'db> Missions<'db> {
     }
 }
 
+#[derive(Debug)]
 pub struct DbMission {
     pub mission: Mission,
     pub supply_info: Option<SupplyInfo>,

@@ -4,6 +4,12 @@ export interface ApiResponse<T> {
   error: string | null;
 }
 
+let authToken: string | null = null;
+
+export function setAuthToken(token: string | null) {
+  authToken = token;
+}
+
 export function getApiUrl(apiRoute: string): string {
   return `/frontend/api/${apiRoute}`;
 }
@@ -16,12 +22,19 @@ export async function callApi<T>(
   let apiResponse: ApiResponse<T>;
 
   try {
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    // If we have an auth token, set Authorization header
+    if (authToken != null) {
+      headers["Authorization"] = `Bearer ${authToken}`;
+    }
+
     const response = await fetch(getApiUrl(route), {
       method,
       body: requestData == null ? null : JSON.stringify(requestData),
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
     });
 
     apiResponse = response.json() as unknown as ApiResponse<T>;

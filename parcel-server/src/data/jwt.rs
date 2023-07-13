@@ -1,7 +1,7 @@
 use std::{ops::Deref, path::Path};
 
 use hmac::{Hmac, Mac};
-use jwt::SigningAlgorithm;
+use jwt::{SigningAlgorithm, VerifyingAlgorithm};
 use sha2::Sha256;
 use tokio::{
     fs::File,
@@ -54,10 +54,25 @@ impl Deref for JwtSecret {
 
 impl SigningAlgorithm for JwtSecret {
     fn algorithm_type(&self) -> jwt::AlgorithmType {
-        self.0.algorithm_type()
+        SigningAlgorithm::algorithm_type(&self.0)
     }
 
     fn sign(&self, header: &str, claims: &str) -> Result<String, jwt::Error> {
         self.0.sign(header, claims)
+    }
+}
+
+impl VerifyingAlgorithm for JwtSecret {
+    fn algorithm_type(&self) -> jwt::AlgorithmType {
+        VerifyingAlgorithm::algorithm_type(&self.0)
+    }
+
+    fn verify_bytes(
+        &self,
+        header: &str,
+        claims: &str,
+        signature: &[u8],
+    ) -> Result<bool, jwt::Error> {
+        self.0.verify_bytes(header, claims, signature)
     }
 }

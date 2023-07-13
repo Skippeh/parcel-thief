@@ -1,5 +1,6 @@
 pub mod api;
 mod error;
+pub mod jwt_session;
 mod result;
 
 use actix_web::{

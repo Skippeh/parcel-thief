@@ -6,7 +6,9 @@ import { AgGridReact } from "ag-grid-react";
 import { useState } from "react";
 import { ColDef, GridReadyEvent } from "ag-grid-community";
 
-const Table = () => {
+interface Props {}
+
+const Table = ({}: Props) => {
   const [defaultColDef] = useState<ColDef>({
     sortable: true,
     filter: true,

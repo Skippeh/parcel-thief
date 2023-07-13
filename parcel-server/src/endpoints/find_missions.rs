@@ -43,7 +43,7 @@ pub async fn find_missions(
             MISSION_TYPES,
             &[&session.account_id],
             PROGRESS_STATES,
-            &request.qpid_ids,
+            Some(&request.qpid_ids),
         )
         .await?;
 

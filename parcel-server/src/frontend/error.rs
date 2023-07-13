@@ -9,6 +9,8 @@ pub enum ApiError {
     Internal(anyhow::Error),
     #[error("Bad request: {0}")]
     BadRequest(anyhow::Error),
+    #[error("You lack the permissions to access to this resource")]
+    Forbidden,
 }
 
 impl From<anyhow::Error> for ApiError {
@@ -47,6 +49,7 @@ impl ResponseError for ApiError {
         match self {
             ApiError::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::BadRequest(_) => StatusCode::BAD_REQUEST,
+            ApiError::Forbidden => StatusCode::FORBIDDEN,
         }
     }
 

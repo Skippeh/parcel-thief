@@ -1,3 +1,4 @@
+use flagset::flags;
 use typescript_type_def::TypeDef;
 
 use crate::api_types::auth::Provider;
@@ -20,6 +21,15 @@ pub struct CheckAuthRequest {
     pub callback_token: String,
 }
 
+flags! {
+    // note: at the moment the typescript generator doesn't support serde_repr/c style enums. So this is currently unusable in TS without a workaround
+    #[derive(PartialOrd, Ord, Hash, serde_repr::Serialize_repr, serde_repr::Deserialize_repr, TypeDef)]
+    #[repr(u32)]
+    pub enum JwtPermissions: u32 {
+        None = 0,
+    }
+}
+
 #[derive(Debug, serde::Serialize, TypeDef, Clone)]
 #[serde(rename_all = "camelCase", tag = "type")]
 pub enum CheckAuthResponse {
@@ -28,6 +38,7 @@ pub enum CheckAuthResponse {
         name: String,
         avatar_url: String,
         auth_token: String,
+        permissions: JwtPermissions,
     },
     Failure {
         error: String,

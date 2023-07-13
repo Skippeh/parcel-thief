@@ -2,6 +2,7 @@ import * as React from "react";
 import { createContext, useState } from "react";
 import useStorage from "../hooks/use_storage";
 import { JwtPayload } from "../api_types";
+import * as Api from "../services";
 
 export enum UserPermissions {
   None = 0,
@@ -46,6 +47,10 @@ export const SessionContextProvider: React.FC<React.PropsWithChildren> = ({
     }
   }
 
+  if (savedSession != null) {
+    Api.setAuthToken(savedSession.authToken);
+  }
+
   let [user, setUser] = useState<User | null>(savedSession?.user || null);
   let [authToken, setAuthToken] = useState<string | null>(
     savedSession?.authToken || null
@@ -69,6 +74,8 @@ export const SessionContextProvider: React.FC<React.PropsWithChildren> = ({
       } else {
         storage.remove();
       }
+
+      Api.setAuthToken(userAndToken?.authToken || null);
     },
   };
 

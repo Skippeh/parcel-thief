@@ -7,5 +7,6 @@ use endpoints::*;
 pub fn configure_endpoints(cfg: &mut ServiceConfig) {
     cfg.service(auth::auth)
         .service(auth::check_auth)
-        .service(auth::steam_callback);
+        .service(auth::steam_callback)
+        .service(baggages::list_shared_cargo);
 }
