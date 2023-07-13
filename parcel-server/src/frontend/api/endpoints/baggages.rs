@@ -40,10 +40,14 @@ pub async fn list_shared_cargo(
         )
         .await?;
 
-    let account_ids = data_missions
+    let mut account_ids = data_missions
         .iter()
         .map(|mission| mission.creator_id.clone())
         .collect::<Vec<_>>();
+
+    // Remove duplicate ids (sort first otherwise dedup doesn't work)
+    account_ids.sort_unstable();
+    account_ids.dedup();
 
     let accounts = conn.accounts();
     let accounts = accounts
