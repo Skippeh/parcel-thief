@@ -2,12 +2,13 @@ mod baggages;
 pub mod qpid_areas;
 mod readers;
 
-use std::path::PathBuf;
+use std::{collections::BTreeMap, path::PathBuf};
 
 use anyhow::Context;
 use clap::Parser;
-use parcel_game_data::GameData;
+use parcel_game_data::{Baggage, QpidArea};
 use readers::LoadContext;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, clap::Parser)]
 struct Options {
@@ -16,9 +17,16 @@ struct Options {
     output_path: PathBuf,
 }
 
+#[derive(Debug, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct GameDataExport {
+    pub baggages: BTreeMap<u32, Baggage>,
+    pub qpid_areas: BTreeMap<i32, QpidArea>,
+}
+
 fn main() -> Result<(), anyhow::Error> {
     let args = Options::parse();
-    let mut output = GameData::default();
+    let mut output = GameDataExport::default();
     let mut load_context = LoadContext::new(args.data_directory.clone());
 
     baggages::read_baggages(&mut load_context, &mut output.baggages)

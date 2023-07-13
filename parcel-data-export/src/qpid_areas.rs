@@ -8,7 +8,7 @@ use crate::readers::{
 
 pub fn read_qpid_areas(
     load_context: &mut LoadContext,
-    qpid_areas: &mut Vec<QpidArea>,
+    qpid_areas: &mut BTreeMap<i32, QpidArea>,
 ) -> Result<(), anyhow::Error> {
     let location_dir = load_context.get_absolute_path(&Path::new("ds").join("location"));
 
@@ -83,11 +83,14 @@ pub fn read_qpid_areas(
                         location: delivery_point.world_transform.position,
                     };
 
-                    qpid_areas.push(QpidArea {
-                        qpid_id: delivery_point.delivery_point_locator_id,
-                        names,
-                        metadata,
-                    });
+                    qpid_areas.insert(
+                        delivery_point.delivery_point_locator_id,
+                        QpidArea {
+                            qpid_id: delivery_point.delivery_point_locator_id,
+                            names,
+                            metadata,
+                        },
+                    );
                 }
             }
         }

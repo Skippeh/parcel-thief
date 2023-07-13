@@ -2,6 +2,8 @@ mod baggages;
 mod language;
 mod qpid_areas;
 
+use std::collections::HashMap;
+
 pub use baggages::*;
 pub use language::*;
 pub use qpid_areas::*;
@@ -16,6 +18,6 @@ pub struct ObjectMetaData {
 #[derive(Debug, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct GameData {
-    pub baggages: Vec<Baggage>,
-    pub qpid_areas: Vec<QpidArea>,
+    pub baggages: HashMap<String, Baggage>,
+    pub qpid_areas: HashMap<String, QpidArea>,
 }

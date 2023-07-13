@@ -32,7 +32,7 @@ impl From<&BaggageListItem> for BaggageMetaData {
 
 pub fn read_baggages(
     load_context: &mut LoadContext,
-    out_baggages: &mut Vec<Baggage>,
+    out_baggages: &mut BTreeMap<u32, Baggage>,
 ) -> Result<(), anyhow::Error> {
     out_baggages.append(&mut read_baggages_from_file(
         &PathBuf::from_str("ds/catalogue/baggages/baggage_equipment.core")
@@ -76,8 +76,8 @@ pub fn read_baggages(
 fn read_baggages_from_file(
     path: &Path,
     load_context: &mut LoadContext,
-) -> Result<Vec<Baggage>, anyhow::Error> {
-    let mut baggages = Vec::new();
+) -> Result<BTreeMap<u32, Baggage>, anyhow::Error> {
+    let mut baggages = BTreeMap::new();
     let file = load_context.load_file(path)?;
 
     // Add all BaggageListItems
@@ -92,13 +92,16 @@ fn read_baggages_from_file(
             uuid: rtti_item.object_uuid().to_string(),
         };
 
-        baggages.push(Baggage {
-            name_hash: item.name_code,
-            names,
-            descriptions,
-            baggage_metadata,
-            object_metadata,
-        });
+        baggages.insert(
+            item.name_code,
+            Baggage {
+                name_hash: item.name_code,
+                names,
+                descriptions,
+                baggage_metadata,
+                object_metadata,
+            },
+        );
     }
 
     Ok(baggages)
