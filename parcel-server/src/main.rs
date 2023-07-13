@@ -29,6 +29,7 @@ use data::{
 use diesel::{pg::Pg, Connection, PgConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use frontend::api::endpoints::auth::FrontendAuthCache;
+use parcel_game_data::GameData;
 use rustls::{Certificate, PrivateKey};
 use rustls_pemfile::{certs, pkcs8_private_keys};
 
@@ -99,6 +100,9 @@ pub struct Options {
     /// This is a lot slower than normal logging so don't use this in production
     #[arg(long, default_value_t = false, env = "DEEP_LOGGING")]
     deep_logging: bool,
+
+    #[arg(long, default_value = "data/game_data.json", env = "GAME_DATA_PATH")]
+    game_data_path: PathBuf,
 }
 
 #[derive(Debug, Clone)]
@@ -150,6 +154,9 @@ async fn main() -> Result<()> {
             .await
             .context("Failed to load jwt secret")?,
     );
+    let game_data = web::Data::new(
+        load_gamedata_from_file(&args.game_data_path).context("Could not load game data")?,
+    );
 
     migrate_database(&database_url)
         .await
@@ -177,6 +184,7 @@ async fn main() -> Result<()> {
             ))
             .app_data(frontend_auth_cache.clone())
             .app_data(jwt_secret.clone())
+            .app_data(game_data.clone())
             .service(
                 actix_web::web::scope("/ds/e")
                     .configure(endpoints::configure_endpoints)
@@ -269,4 +277,13 @@ async fn migrate_database(database_url: &str) -> Result<(), anyhow::Error> {
     }
 
     Ok(())
+}
+
+fn load_gamedata_from_file(game_data_path: &Path) -> Result<GameData, anyhow::Error> {
+    log::info!("Loading game data");
+
+    let bytes = std::fs::read(game_data_path)?;
+    let game_data = serde_json::from_slice(&bytes)?;
+
+    Ok(game_data)
 }

@@ -4,46 +4,12 @@ use std::{
     str::FromStr,
 };
 
-use serde::Serialize;
+use parcel_game_data::{Baggage, BaggageMetaData, Language, ObjectMetaData};
 
-use crate::{
-    readers::{
-        baggage_list_item::{
-            BaggageCaseType, BaggageListItem, ContentsDamageType, ContentsType, VolumeType,
-        },
-        game_list_item_base::GameListItemBase,
-        localized_text_resource::Language,
-        LoadContext, RTTITypeHash,
-    },
-    ObjectMetaData,
+use crate::readers::{
+    baggage_list_item::BaggageListItem, game_list_item_base::GameListItemBase, LoadContext,
+    RTTITypeHash,
 };
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Baggage {
-    pub name_hash: u32,
-    pub object_metadata: ObjectMetaData,
-    pub baggage_metadata: BaggageMetaData,
-    pub names: BTreeMap<Language, String>,
-    pub descriptions: BTreeMap<Language, String>,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct BaggageMetaData {
-    pub type_case: BaggageCaseType,
-    pub type_contents_damage: ContentsDamageType,
-    pub type_contents: ContentsType,
-    pub type_volume: VolumeType,
-    pub amount: u32,
-    pub sub_amount: u32,
-    pub weight: f32,
-    pub durability_contents: u32,
-    pub durability_case: u32,
-    pub initial_durability_contents: u32,
-    pub initial_durability_case: u32,
-    pub mission_id: u32,
-}
 
 impl From<&BaggageListItem> for BaggageMetaData {
     fn from(value: &BaggageListItem) -> Self {

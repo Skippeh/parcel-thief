@@ -3,7 +3,7 @@ use std::ops::Deref;
 use actix_http::{header::Header, StatusCode};
 use actix_web::{web::Data, FromRequest, ResponseError};
 use actix_web_httpauth::headers::authorization::{Authorization, Bearer};
-use chrono::{DateTime, TimeZone, Utc};
+use chrono::{TimeZone, Utc};
 use flagset::FlagSet;
 use futures_util::future::LocalBoxFuture;
 use jwt::VerifyWithKey;

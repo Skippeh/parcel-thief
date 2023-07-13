@@ -1,14 +1,8 @@
 use std::ops::{Deref, DerefMut};
 
-use super::game_list_item_base_with_icon::GameListItemBaseWithIcon;
+use parcel_game_data::EquipmentType;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[repr(u16)]
-pub enum EquipmentType {
-    Suits,
-    Mask,
-    Boots,
-}
+use super::game_list_item_base_with_icon::GameListItemBaseWithIcon;
 
 impl super::Read for EquipmentType {
     fn read(

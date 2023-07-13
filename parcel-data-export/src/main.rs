@@ -5,11 +5,9 @@ mod readers;
 use std::path::PathBuf;
 
 use anyhow::Context;
-use baggages::Baggage;
 use clap::Parser;
-use qpid_areas::QpidArea;
+use parcel_game_data::GameData;
 use readers::LoadContext;
-use serde::Serialize;
 
 #[derive(Debug, clap::Parser)]
 struct Options {
@@ -18,22 +16,9 @@ struct Options {
     output_path: PathBuf,
 }
 
-#[derive(Debug, Serialize, Default)]
-#[serde(rename_all = "camelCase")]
-struct Output {
-    baggages: Vec<Baggage>,
-    qpid_areas: Vec<QpidArea>,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ObjectMetaData {
-    pub uuid: String,
-}
-
 fn main() -> Result<(), anyhow::Error> {
     let args = Options::parse();
-    let mut output = Output::default();
+    let mut output = GameData::default();
     let mut load_context = LoadContext::new(args.data_directory.clone());
 
     baggages::read_baggages(&mut load_context, &mut output.baggages)

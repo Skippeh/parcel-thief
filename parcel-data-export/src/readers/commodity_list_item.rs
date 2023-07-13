@@ -1,13 +1,8 @@
 use std::ops::{Deref, DerefMut};
 
-use super::{game_list_item_base_with_icon::GameListItemBaseWithIcon, LoadContext};
+use parcel_game_data::{EffectivenessType, TypeOfConsume};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum TypeOfConsume {
-    None,
-    Once,
-    LikeBattery,
-}
+use super::{game_list_item_base_with_icon::GameListItemBaseWithIcon, LoadContext};
 
 impl super::Read for TypeOfConsume {
     fn read(
@@ -21,16 +16,6 @@ impl super::Read for TypeOfConsume {
             other => anyhow::bail!("Unknown type of TypeOfConsume variant: {other}"),
         })
     }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum EffectivenessType {
-    RecoveryOfStamina,
-    RecoveryOfBlood,
-    RecoveryOfCase,
-    RecoveryOfBattery,
-    Shoes,
-    BtLight,
 }
 
 impl super::Read for EffectivenessType {

@@ -1,21 +1,13 @@
 use std::ops::{Deref, DerefMut};
 
+use parcel_game_data::RawMaterialType;
+
 use super::{game_list_item_base_with_icon::GameListItemBaseWithIcon, LoadContext};
 
 #[derive(Debug, Clone)]
 pub struct RawMaterialListItem {
     base: GameListItemBaseWithIcon,
     pub raw_material_type: RawMaterialType,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum RawMaterialType {
-    Crystal,
-    Resin,
-    Metal,
-    Ceramic,
-    ChemicalSubstance,
-    SpecialAlloy,
 }
 
 impl super::Read for RawMaterialType {

@@ -1,12 +1,8 @@
 use std::ops::{Deref, DerefMut};
 
-use super::game_list_item_base_with_icon::GameListItemBaseWithIcon;
+use parcel_game_data::{WeaponCategory, WeaponType};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum WeaponType {
-    Main,
-    Sub,
-}
+use super::game_list_item_base_with_icon::GameListItemBaseWithIcon;
 
 impl super::Read for WeaponType {
     fn read(
@@ -19,13 +15,6 @@ impl super::Read for WeaponType {
             other => anyhow::bail!("Unknown weapon variant: {other}"),
         })
     }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum WeaponCategory {
-    Gun,
-    Throwing,
-    Placement,
 }
 
 impl super::Read for WeaponCategory {

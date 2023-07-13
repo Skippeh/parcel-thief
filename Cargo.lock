@@ -2967,9 +2967,20 @@ dependencies = [
  "enum-as-inner",
  "enum-iterator",
  "int-enum",
+ "parcel-game-data",
  "serde",
  "serde_json",
  "uuid",
+]
+
+[[package]]
+name = "parcel-game-data"
+version = "0.1.0"
+dependencies = [
+ "enum-as-inner",
+ "enum-iterator",
+ "int-enum",
+ "serde",
 ]
 
 [[package]]
@@ -3044,6 +3055,7 @@ dependencies = [
  "mime_guess",
  "moka",
  "parcel-common",
+ "parcel-game-data",
  "pg-embed",
  "portpicker",
  "rand",

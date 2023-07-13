@@ -1,9 +1,6 @@
 use std::collections::HashMap;
 
-use actix_web::{
-    get,
-    web::{Data, Json},
-};
+use actix_web::{get, web::Data};
 use parcel_common::api_types::{
     frontend::baggages::{BaggageListItem, ListSharedCargoResponse},
     mission::{MissionType, OnlineMissionType, ProgressState},
@@ -12,7 +9,6 @@ use parcel_common::api_types::{
 use crate::{
     data::database::Database,
     frontend::{
-        error::ApiError,
         jwt_session::JwtSession,
         result::{ApiResponse, ApiResult},
     },
