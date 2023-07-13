@@ -1,22 +1,28 @@
+use std::collections::HashMap;
+
 use actix_web::{
     get,
     web::{Data, Json},
 };
 use parcel_common::api_types::{
-    frontend::baggages::ListItemsResponse,
+    frontend::baggages::{BaggageListItem, ListSharedCargoResponse},
     mission::{MissionType, OnlineMissionType, ProgressState},
 };
 
 use crate::{
     data::database::Database,
-    frontend::{error::ApiError, jwt_session::JwtSession},
+    frontend::{
+        error::ApiError,
+        jwt_session::JwtSession,
+        result::{ApiResponse, ApiResult},
+    },
 };
 
 #[get("baggages/sharedCargo")]
 pub async fn list_shared_cargo(
     _session: JwtSession,
     database: Data<Database>,
-) -> Result<Json<ListItemsResponse>, ApiError> {
+) -> ApiResult<ListSharedCargoResponse> {
     let conn = database.connect()?;
     let missions = conn.missions(); // shared and lost cargo are saved as missions
 
@@ -34,7 +40,38 @@ pub async fn list_shared_cargo(
         )
         .await?;
 
-    let data_missions = missions.query_mission_data(data_missions).await?;
+    let account_ids = data_missions
+        .iter()
+        .map(|mission| mission.creator_id.clone())
+        .collect::<Vec<_>>();
 
-    Err(ApiError::Internal(anyhow::anyhow!("Not implemented")))
+    let accounts = conn.accounts();
+    let accounts = accounts
+        .get_by_ids(&account_ids)
+        .await?
+        .into_iter()
+        .map(|acc| (acc.id.clone(), acc))
+        .collect::<HashMap<_, _>>();
+
+    let data_missions = missions.query_mission_data(data_missions).await?;
+    let mut baggages = Vec::new();
+
+    for mission in data_missions {
+        let creator = accounts
+            .get(&mission.mission.creator_id)
+            .map(|acc| acc.display_name.clone())
+            .unwrap_or_else(|| "Deleted account".into());
+
+        for baggage in mission.baggages {
+            baggages.push(BaggageListItem {
+                name: baggage.name_hash.to_string(),
+                category: "todo".into(),
+                amount: baggage.amount,
+                location: mission.mission.qpid_id.to_string(),
+                creator: creator.clone(),
+            })
+        }
+    }
+
+    ApiResponse::ok(ListSharedCargoResponse { baggages })
 }

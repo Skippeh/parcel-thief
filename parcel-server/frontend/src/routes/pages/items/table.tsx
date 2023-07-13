@@ -5,10 +5,13 @@ import * as React from "react";
 import { AgGridReact } from "ag-grid-react";
 import { useState } from "react";
 import { ColDef, GridReadyEvent } from "ag-grid-community";
+import { BaggageListItem } from "../../../api_types";
 
-interface Props {}
+interface Props {
+  items?: BaggageListItem[];
+}
 
-const Table = ({}: Props) => {
+const Table = ({ items }: Props) => {
   const [defaultColDef] = useState<ColDef>({
     sortable: true,
     filter: true,
@@ -23,16 +26,6 @@ const Table = ({}: Props) => {
     { field: "creator" },
   ]);
 
-  const [rowData] = useState([
-    {
-      name: "Item 1",
-      amount: 1,
-      category: "Category 1",
-      location: "Location 1",
-      creator: "Creator 1",
-    },
-  ]);
-
   function onGridReady(ev: GridReadyEvent) {
     ev.api.sizeColumnsToFit();
   }
@@ -42,7 +35,7 @@ const Table = ({}: Props) => {
       <AgGridReact
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}
-        rowData={rowData}
+        rowData={items}
         domLayout="autoHeight"
         onGridReady={onGridReady}
       />

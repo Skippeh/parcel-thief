@@ -42,9 +42,9 @@ pub async fn auth(
 
             let redirect_url = redirector.url();
 
-            Ok(ApiResponse::ok(InitAuthResponse {
+            ApiResponse::ok(InitAuthResponse {
                 redirect_url: redirect_url.to_string(),
-            }))
+            })
         }
         Provider::Epic => Err(anyhow::anyhow!("Epic auth not implemented").into()),
     }
@@ -58,11 +58,11 @@ pub async fn check_auth(
     let auth_response = auth_cache.get(&request.callback_token);
 
     if let Some(auth_response) = auth_response {
-        Ok(ApiResponse::ok(auth_response))
+        ApiResponse::ok(auth_response)
     } else {
-        Ok(ApiResponse::ok(CheckAuthResponse::Failure {
+        ApiResponse::ok(CheckAuthResponse::Failure {
             error: "Login has expired".into(),
-        }))
+        })
     }
 }
 

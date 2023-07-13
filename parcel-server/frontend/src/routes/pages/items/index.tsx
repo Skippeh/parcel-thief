@@ -4,14 +4,22 @@ import PageTitle from "../../../components/page_title";
 import Table from "./table";
 import { useState } from "react";
 import { getSharedCargo } from "../../../services/baggages_service";
+import { BaggageListItem } from "../../../api_types";
 
 const Items = () => {
-  const [items, setItems] = useState(undefined);
+  const [items, setItems] = useState<BaggageListItem[] | undefined>();
 
   React.useEffect(() => {
-    // fetch items
+    // fetch items if there are no items yet
     (async () => {
-      const baggages = await getSharedCargo();
+      if (items == null) {
+        const response = await getSharedCargo();
+        console.log(response);
+
+        if (response.data != null) {
+          setItems(response.data.baggages);
+        }
+      }
     })();
   }, []);
 
@@ -19,7 +27,7 @@ const Items = () => {
     <div>
       <PageTitle>Items</PageTitle>
       <ContentBox>
-        <Table />
+        <Table items={items} />
       </ContentBox>
     </div>
   );

@@ -8,3 +8,6 @@ export type JwtPermissions="None";
 export type CheckAuthResponse=(({"type":"success";}&{"name":string;"avatarUrl":string;"authToken":string;"permissions":JwtPermissions;})|({"type":"failure";}&{"error":string;}));
 export type I64=number;
 export type JwtPayload={"expiresAt":I64;"accountId":string;};
+export type I32=number;
+export type BaggageListItem={"name":string;"amount":I32;"category":string;"location":string;"creator":string;};
+export type ListSharedCargoResponse={"baggages":(BaggageListItem)[];};

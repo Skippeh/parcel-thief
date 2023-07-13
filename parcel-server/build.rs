@@ -1,6 +1,6 @@
 use std::fs::File;
 
-use parcel_common::api_types::frontend::auth::*;
+use parcel_common::api_types::frontend::{auth::*, baggages::*};
 use typescript_type_def::{write_definition_file, DefinitionFileOptions};
 
 fn main() {
@@ -13,6 +13,7 @@ type Api = (
     CheckAuthRequest,
     CheckAuthResponse,
     JwtPayload,
+    ListSharedCargoResponse,
 );
 
 fn generate_ts_types() {
