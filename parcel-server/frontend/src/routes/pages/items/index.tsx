@@ -7,17 +7,19 @@ import { getSharedCargo } from "../../../services/baggages_service";
 import { BaggageListItem } from "../../../api_types";
 
 const Items = () => {
-  const [items, setItems] = useState<BaggageListItem[] | undefined>();
+  const [items, setItems] = useState<BaggageListItem[] | undefined | null>();
 
   React.useEffect(() => {
     // fetch items if there are no items yet
     (async () => {
       if (items == null) {
         const response = await getSharedCargo();
-        console.log(response);
 
         if (response.data != null) {
           setItems(response.data.baggages);
+        } else {
+          console.error(response.statusCode, response.error);
+          setItems(null);
         }
       }
     })();

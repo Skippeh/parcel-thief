@@ -8,7 +8,7 @@ import { ColDef, GridReadyEvent } from "ag-grid-community";
 import { BaggageListItem } from "../../../api_types";
 
 interface Props {
-  items?: BaggageListItem[];
+  items?: BaggageListItem[] | null;
 }
 
 const Table = ({ items }: Props) => {
