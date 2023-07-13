@@ -23,7 +23,7 @@ const Table = ({ items }: Props) => {
     { field: "amount" },
     { field: "category" },
     { field: "location" },
-    { field: "creator" },
+    { field: "creator", headerName: "Donator" },
   ]);
 
   function onGridReady(ev: GridReadyEvent) {
@@ -39,6 +39,7 @@ const Table = ({ items }: Props) => {
         domLayout="autoHeight"
         onGridReady={onGridReady}
         enableCellTextSelection={true}
+        pagination={true}
       />
     </div>
   );
