@@ -13,6 +13,7 @@ const Table = ({ items }: Props) => {
     sortable: true,
     filter: true,
     resizable: true,
+    flex: 1,
   });
 
   const [columnDefs] = useState<ColDef[]>([
@@ -23,10 +24,6 @@ const Table = ({ items }: Props) => {
     { field: "creator", headerName: "Donator" },
   ]);
 
-  function onGridReady(ev: GridReadyEvent) {
-    ev.api.sizeColumnsToFit();
-  }
-
   return (
     <div className="ag-theme-alpine-dark">
       <AgGridReact
@@ -34,7 +31,6 @@ const Table = ({ items }: Props) => {
         defaultColDef={defaultColDef}
         rowData={items}
         domLayout="autoHeight"
-        onGridReady={onGridReady}
         enableCellTextSelection={true}
         pagination={true}
       />
