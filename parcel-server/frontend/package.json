@@ -1,5 +1,7 @@
 {
   "name": "parcel-server-frontend",
+  "private": true,
+  "license": "UNLICENCED",
   "source": "src/index.html",
   "scripts": {
     "watch": "parcel watch --public-url /frontend",
