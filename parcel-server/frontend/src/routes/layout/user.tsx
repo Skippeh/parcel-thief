@@ -1,6 +1,7 @@
 import * as React from "react";
 import { User } from "../../context/session_context";
 import styled from "styled-components";
+import * as Colors from "@radix-ui/colors";
 
 const Wrapper = styled.div`
   padding: 0 1rem;
@@ -19,8 +20,9 @@ const Wrapper = styled.div`
     width: 2rem;
     width: 100%;
     border-radius: 50%;
-    border: 1px solid #2ed9d9;
-    box-shadow: 0 0 1px 0px #2ed9d9 inset, 0 0 1px 0px #2ed9d9;
+    border: 1px solid ${Colors.tealDark.teal11};
+    box-shadow: 0 0 1px 0px ${Colors.tealDark.teal11} inset,
+      0 0 1px 0px ${Colors.tealDark.teal11};
   }
 `;
 
