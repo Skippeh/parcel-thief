@@ -17,13 +17,10 @@ const Wrapper = styled.div`
   & .avatar {
     height: 2rem;
     width: 2rem;
-
-    & img {
-      width: 100%;
-      border-radius: 50%;
-      border: 1px solid #2ed9d9;
-      box-shadow: 0 0 1px 0px #2ed9d9 inset, 0 0 1px 0px #2ed9d9;
-    }
+    width: 100%;
+    border-radius: 50%;
+    border: 1px solid #2ed9d9;
+    box-shadow: 0 0 1px 0px #2ed9d9 inset, 0 0 1px 0px #2ed9d9;
   }
 `;
 
@@ -34,10 +31,8 @@ interface Props {
 const User = ({ user }: Props) => {
   return (
     <Wrapper>
-      <div className="name">{user.name}</div>
-      <div className="avatar">
-        <img src={user.avatarUrl} />
-      </div>
+      <span className="name">{user.name}</span>
+      <img className="avatar" src={user.avatarUrl} alt="avatar" />
     </Wrapper>
   );
 };
