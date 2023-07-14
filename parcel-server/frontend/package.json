@@ -9,12 +9,17 @@
     "type": "git",
     "url": "https://github.com/Skippeh/parcel-thief.git"
   },
+  "alias": {
+    "process": "process/browser.js",
+    "buffer": "buffer"
+  },
   "devDependencies": {
     "@parcel/transformer-sass": "2.9.3",
     "@types/react": "^18.2.14",
     "@types/react-dom": "^18.2.6",
     "@types/react-router-dom": "^5.3.3",
-    "parcel": "^2.9.3"
+    "parcel": "^2.9.3",
+    "process": "^0.11.10"
   },
   "dependencies": {
     "ag-grid-community": "30.0.3",
