@@ -5,6 +5,7 @@ import Table from "./table";
 import { useState } from "react";
 import { getSharedCargo } from "../../../services/baggages_service";
 import { BaggageListItem } from "../../../api_types";
+import * as Tabs from "../../../components/tabs";
 
 const Items = () => {
   const [items, setItems] = useState<BaggageListItem[] | undefined | null>();
@@ -29,7 +30,18 @@ const Items = () => {
     <div>
       <PageTitle>Items</PageTitle>
       <ContentBox>
-        <Table items={items} />
+        <Tabs.Root defaultValue="sharedCargo">
+          <Tabs.List>
+            <Tabs.Trigger value="sharedCargo">Shared cargo</Tabs.Trigger>
+            <Tabs.Trigger value="lostCargo">Lost cargo</Tabs.Trigger>
+            <Tabs.Trigger value="wastedCargo">Wasted cargo</Tabs.Trigger>
+          </Tabs.List>
+          <Tabs.Content value="sharedCargo">
+            <Table items={items} />
+          </Tabs.Content>
+          <Tabs.Content value="lostCargo">Lost cargo</Tabs.Content>
+          <Tabs.Content value="wastedCargo">Wasted cargo</Tabs.Content>
+        </Tabs.Root>
       </ContentBox>
     </div>
   );
