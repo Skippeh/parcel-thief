@@ -28,4 +28,8 @@ export const Trigger = styled(Tabs.Trigger)`
     background: ${Colors.blueDark.blue7};
   }
 `;
-export const Content = styled(Tabs.Content)``;
+export const Content = styled(Tabs.Content)`
+  &[data-state="inactive"] {
+    display: none;
+  }
+`;

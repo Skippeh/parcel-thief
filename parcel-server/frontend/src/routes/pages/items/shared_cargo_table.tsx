@@ -1,14 +1,14 @@
 import * as React from "react";
 import { AgGridReact } from "ag-grid-react";
 import { useState } from "react";
-import { ColDef, GridReadyEvent } from "ag-grid-community";
-import { BaggageListItem } from "../../../api_types";
+import { ColDef } from "ag-grid-community";
+import { SharedCargoListItem } from "../../../api_types";
 
 interface Props {
-  items?: BaggageListItem[] | null;
+  items?: SharedCargoListItem[] | null;
 }
 
-const Table = ({ items }: Props) => {
+const SharedCargoTable = ({ items }: Props) => {
   const [defaultColDef] = useState<ColDef>({
     sortable: true,
     filter: true,
@@ -38,4 +38,4 @@ const Table = ({ items }: Props) => {
   );
 };
 
-export default Table;
+export default SharedCargoTable;

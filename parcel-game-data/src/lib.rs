@@ -21,3 +21,19 @@ pub struct GameData {
     pub baggages: HashMap<u32, Baggage>,
     pub qpid_areas: HashMap<i32, QpidArea>,
 }
+
+impl GameData {
+    pub fn baggage_name(&self, name_hash: u32, language: Language) -> Option<&String> {
+        self.baggages
+            .get(&name_hash)
+            .map(|b| b.names.get(&language))
+            .flatten()
+    }
+
+    pub fn qpid_area_name(&self, qpid_id: i32, language: Language) -> Option<&String> {
+        self.qpid_areas
+            .get(&qpid_id)
+            .map(|a| a.names.get(&language))
+            .flatten()
+    }
+}
