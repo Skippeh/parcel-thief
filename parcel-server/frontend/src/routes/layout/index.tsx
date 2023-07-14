@@ -15,6 +15,14 @@ const Wrapper = styled.div`
 const Content = styled.div`
   grid-area: 2 / 1 / 2 / 2;
   margin: 2rem;
+  display: flex;
+  justify-content: center;
+`;
+
+const CenterContainer = styled.div`
+  width: 100%;
+  height: 100%;
+  max-width: 1440px;
 `;
 
 const Layout = () => {
@@ -22,7 +30,9 @@ const Layout = () => {
     <Wrapper>
       <Header />
       <Content>
-        <Outlet />
+        <CenterContainer>
+          <Outlet />
+        </CenterContainer>
       </Content>
     </Wrapper>
   );

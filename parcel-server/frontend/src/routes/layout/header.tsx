@@ -7,11 +7,21 @@ const Wrapper = styled.div`
   grid-area: 1 / 1 / 1 / 3;
 
   background: rgb(31, 37, 55);
+  border-bottom: 1px solid rgb(36, 45, 70);
+  box-shadow: 0px 14px 36px -13px rgba(0, 0, 0, 0.3);
+
+  display: flex;
+  justify-content: center;
+`;
+
+const CenterContainer = styled.div`
+  width: 100%;
+  height: 100%;
+  max-width: 1440px;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgb(36, 45, 70);
-  box-shadow: 0px 14px 36px -13px rgba(0, 0, 0, 0.3);
 
   & .user {
     padding: 0 1rem;
@@ -74,22 +84,24 @@ const Header = () => {
 
   return (
     <Wrapper>
-      <nav>
-        <ul>
-          <li>
-            <NavLink to="/">Home</NavLink>
-          </li>
-          <li>
-            <NavLink to="/items">Items</NavLink>
-          </li>
-        </ul>
-      </nav>
-      <div className="user">
-        <div className="name">{user.name}</div>
-        <div className="avatar">
-          <img src={user.avatarUrl} />
+      <CenterContainer>
+        <nav>
+          <ul>
+            <li>
+              <NavLink to="/">Home</NavLink>
+            </li>
+            <li>
+              <NavLink to="/items">Items</NavLink>
+            </li>
+          </ul>
+        </nav>
+        <div className="user">
+          <div className="name">{user.name}</div>
+          <div className="avatar">
+            <img src={user.avatarUrl} />
+          </div>
         </div>
-      </div>
+      </CenterContainer>
     </Wrapper>
   );
 };
