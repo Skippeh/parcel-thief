@@ -156,7 +156,7 @@ pub async fn steam_callback(
 fn get_site_url(request: &HttpRequest) -> String {
     let uri = request.connection_info();
 
-    dbg!(format!("{}://{}", uri.scheme(), uri.host()))
+    format!("{}://{}", uri.scheme(), uri.host())
 }
 
 fn generate_response_token() -> String {
