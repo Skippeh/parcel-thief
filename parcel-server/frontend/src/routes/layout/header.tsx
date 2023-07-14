@@ -2,6 +2,7 @@ import * as React from "react";
 import styled from "styled-components";
 import useSession from "../../hooks/use_session";
 import { NavLink } from "react-router-dom";
+import User from "./user";
 
 const Wrapper = styled.div`
   grid-area: 1 / 1 / 1 / 3;
@@ -22,31 +23,6 @@ const CenterContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  & .user {
-    padding: 0 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    cursor: pointer;
-
-    & .name {
-      font-weight: bold;
-      font-size: 0.8rem;
-    }
-
-    & .avatar {
-      height: 2rem;
-      width: 2rem;
-
-      & img {
-        width: 100%;
-        border-radius: 50%;
-        border: 1px solid #2ed9d9;
-        box-shadow: 0 0 1px 0px #2ed9d9 inset, 0 0 1px 0px #2ed9d9;
-      }
-    }
-  }
 
   & nav {
     padding: 0 1rem;
@@ -95,12 +71,7 @@ const Header = () => {
             </li>
           </ul>
         </nav>
-        <div className="user">
-          <div className="name">{user.name}</div>
-          <div className="avatar">
-            <img src={user.avatarUrl} />
-          </div>
-        </div>
+        <User user={user} />
       </CenterContainer>
     </Wrapper>
   );
