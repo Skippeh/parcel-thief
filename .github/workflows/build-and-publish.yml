@@ -120,6 +120,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-windows, build-linux]
     steps:
+      - uses: actions/checkout@v3
       - name: Download windows server artifact
         uses: actions/download-artifact@v3
         with:
@@ -135,6 +136,12 @@ jobs:
         with:
           name: parcel-client_x86_64-pc-windows-msvc
           path: ./parcel-client_x86_64-pc-windows-msvc
+      - name: Copy game data json file to server data folder
+        run: |
+          mkdir ./parcel-server_x86_64-pc-windows-msvc/data/
+          mkdir ./parcel-server_x86_64-unknown-linux-gnu/data/
+          cp ./re-testing/exported-data.json ./parcel-server_x86_64-pc-windows-msvc/data/game_data.json
+          cp ./re-testing/exported-data.json ./parcel-server_x86_64-unknown-linux-gnu/data/game_data.json
       - name: Create release zip files
         run: |
           zip -r ./parcel-server_x86_64-pc-windows-msvc.zip ./parcel-server_x86_64-pc-windows-msvc
