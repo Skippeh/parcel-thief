@@ -3,11 +3,12 @@ import styled from "styled-components";
 import useSession from "../../hooks/use_session";
 import { NavLink } from "react-router-dom";
 import User from "./user";
+import * as Colors from "@radix-ui/colors";
 
 const Wrapper = styled.div`
   grid-area: 1 / 1 / 1 / 3;
 
-  background: rgb(31, 37, 55);
+  background: ${Colors.blueDark.blue3};
   border-bottom: 1px solid rgb(36, 45, 70);
   box-shadow: 0px 14px 36px -13px rgba(0, 0, 0, 0.3);
 
@@ -36,15 +37,16 @@ const CenterContainer = styled.div`
 
         & a {
           text-decoration: none;
-          color: #f5f5f5;
+          color: ${Colors.whiteA.whiteA12};
           padding: 1rem;
+          transition: background-color 0.1s ease-out;
 
           &.active {
-            background: #244475;
+            background: ${Colors.blueDark.blue8};
           }
 
           &:not(.active):hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: ${Colors.blueDark.blue7};
           }
         }
       }
