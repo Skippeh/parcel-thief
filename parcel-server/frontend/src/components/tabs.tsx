@@ -11,6 +11,7 @@ export const Trigger = styled(Tabs.Trigger)`
   cursor: pointer;
   background: ${Colors.blueDark.blue6};
   transition: background-color 0.1s ease-out;
+  font-size: 0.82rem;
 
   &:first-child {
     border-top-left-radius: 4px;
