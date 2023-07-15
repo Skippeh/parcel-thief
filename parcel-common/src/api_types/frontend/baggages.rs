@@ -22,6 +22,7 @@ pub struct LostCargoListItem {
     pub amount: i32,
     pub category: String,
     pub location: String,
+    pub end_location: String,
     pub creator: String,
 }
 

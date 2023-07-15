@@ -163,11 +163,17 @@ pub async fn list_lost_cargo(
                 .map(|n| n.to_owned())
                 .unwrap_or_else(|| mission.mission.qpid_id.to_string());
 
+            let target_location_name = game_data
+                .qpid_area_name(mission.mission.qpid_end_location, Language::English)
+                .map(|n| n.to_owned())
+                .unwrap_or_else(|| mission.mission.qpid_end_location.to_string());
+
             baggages.push(LostCargoListItem {
                 name: item_name,
                 category,
                 amount: baggage.amount,
                 location: location_name,
+                end_location: target_location_name,
                 creator: creator.clone(),
             })
         }

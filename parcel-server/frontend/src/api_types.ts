@@ -11,5 +11,5 @@ export type JwtPayload={"expiresAt":I64;"accountId":string;};
 export type I32=number;
 export type SharedCargoListItem={"name":string;"amount":I32;"category":string;"location":string;"creator":string;};
 export type ListSharedCargoResponse={"baggages":(SharedCargoListItem)[];};
-export type LostCargoListItem={"name":string;"amount":I32;"category":string;"location":string;"creator":string;};
+export type LostCargoListItem={"name":string;"amount":I32;"category":string;"location":string;"endLocation":string;"creator":string;};
 export type ListLostCargoResponse={"baggages":(LostCargoListItem)[];};

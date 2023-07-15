@@ -21,6 +21,7 @@ const LostCargoTable = ({ items }: Props) => {
     { field: "amount" },
     { field: "category" },
     { field: "location", headerName: "Area" },
+    { field: "endLocation", headerName: "Destination" },
     { field: "creator", headerName: "Player" },
   ]);
 
