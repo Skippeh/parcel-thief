@@ -6,10 +6,16 @@ import { useState } from "react";
 import {
   getLostCargo,
   getSharedCargo,
+  getWastedCargo,
 } from "../../../services/baggages_service";
-import { LostCargoListItem, SharedCargoListItem } from "../../../api_types";
+import {
+  LostCargoListItem,
+  SharedCargoListItem,
+  WastedCargoListItem,
+} from "../../../api_types";
 import * as Tabs from "../../../components/tabs";
 import LostCargoTable from "./lost_cargo_table";
+import WastedCargoTable from "./wasted_cargo_table";
 
 const Items = () => {
   const [sharedItems, setSharedItems] = useState<
@@ -18,6 +24,10 @@ const Items = () => {
 
   const [lostItems, setLostItems] = useState<
     LostCargoListItem[] | undefined | null
+  >();
+
+  const [wastedItems, setWastedItems] = useState<
+    WastedCargoListItem[] | undefined | null
   >();
 
   React.useEffect(() => {
@@ -44,6 +54,17 @@ const Items = () => {
           setLostItems(null);
         }
       }
+
+      if (wastedItems == null) {
+        const response = await getWastedCargo();
+
+        if (response.data != null) {
+          setWastedItems(response.data.baggages);
+        } else {
+          console.error(response.statusCode, response.error);
+          setWastedItems(null);
+        }
+      }
     })();
   }, []);
 
@@ -64,7 +85,7 @@ const Items = () => {
             <LostCargoTable items={lostItems} />
           </Tabs.Content>
           <Tabs.Content value="wastedCargo" forceMount>
-            Wasted cargo
+            <WastedCargoTable items={wastedItems} />
           </Tabs.Content>
         </Tabs.Root>
       </ContentBox>

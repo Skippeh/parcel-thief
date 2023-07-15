@@ -19,6 +19,7 @@ type Api = (
     JwtPayload,
     ListSharedCargoResponse,
     ListLostCargoResponse,
+    ListWastedCargoResponse,
 );
 
 fn generate_ts_types() {

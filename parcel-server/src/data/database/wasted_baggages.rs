@@ -75,6 +75,15 @@ impl<'db> WastedBaggages<'db> {
         Ok(baggages)
     }
 
+    pub async fn get_all_baggages(&self) -> Result<Vec<WastedBaggage>, QueryError> {
+        use crate::db::schema::wasted_baggages::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        let baggages = dsl::wasted_baggages.get_results(conn)?;
+
+        Ok(baggages)
+    }
+
     pub async fn delete_by_requests(
         &self,
         delete_requests: impl Iterator<Item = &DeleteRequest>,

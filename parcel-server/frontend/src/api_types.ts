@@ -13,3 +13,5 @@ export type SharedCargoListItem={"name":string;"amount":I32;"category":string;"l
 export type ListSharedCargoResponse={"baggages":(SharedCargoListItem)[];};
 export type LostCargoListItem={"name":string;"amount":I32;"category":string;"location":string;"endLocation":string;"creator":string;};
 export type ListLostCargoResponse={"baggages":(LostCargoListItem)[];};
+export type WastedCargoListItem={"name":string;"category":string;"broken":boolean;"location":string;"creator":string;};
+export type ListWastedCargoResponse={"baggages":(WastedCargoListItem)[];};
