@@ -12,6 +12,7 @@ export const Content = styled(DropdownMenu.Content)`
   min-width: 200px;
   background: ${Colors.blueDark.blue2};
   border-radius: 4px;
+  border: 1px solid ${Colors.whiteA.whiteA7};
 `;
 export const Item = styled(DropdownMenu.Item)`
   all: unset;
