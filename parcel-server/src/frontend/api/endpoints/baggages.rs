@@ -225,9 +225,6 @@ pub async fn list_wasted_cargo(
             .map(|n| n.to_owned())
             .unwrap_or_else(|| baggage.item_hash.to_string());
 
-        // Replace '{0}' with the amount
-        //item_name = item_name.replace("{0}", baggage.amount.to_string().as_str());
-
         let category = baggage_data
             .map(|b| b.baggage_metadata.type_contents)
             .map(|t| format!("{:?}", t))
