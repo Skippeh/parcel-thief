@@ -2,6 +2,9 @@ import * as React from "react";
 import { User } from "../../context/session_context";
 import styled from "styled-components";
 import * as Colors from "@radix-ui/colors";
+import * as DropdownMenu from "../../components/dropdown_menu";
+import useSession from "../../hooks/use_session";
+import { useNavigate } from "react-router-dom";
 
 const Wrapper = styled.div`
   padding: 0 1rem;
@@ -31,11 +34,28 @@ interface Props {
 }
 
 const User = ({ user }: Props) => {
+  const { logout } = useSession();
+  const navigate = useNavigate();
+
+  function doLogout() {
+    logout();
+    navigate("/login");
+  }
+
   return (
-    <Wrapper>
-      <span className="name">{user.name}</span>
-      <img className="avatar" src={user.avatarUrl} alt="avatar" />
-    </Wrapper>
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger>
+        <Wrapper>
+          <span className="name">{user.name}</span>
+          <img className="avatar" src={user.avatarUrl} alt="avatar" />
+        </Wrapper>
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content align="end">
+          <DropdownMenu.Item onClick={doLogout}>Logout</DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
   );
 };
 
