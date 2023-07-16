@@ -22,4 +22,14 @@ body {
     rgba(24, 27, 52, 1) 0%,
     rgba(2, 0, 36, 1) 100%
   );
+
+  & a {
+    color: hsl(228 100% 75.9%);
+    text-decoration: none;
+    transition: color 0.05s ease-out;
+
+    &:hover {
+      color: hsl(228 100% 85.9%);
+    }
+  }
 }

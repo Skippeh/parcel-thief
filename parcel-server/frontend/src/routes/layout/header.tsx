@@ -4,6 +4,7 @@ import useSession from "../../hooks/use_session";
 import { NavLink } from "react-router-dom";
 import User from "./user";
 import * as Colors from "@radix-ui/colors";
+import { CenterContainer } from ".";
 
 const Wrapper = styled.div`
   grid-area: 1 / 1 / 1 / 3;
@@ -16,11 +17,7 @@ const Wrapper = styled.div`
   justify-content: center;
 `;
 
-const CenterContainer = styled.div`
-  width: 100%;
-  height: 100%;
-  max-width: 1440px;
-
+const InnerContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -63,17 +60,19 @@ const Header = () => {
   return (
     <Wrapper>
       <CenterContainer>
-        <nav>
-          <ul>
-            <li>
-              <NavLink to="/">Home</NavLink>
-            </li>
-            <li>
-              <NavLink to="/items">Items</NavLink>
-            </li>
-          </ul>
-        </nav>
-        <User user={user} />
+        <InnerContainer>
+          <nav>
+            <ul>
+              <li>
+                <NavLink to="/">Home</NavLink>
+              </li>
+              <li>
+                <NavLink to="/items">Items</NavLink>
+              </li>
+            </ul>
+          </nav>
+          <User user={user} />
+        </InnerContainer>
       </CenterContainer>
     </Wrapper>
   );
