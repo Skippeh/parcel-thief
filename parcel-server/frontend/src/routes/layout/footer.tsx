@@ -5,6 +5,7 @@ import GithubIcon from "./github-mark-white.svg";
 import * as Colors from "@radix-ui/colors";
 
 const Wrapper = styled.div`
+  margin-top: 2rem;
   display: flex;
   justify-content: center;
 `;
