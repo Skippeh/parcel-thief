@@ -52,7 +52,7 @@ const User = ({ user }: Props) => {
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content align="end">
-          <DropdownMenu.Item onClick={doLogout}>Logout</DropdownMenu.Item>
+          <DropdownMenu.Item onClick={doLogout}>Log out</DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>
