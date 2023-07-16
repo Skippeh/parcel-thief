@@ -4,7 +4,7 @@ import * as Colors from "@radix-ui/colors";
 
 const Wrapper = styled.div`
   padding: 1.5rem;
-  border-radius: 1.5rem;
+  border-radius: 4px;
   background: ${Colors.indigoDark.indigo3};
   border: 1px solid black;
 `;
