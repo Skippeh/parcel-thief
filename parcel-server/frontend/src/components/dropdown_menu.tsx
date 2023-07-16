@@ -22,6 +22,6 @@ export const Item = styled(DropdownMenu.Item)`
   font-size: 0.9rem;
 
   &:hover {
-    background: ${Colors.blueDark.blue7};
+    background: ${Colors.blueDark.blue8};
   }
 `;
