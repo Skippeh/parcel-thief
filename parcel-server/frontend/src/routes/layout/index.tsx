@@ -6,15 +6,9 @@ import Footer from "./footer";
 
 const Wrapper = styled.div`
   height: 100%;
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: 0fr 0fr 0fr;
-  grid-column-gap: 0;
-  grid-row-gap: 0;
 `;
 
 const Content = styled.div`
-  grid-area: 2 / 1 / 2 / 2;
   margin: 2rem;
   display: flex;
   justify-content: center;

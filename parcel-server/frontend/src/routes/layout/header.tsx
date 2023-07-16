@@ -7,8 +7,6 @@ import * as Colors from "@radix-ui/colors";
 import { CenterContainer } from ".";
 
 const Wrapper = styled.div`
-  grid-area: 1 / 1 / 1 / 3;
-
   background: ${Colors.blueDark.blue3};
   border-bottom: 1px solid ${Colors.blueDark.blue4};
   box-shadow: 0px 14px 36px -13px rgba(0, 0, 0, 0.3);
