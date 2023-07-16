@@ -9,7 +9,6 @@ const Wrapper = styled.div`
 `;
 
 const Content = styled.div`
-  margin: 1rem 0;
   display: flex;
   justify-content: center;
 `;
