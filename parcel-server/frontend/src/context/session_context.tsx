@@ -1,17 +1,13 @@
 import * as React from "react";
 import { createContext, useState } from "react";
 import useStorage from "../hooks/use_storage";
-import { JwtPayload } from "../api_types";
+import { FrontendPermissions, JwtPayload } from "../api_types";
 import * as Api from "../services";
-
-export enum UserPermissions {
-  None = 0,
-}
 
 export interface User {
   name: string;
   avatarUrl: string;
-  permissions: UserPermissions;
+  permissions: FrontendPermissions[];
 }
 
 interface Session {

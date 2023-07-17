@@ -7,7 +7,7 @@ use chrono::{TimeZone, Utc};
 use flagset::FlagSet;
 use futures_util::future::LocalBoxFuture;
 use jwt::VerifyWithKey;
-use parcel_common::api_types::frontend::auth::{JwtPayload, JwtPermissions};
+use parcel_common::api_types::frontend::auth::{FrontendPermissions, JwtPayload};
 
 use crate::data::jwt::JwtSecret;
 
@@ -28,14 +28,14 @@ impl AsRef<JwtPayload> for JwtSession {
 }
 
 impl JwtSession {
-    pub fn has_permissions(&self, permissions: impl Into<FlagSet<JwtPermissions>>) -> bool {
-        let permissions: FlagSet<JwtPermissions> = permissions.into();
+    pub fn has_permissions(&self, permissions: impl Into<FlagSet<FrontendPermissions>>) -> bool {
+        let permissions: FlagSet<FrontendPermissions> = permissions.into();
 
         if permissions.is_empty() {
             return true;
         }
 
-        let account_id = &self.account_id;
+        let account_id = &self.game_account_id;
 
         // todo: load permissions from db and check
         return true;

@@ -27,12 +27,12 @@ pub struct CheckAuthRequest {
 }
 
 flags! {
-    // note: at the moment the typescript generator doesn't support serde_repr/c style enums. So this is currently unusable in TS without a workaround
-    #[derive(PartialOrd, Ord, Hash, serde_repr::Serialize_repr, serde_repr::Deserialize_repr)]
+    #[derive(PartialOrd, Ord, Hash, serde::Serialize, serde::Deserialize)]
     #[cfg_attr(feature = "ts", derive(TypeDef))]
-    #[repr(u32)]
-    pub enum JwtPermissions: u32 {
+    #[repr(i64)]
+    pub enum FrontendPermissions: i64 {
         None = 0,
+        ManageAccounts = 1,
     }
 }
 
@@ -45,7 +45,7 @@ pub enum CheckAuthResponse {
         name: String,
         avatar_url: String,
         auth_token: String,
-        permissions: JwtPermissions,
+        permissions: Vec<FrontendPermissions>,
     },
     Failure {
         error: String,
@@ -57,5 +57,5 @@ pub enum CheckAuthResponse {
 #[serde(rename_all = "camelCase")]
 pub struct JwtPayload {
     pub expires_at: i64,
-    pub account_id: String,
+    pub game_account_id: Option<String>,
 }

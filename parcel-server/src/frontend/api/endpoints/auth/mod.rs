@@ -9,15 +9,18 @@ use jwt::SignWithKey;
 use parcel_common::api_types::{
     auth::Provider,
     frontend::auth::{
-        AuthRequest, CheckAuthRequest, CheckAuthResponse, InitAuthResponse, JwtPayload,
-        JwtPermissions,
+        AuthRequest, CheckAuthRequest, CheckAuthResponse, FrontendPermissions, InitAuthResponse,
+        JwtPayload,
     },
 };
 use steam_auth::{Redirector, Verifier};
 
 use crate::{
     data::{
-        database::Database, jwt::JwtSecret, memory_cache::MemoryCache, platforms::steam::Steam,
+        database::{frontend_accounts::GetOrCreateError, Database},
+        jwt::JwtSecret,
+        memory_cache::MemoryCache,
+        platforms::steam::Steam,
     },
     frontend::{
         error::ApiError,
@@ -97,14 +100,14 @@ pub async fn steam_callback(
     let response = match verifier.verify_response(text) {
         Ok(steam_id) => {
             let conn = database.connect()?;
-            let accounts = conn.accounts();
+            let accounts = conn.frontend_accounts();
 
             let account = accounts
-                .get_by_provider_id(Provider::Steam, &steam_id.to_string())
-                .await?;
+                .get_or_create_from_provider(Provider::Steam, &steam_id.to_string())
+                .await;
 
             match account {
-                Some(account) => {
+                Ok(account) => {
                     let user_summary = steam
                         .get_player_summaries(&[&steam_id])
                         .await?
@@ -113,7 +116,7 @@ pub async fn steam_callback(
 
                     let payload = JwtPayload {
                         expires_at: (Utc::now() + chrono::Duration::days(7)).timestamp(),
-                        account_id: account.id,
+                        game_account_id: account.game_account_id,
                     };
 
                     let auth_token = payload
@@ -124,14 +127,18 @@ pub async fn steam_callback(
                         auth_token,
                         avatar_url: user_summary.avatar_full,
                         name: user_summary.name,
-                        permissions: JwtPermissions::None,
+                        permissions: vec![],
                     }
                 }
-                None => {
-                    // set error to account not found
-                    // or should the account be created?
-                    CheckAuthResponse::Failure {
-                        error: "Account not found, log in to the game server first".into(),
+                Err(err) => {
+                    if let GetOrCreateError::GameAccountNotFound = err {
+                        // set error to account not found
+                        // or should the account be created?
+                        CheckAuthResponse::Failure {
+                            error: "Account not found, log in to the game server first".into(),
+                        }
+                    } else {
+                        return Err(anyhow::anyhow!(err).into());
                     }
                 }
             }

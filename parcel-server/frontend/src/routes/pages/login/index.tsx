@@ -6,7 +6,6 @@ import { Provider as ProviderType } from "../../../api_types";
 import * as AuthService from "../../../services/auth_service";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import useSession from "../../../hooks/use_session";
-import { UserPermissions } from "../../../context/session_context";
 import * as Tabs from "../../../components/tabs";
 import Footer from "../../layout/footer";
 import * as Form from "../../../components/form";
@@ -182,7 +181,7 @@ const Login = () => {
             {
               name: data.name,
               avatarUrl: data.avatarUrl,
-              permissions: UserPermissions.None,
+              permissions: data.permissions,
             },
             data.authToken
           );
