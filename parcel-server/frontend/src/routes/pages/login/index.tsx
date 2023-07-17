@@ -7,6 +7,8 @@ import * as AuthService from "../../../services/auth_service";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import useSession from "../../../hooks/use_session";
 import { UserPermissions } from "../../../context/session_context";
+import * as Tabs from "../../../components/tabs";
+import Footer from "../../layout/footer";
 
 const Wrapper = styled.div`
   height: 100%;
@@ -15,23 +17,24 @@ const Wrapper = styled.div`
   align-items: center;
 `;
 
-const LoginBox = styled.div`
-  padding: 1rem;
-  background: rgba(31, 71, 96, 0.5);
-  width: 20rem;
-  border-radius: 0.1rem;
+const Title = styled.div`
+  font-weight: bold;
+  margin-bottom: 2rem;
+  text-align: center;
 `;
 
-const Title = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
+const LoginBox = styled.div`
+  background: rgba(31, 71, 96, 0.5);
+  width: 20rem;
+  height: 250px;
+  border-radius: 4px;
 `;
 
 const Content = styled.div`
+  height: 100%;
   display: flex;
   justify-content: center;
+  align-items: center;
 `;
 
 const Provider = styled.a`
@@ -48,6 +51,31 @@ const Provider = styled.a`
   &:hover {
     scale: 1.1;
   }
+`;
+
+const TabsRoot = styled(Tabs.Root)`
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 0fr 1fr;
+`;
+
+const TabsList = styled(Tabs.List)`
+  grid-area: 1 / 1 / 1 / 1;
+  display: flex;
+  justify-content: stretch;
+  font-size: 1.1rem;
+`;
+
+const TabsTrigger = styled(Tabs.Trigger)`
+  flex: 1;
+  text-align: center;
+`;
+
+const TabsContent = styled(Tabs.Content)`
+  grid-area: 2 / 1 / 2 / 1;
+  height: 100%;
+  padding: 1rem;
 `;
 
 enum LoginState {
@@ -117,14 +145,23 @@ const Login = () => {
     switch (state) {
       case LoginState.WaitingForLoginOption: {
         return (
-          <Content>
-            <Provider onClick={() => login("steam")}>
-              <img src={steamIcon} />
-            </Provider>
-            <Provider onClick={() => login("epic")}>
-              <img src={epicIcon} />
-            </Provider>
-          </Content>
+          <TabsRoot defaultValue="provider">
+            <TabsList>
+              <TabsTrigger value="provider">Provider</TabsTrigger>
+              <TabsTrigger value="account">Account</TabsTrigger>
+            </TabsList>
+            <TabsContent value="provider">
+              <Content>
+                <Provider onClick={() => login("steam")}>
+                  <img src={steamIcon} />
+                </Provider>
+                <Provider onClick={() => login("epic")}>
+                  <img src={epicIcon} />
+                </Provider>
+              </Content>
+            </TabsContent>
+            <TabsContent value="account">Account login</TabsContent>
+          </TabsRoot>
         );
       }
       case LoginState.WaitingForAuthResponse: {
@@ -136,7 +173,7 @@ const Login = () => {
             <div>
               <p>Failed to login:</p>
               <p>{error}</p>
-              <Link to="/login" reloadDocument={true}>
+              <Link to="/login" reloadDocument>
                 Try again
               </Link>
             </div>
@@ -148,10 +185,11 @@ const Login = () => {
 
   return (
     <Wrapper>
-      <LoginBox>
+      <div>
         <Title>Log in</Title>
-        {renderCurrentState()}
-      </LoginBox>
+        <LoginBox>{renderCurrentState()}</LoginBox>
+        <Footer />
+      </div>
     </Wrapper>
   );
 };
