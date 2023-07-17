@@ -18,6 +18,11 @@ const InnerContainer = styled.div`
   & span {
     vertical-align: super;
     color: ${Colors.whiteA.whiteA12};
+    transition: color 0.1s ease-out;
+
+    &:hover {
+      color: white;
+    }
   }
 
   & img {
