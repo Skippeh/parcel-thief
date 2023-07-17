@@ -6,6 +6,7 @@ import * as Colors from "@radix-ui/colors";
 export const Root = styled(DropdownMenu.Root)``;
 export const Trigger = styled(DropdownMenu.Trigger)`
   all: unset;
+  box-sizing: border-box;
 `;
 export const Portal = DropdownMenu.Portal; // no styling necessary
 export const Content = styled(DropdownMenu.Content)`
@@ -16,6 +17,7 @@ export const Content = styled(DropdownMenu.Content)`
 `;
 export const Item = styled(DropdownMenu.Item)`
   all: unset;
+  box-sizing: border-box;
   cursor: pointer;
   display: block;
   padding: 0.5rem;

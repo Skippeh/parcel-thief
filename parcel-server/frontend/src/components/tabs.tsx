@@ -7,6 +7,7 @@ export const Root = styled(Tabs.Root)``;
 export const List = styled(Tabs.List)``;
 export const Trigger = styled(Tabs.Trigger)`
   all: unset;
+  box-sizing: border-box;
   padding: 0.8rem 1rem;
   cursor: pointer;
   background: ${Colors.blueDark.blue6};

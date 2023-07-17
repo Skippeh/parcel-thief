@@ -9,6 +9,8 @@ import useSession from "../../../hooks/use_session";
 import { UserPermissions } from "../../../context/session_context";
 import * as Tabs from "../../../components/tabs";
 import Footer from "../../layout/footer";
+import * as Form from "../../../components/form";
+import * as Colors from "@radix-ui/colors";
 
 const Wrapper = styled.div`
   height: 100%;
@@ -26,12 +28,11 @@ const Title = styled.div`
 const LoginBox = styled.div`
   background: rgba(31, 71, 96, 0.5);
   width: 20rem;
-  height: 250px;
   border-radius: 4px;
 `;
 
-const Content = styled.div`
-  height: 100%;
+const ProviderContent = styled.div`
+  height: 221px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -50,6 +51,25 @@ const Provider = styled.a`
 
   &:hover {
     scale: 1.1;
+  }
+`;
+
+const FailedContent = styled.div`
+  padding: 1rem;
+
+  & .title {
+    text-align: center;
+    margin-bottom: 0.7rem;
+    font-weight: bold;
+  }
+
+  & .error {
+    font-size: 0.9rem;
+  }
+
+  & .button {
+    margin-top: 1rem;
+    margin-left: 0;
   }
 `;
 
@@ -75,7 +95,29 @@ const TabsTrigger = styled(Tabs.Trigger)`
 const TabsContent = styled(Tabs.Content)`
   grid-area: 2 / 1 / 2 / 1;
   height: 100%;
-  padding: 1rem;
+`;
+
+const FormRoot = styled(Form.Root)`
+  position: relative;
+  padding-bottom: 47px;
+`;
+
+const FormSubmit = styled(Form.Submit)`
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0.8rem 1rem;
+  font-size: 0.9rem;
+`;
+
+const FormError = styled.div`
+  color: ${Colors.redDark.red9};
+  font-size: 0.9rem;
+`;
+
+const Fields = styled.div`
+  margin: 1rem;
 `;
 
 enum LoginState {
@@ -102,6 +144,15 @@ const Login = () => {
     }
 
     window.location.href = response.data!.redirectUrl;
+  };
+
+  const loginWithAccount = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); // prevent form submission
+
+    const formData = new FormData(event.currentTarget);
+    console.log(formData);
+
+    setError("Not implemented");
   };
 
   React.useEffect(() => {
@@ -151,33 +202,46 @@ const Login = () => {
               <TabsTrigger value="account">Account</TabsTrigger>
             </TabsList>
             <TabsContent value="provider">
-              <Content>
+              <ProviderContent>
                 <Provider onClick={() => login("steam")}>
                   <img src={steamIcon} />
                 </Provider>
                 <Provider onClick={() => login("epic")}>
                   <img src={epicIcon} />
                 </Provider>
-              </Content>
+              </ProviderContent>
             </TabsContent>
-            <TabsContent value="account">Account login</TabsContent>
+            <TabsContent value="account">
+              <FormRoot onSubmit={loginWithAccount}>
+                <Fields>
+                  <Form.Field name="Username">
+                    <Form.Label>Username</Form.Label>
+                    <Form.Control type="text" name="username" required />
+                  </Form.Field>
+                  <Form.Field name="Password">
+                    <Form.Label>Password</Form.Label>
+                    <Form.Control type="password" name="password" required />
+                  </Form.Field>
+                  <FormError>{error}</FormError>
+                </Fields>
+                <FormSubmit>Log in</FormSubmit>
+              </FormRoot>
+            </TabsContent>
           </TabsRoot>
         );
       }
       case LoginState.WaitingForAuthResponse: {
-        return <Content>Waiting for login response...</Content>;
+        return <ProviderContent>Waiting for login response...</ProviderContent>;
       }
       case LoginState.Failed: {
         return (
-          <Content>
-            <div>
-              <p>Failed to login:</p>
-              <p>{error}</p>
-              <Link to="/login" reloadDocument>
-                Try again
-              </Link>
-            </div>
-          </Content>
+          <FailedContent>
+            <div className="title">Failed to login</div>
+            <div className="error">{error}</div>
+            <Link className="button primary" to="/login" reloadDocument>
+              Try again
+            </Link>
+          </FailedContent>
         );
       }
     }
@@ -186,7 +250,7 @@ const Login = () => {
   return (
     <Wrapper>
       <div>
-        <Title>Log in</Title>
+        <Title>Log in with preferred method</Title>
         <LoginBox>{renderCurrentState()}</LoginBox>
         <Footer />
       </div>
