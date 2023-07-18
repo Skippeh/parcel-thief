@@ -28,17 +28,19 @@ impl AsRef<JwtPayload> for JwtSession {
 }
 
 impl JwtSession {
-    pub fn has_permissions(&self, permissions: impl Into<FlagSet<FrontendPermissions>>) -> bool {
-        let permissions: FlagSet<FrontendPermissions> = permissions.into();
+    pub async fn has_permissions(
+        &self,
+        permissions: impl Into<FlagSet<FrontendPermissions>>,
+    ) -> bool {
+        let permissions = permissions.into();
 
         if permissions.is_empty() {
             return true;
         }
 
-        let account_id = &self.game_account_id;
+        let my_permissions = FlagSet::<FrontendPermissions>::new_truncated(self.permissions);
 
-        // todo: load permissions from db and check
-        return true;
+        my_permissions.contains(permissions)
     }
 }
 

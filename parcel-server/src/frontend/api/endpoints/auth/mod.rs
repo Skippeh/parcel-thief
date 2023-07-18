@@ -111,7 +111,7 @@ pub async fn steam_callback(
                 Ok(account) => {
                     let permissions =
                         FlagSet::<FrontendPermissions>::new_truncated(account.permissions);
-                    let permissions = permissions.into_iter().collect();
+                    let permissions_vec = permissions.into_iter().collect();
 
                     let user_summary = steam
                         .get_player_summaries(&[&steam_id])
@@ -122,6 +122,7 @@ pub async fn steam_callback(
                     let payload = JwtPayload {
                         expires_at: (Utc::now() + chrono::Duration::days(7)).timestamp(),
                         account_id: account.id,
+                        permissions: permissions.bits(),
                     };
 
                     let auth_token = payload
@@ -133,7 +134,7 @@ pub async fn steam_callback(
                         avatar_url: user_summary.avatar_full,
                         name: user_summary.name,
                         game_account_id: account.game_account_id,
-                        permissions,
+                        permissions: permissions_vec,
                     }
                 }
                 Err(err) => {

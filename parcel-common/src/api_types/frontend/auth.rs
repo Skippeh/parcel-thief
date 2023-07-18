@@ -60,4 +60,6 @@ pub struct JwtPayload {
     pub expires_at: i64,
     /// Frontend account id, not game account id
     pub account_id: i64,
+    /// Use `FlagSet<FrontendPermissions>` to read flags
+    pub permissions: i64,
 }

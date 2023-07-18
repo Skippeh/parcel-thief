@@ -11,7 +11,11 @@ export type JwtPayload={"expiresAt":I64;
 /**
  * Frontend account id, not game account id
  */
-"accountId":I64;};
+"accountId":I64;
+/**
+ * Use `FlagSet<FrontendPermissions>` to read flags
+ */
+"permissions":I64;};
 export type I32=number;
 export type SharedCargoListItem={"name":string;"amount":I32;"category":string;"location":string;"creator":string;};
 export type ListSharedCargoResponse={"baggages":(SharedCargoListItem)[];};
