@@ -4,10 +4,10 @@ import PageTitle from "../../components/page_title";
 
 const Home = () => {
   return (
-    <div>
+    <>
       <PageTitle>Parcel Server</PageTitle>
       <ContentBox></ContentBox>
-    </div>
+    </>
   );
 };
 
