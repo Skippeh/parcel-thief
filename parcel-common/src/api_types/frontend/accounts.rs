@@ -47,3 +47,30 @@ pub enum ListAccountsResponse {
     #[serde(rename_all = "camelCase")]
     Game { accounts: Vec<GameAccountListItem> },
 }
+
+#[derive(Debug, Clone, Serialize)]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
+#[serde(rename_all = "camelCase")]
+pub struct LocalAccount {
+    pub username: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
+#[serde(rename_all = "camelCase")]
+pub struct ProviderConnection {
+    pub provider: Provider,
+    pub provider_id: String,
+    pub name: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
+#[serde(rename_all = "camelCase")]
+pub struct FrontendAccount {
+    pub id: i64,
+    pub game_id: Option<String>,
+    pub permissions: Vec<FrontendPermissions>,
+    pub provider_connection: Option<ProviderConnection>,
+    pub local_account: Option<LocalAccount>,
+}

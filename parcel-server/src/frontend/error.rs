@@ -11,6 +11,8 @@ pub enum ApiError {
     BadRequest(anyhow::Error),
     #[error("You lack the permissions to access to this resource")]
     Forbidden,
+    #[error("The resource could not be found")]
+    NotFound,
 }
 
 impl From<anyhow::Error> for ApiError {
@@ -50,6 +52,7 @@ impl ResponseError for ApiError {
             ApiError::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::BadRequest(_) => StatusCode::BAD_REQUEST,
             ApiError::Forbidden => StatusCode::FORBIDDEN,
+            ApiError::NotFound => StatusCode::NOT_FOUND,
         }
     }
 

@@ -27,3 +27,6 @@ export type ListAccountsType=("frontend"|"game");
 export type FrontendAccountListItem={"id":I64;"gameId":(string|null);"name":string;"permissions":(FrontendPermissions)[];};
 export type GameAccountListItem={"gameId":string;"name":string;"provider":Provider;"providerId":string;"lastLogin":string;};
 export type ListAccountsResponse=(({"type":"frontend";}&{"accounts":(FrontendAccountListItem)[];})|({"type":"game";}&{"accounts":(GameAccountListItem)[];}));
+export type ProviderConnection={"provider":Provider;"providerId":string;"name":(string|null);};
+export type LocalAccount={"username":string;};
+export type FrontendAccount={"id":I64;"gameId":(string|null);"permissions":(FrontendPermissions)[];"providerConnection":(ProviderConnection|null);"localAccount":(LocalAccount|null);};

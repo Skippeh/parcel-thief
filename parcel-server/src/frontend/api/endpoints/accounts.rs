@@ -7,7 +7,8 @@ use actix_web::{
 use flagset::FlagSet;
 use parcel_common::api_types::frontend::{
     accounts::{
-        FrontendAccountListItem, GameAccountListItem, ListAccountsResponse, ListAccountsType,
+        FrontendAccount as ApiFrontendAccount, FrontendAccountListItem, GameAccountListItem,
+        ListAccountsResponse, ListAccountsType, LocalAccount, ProviderConnection,
     },
     auth::FrontendPermissions,
 };
@@ -48,7 +49,8 @@ pub async fn list_accounts(
             let mut result = Vec::new();
 
             let data_accounts = frontend_accounts.get_all().await?;
-            let account_names = get_frontend_account_names(conn, &data_accounts).await?;
+            let account_names =
+                get_frontend_account_names(conn, &data_accounts.iter().collect::<Vec<_>>()).await?;
 
             for account in data_accounts {
                 let name = account_names
@@ -90,6 +92,57 @@ pub async fn list_accounts(
     }
 }
 
+#[get("accounts/frontend/{id}")]
+pub async fn get_frontend_account(
+    session: JwtSession,
+    database: Data<Database>,
+    params: actix_web::web::Path<i64>,
+) -> ApiResult<ApiFrontendAccount> {
+    let account_id = params.into_inner();
+
+    // Make sure the current session is either looking up their own account or has permissions to manage accounts
+    if account_id != session.account_id
+        && !session.has_permissions(FrontendPermissions::ManageAccounts)
+    {
+        return Err(ApiError::Forbidden);
+    }
+
+    let conn = database.connect()?;
+    let accounts = conn.frontend_accounts();
+    let account = accounts.get_by_id(account_id).await?;
+    let credentials = accounts.get_credentials(account_id).await?;
+    let provider_connection = accounts.get_provider_connection(account_id).await?;
+
+    match account {
+        None => Err(ApiError::NotFound),
+        Some(account) => {
+            let permissions = FlagSet::new_truncated(account.permissions)
+                .into_iter()
+                .collect();
+
+            let name = get_frontend_account_names(conn, &[&account])
+                .await?
+                .into_iter()
+                .next()
+                .map(|kv| kv.1);
+
+            ApiResponse::ok(ApiFrontendAccount {
+                id: account.id,
+                game_id: account.game_account_id,
+                permissions,
+                local_account: credentials.map(|c| LocalAccount {
+                    username: c.username,
+                }),
+                provider_connection: provider_connection.map(|c| ProviderConnection {
+                    provider: c.provider,
+                    provider_id: c.provider_id,
+                    name,
+                }),
+            })
+        }
+    }
+}
+
 /// Query the names for the specified frontend accounts.
 ///
 /// * Accounts with a game account id will use their provider/in-game names
@@ -97,7 +150,7 @@ pub async fn list_accounts(
 /// * Accounts without a game account id or login names will not be added to the returned hash map
 async fn get_frontend_account_names(
     conn: DatabaseConnection<'_>,
-    accounts: &[FrontendAccount],
+    accounts: &[&FrontendAccount],
 ) -> Result<HashMap<i64, String>, ApiError> {
     let game_accounts = conn.accounts();
 

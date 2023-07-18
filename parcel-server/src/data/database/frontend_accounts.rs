@@ -119,6 +119,51 @@ impl<'db> FrontendAccounts<'db> {
         })
     }
 
+    pub async fn get_by_id(&self, id: i64) -> Result<Option<FrontendAccount>, QueryError> {
+        use crate::db::schema::frontend_accounts::dsl;
+
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        let account = dsl::frontend_accounts
+            .filter(dsl::id.eq(id))
+            .first(conn)
+            .optional()?;
+
+        Ok(account)
+    }
+
+    pub async fn get_provider_connection(
+        &self,
+        account_id: i64,
+    ) -> Result<Option<AccountProviderConnection>, QueryError> {
+        use crate::db::schema::frontend_account_provider_connections::dsl;
+
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        let connection = dsl::frontend_account_provider_connections
+            .filter(dsl::account_id.eq(account_id))
+            .first(conn)
+            .optional()?;
+
+        Ok(connection)
+    }
+
+    pub async fn get_credentials(
+        &self,
+        account_id: i64,
+    ) -> Result<Option<AccountCredentials>, QueryError> {
+        use crate::db::schema::frontend_account_credentials::dsl;
+
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        let credentials = dsl::frontend_account_credentials
+            .filter(dsl::account_id.eq(account_id))
+            .first(conn)
+            .optional()?;
+
+        Ok(credentials)
+    }
+
     pub async fn get_all(&self) -> Result<Vec<FrontendAccount>, QueryError> {
         use crate::db::schema::frontend_accounts::dsl;
 

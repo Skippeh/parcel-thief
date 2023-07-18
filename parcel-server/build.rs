@@ -1,7 +1,7 @@
 use std::{fs::File, path::Path, process::Command};
 
 use parcel_common::api_types::frontend::{
-    accounts::{ListAccountsResponse, ListAccountsType},
+    accounts::{FrontendAccount, ListAccountsResponse, ListAccountsType},
     auth::*,
     baggages::*,
 };
@@ -26,6 +26,7 @@ type Api = (
     ListWastedCargoResponse,
     ListAccountsType,
     ListAccountsResponse,
+    FrontendAccount,
 );
 
 fn generate_ts_types() {
