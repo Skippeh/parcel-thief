@@ -7,6 +7,7 @@ import Home from "./pages/home";
 import ProtectedContent from "./protected_content";
 import Items from "./pages/items";
 import Accounts from "./pages/accounts";
+import FrontendAccount from "./pages/accounts/frontend/account";
 
 export interface RouteHandle {
   crumb: string;
@@ -50,6 +51,13 @@ export default createBrowserRouter(
             {
               path: "",
               element: <Accounts />,
+            },
+            {
+              path: "frontend/:id",
+              element: <FrontendAccount />,
+              handle: {
+                crumb: "Edit frontend account",
+              },
             },
           ],
         },

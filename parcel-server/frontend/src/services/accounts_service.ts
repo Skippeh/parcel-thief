@@ -1,5 +1,6 @@
 import { ApiResponse, callApi } from ".";
 import {
+  FrontendAccount,
   FrontendPermissions,
   ListAccountsResponse,
   ListAccountsType,
@@ -11,6 +12,12 @@ export async function getAccounts<
 >(type: T): Promise<ApiResponse<V>> {
   const query = `?accountsType=${encodeURIComponent(type)}`;
   return await callApi(`accounts${query}`, "GET");
+}
+
+export async function getFrontendAccount(
+  id: number
+): Promise<ApiResponse<FrontendAccount>> {
+  return await callApi(`accounts/frontend/${id}`, "GET");
 }
 
 export function permissionToReadableString(
