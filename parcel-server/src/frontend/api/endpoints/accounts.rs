@@ -68,7 +68,7 @@ pub async fn list_accounts(
                 });
             }
 
-            ApiResponse::ok(ListAccountsResponse::FrontendAccounts { accounts: result })
+            ApiResponse::ok(ListAccountsResponse::Frontend { accounts: result })
         }
         ListAccountsType::Game => {
             let accounts = conn.accounts();
@@ -85,7 +85,7 @@ pub async fn list_accounts(
                 });
             }
 
-            ApiResponse::ok(ListAccountsResponse::GameAccounts { accounts: result })
+            ApiResponse::ok(ListAccountsResponse::Game { accounts: result })
         }
     }
 }

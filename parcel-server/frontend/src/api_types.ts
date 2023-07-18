@@ -26,4 +26,4 @@ export type ListWastedCargoResponse={"baggages":(WastedCargoListItem)[];};
 export type ListAccountsType=("frontend"|"game");
 export type FrontendAccountListItem={"id":I64;"gameId":(string|null);"name":string;"permissions":(FrontendPermissions)[];};
 export type GameAccountListItem={"gameId":string;"name":string;"provider":Provider;"providerId":string;"lastLogin":string;};
-export type ListAccountsResponse=({"frontendAccounts":{"accounts":(FrontendAccountListItem)[];};}|{"gameAccounts":{"accounts":(GameAccountListItem)[];};});
+export type ListAccountsResponse=(({"type":"frontend";}&{"accounts":(FrontendAccountListItem)[];})|({"type":"game";}&{"accounts":(GameAccountListItem)[];}));

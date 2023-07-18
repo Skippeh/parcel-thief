@@ -38,12 +38,12 @@ pub enum ListAccountsType {
 
 #[derive(Debug, Clone, Serialize)]
 #[cfg_attr(feature = "ts", derive(TypeDef))]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", tag = "type")]
 pub enum ListAccountsResponse {
     #[serde(rename_all = "camelCase")]
-    FrontendAccounts {
+    Frontend {
         accounts: Vec<FrontendAccountListItem>,
     },
     #[serde(rename_all = "camelCase")]
-    GameAccounts { accounts: Vec<GameAccountListItem> },
+    Game { accounts: Vec<GameAccountListItem> },
 }
