@@ -1,17 +1,19 @@
 import * as React from "react";
 import useSession from "../hooks/use_session";
-import { UserPermissions } from "../context/session_context";
 import { Outlet, useNavigate } from "react-router-dom";
+import { FrontendPermissions } from "../api_types";
 
 interface Props extends React.PropsWithChildren {
-  permissions?: UserPermissions;
+  permissions?: FrontendPermissions[];
 }
 
 function hasPermissions(
-  userPermissions: UserPermissions,
-  targetPermissions: UserPermissions
+  userPermissions: FrontendPermissions[],
+  targetPermissions: FrontendPermissions[]
 ): boolean {
-  return (userPermissions & targetPermissions) == targetPermissions;
+  return targetPermissions.every((permission) =>
+    userPermissions.includes(permission)
+  );
 }
 
 /**
