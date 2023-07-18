@@ -5,6 +5,7 @@ import { NavLink } from "react-router-dom";
 import User from "./user";
 import * as Colors from "@radix-ui/colors";
 import { CenterContainer } from ".";
+import ProtectedContent from "../protected_content";
 
 const Wrapper = styled.div`
   background: ${Colors.blueDark.blue3};
@@ -67,6 +68,11 @@ const Header = () => {
               <li>
                 <NavLink to="/items">Items</NavLink>
               </li>
+              <ProtectedContent permissions={["manageAccounts"]}>
+                <li>
+                  <NavLink to="/accounts">Accounts</NavLink>
+                </li>
+              </ProtectedContent>
             </ul>
           </nav>
           <User user={user} />

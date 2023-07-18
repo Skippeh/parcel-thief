@@ -6,6 +6,7 @@ import Layout from "./layout";
 import Home from "./pages/home";
 import ProtectedContent from "./protected_content";
 import Items from "./pages/items";
+import Accounts from "./pages/accounts";
 
 export default createBrowserRouter(
   [
@@ -26,6 +27,16 @@ export default createBrowserRouter(
             {
               path: "/items",
               element: <Items />,
+            },
+          ],
+        },
+        {
+          path: "/accounts",
+          element: <ProtectedContent permissions={["manageAccounts"]} />,
+          children: [
+            {
+              path: "",
+              element: <Accounts />,
             },
           ],
         },
