@@ -11,6 +11,7 @@ import FrontendAccount from "./pages/accounts/frontend/account";
 
 export interface RouteHandle {
   crumb: string;
+  title?: string;
 }
 
 export default createBrowserRouter(
@@ -21,6 +22,7 @@ export default createBrowserRouter(
       errorElement: <PageError />,
       handle: {
         crumb: "Home",
+        title: "Parcel Server",
       },
       children: [
         {

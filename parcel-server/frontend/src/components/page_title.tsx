@@ -1,7 +1,8 @@
 import * as React from "react";
-import { PropsWithChildren } from "react";
 import styled from "styled-components";
 import Breadcrumb from "./breadcrumb";
+import { useMatches } from "react-router-dom";
+import { RouteHandle } from "../routes";
 
 const Wrapper = styled.div`
   margin: 0.67rem 0;
@@ -13,10 +14,29 @@ const Wrapper = styled.div`
   }
 `;
 
-const PageTitle = ({ children }: PropsWithChildren) => {
+const PageTitle = () => {
+  const matches = useMatches();
+  let match;
+
+  // Iterate matches backwards until we find one with a handle defined
+  for (let i = matches.length - 1; i >= 0; i--) {
+    match = matches[i];
+
+    if (match.handle != null) {
+      break;
+    }
+  }
+
+  const handle = match.handle as RouteHandle;
+  let title: string | undefined = undefined;
+
+  if (handle != null) {
+    title = handle.title ?? handle.crumb;
+  }
+
   return (
     <Wrapper>
-      <h1>{children}</h1>
+      <h1>{title}</h1>
       <Breadcrumb />
     </Wrapper>
   );

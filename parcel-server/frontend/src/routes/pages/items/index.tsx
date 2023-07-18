@@ -1,6 +1,4 @@
 import * as React from "react";
-import ContentBox from "../../layout/content_box";
-import PageTitle from "../../../components/page_title";
 import SharedCargoTable from "./shared_cargo_table";
 import { useState } from "react";
 import {
@@ -69,27 +67,24 @@ const Items = () => {
   }, []);
 
   return (
-    <div>
-      <PageTitle>Items</PageTitle>
-      <ContentBox>
-        <Tabs.Root defaultValue="sharedCargo">
-          <Tabs.List>
-            <Tabs.Trigger value="sharedCargo">Shared cargo</Tabs.Trigger>
-            <Tabs.Trigger value="lostCargo">Lost cargo</Tabs.Trigger>
-            <Tabs.Trigger value="wastedCargo">Wasted cargo</Tabs.Trigger>
-          </Tabs.List>
-          <Tabs.Content value="sharedCargo" forceMount>
-            <SharedCargoTable items={sharedItems} />
-          </Tabs.Content>
-          <Tabs.Content value="lostCargo" forceMount>
-            <LostCargoTable items={lostItems} />
-          </Tabs.Content>
-          <Tabs.Content value="wastedCargo" forceMount>
-            <WastedCargoTable items={wastedItems} />
-          </Tabs.Content>
-        </Tabs.Root>
-      </ContentBox>
-    </div>
+    <>
+      <Tabs.Root defaultValue="sharedCargo">
+        <Tabs.List>
+          <Tabs.Trigger value="sharedCargo">Shared cargo</Tabs.Trigger>
+          <Tabs.Trigger value="lostCargo">Lost cargo</Tabs.Trigger>
+          <Tabs.Trigger value="wastedCargo">Wasted cargo</Tabs.Trigger>
+        </Tabs.List>
+        <Tabs.Content value="sharedCargo" forceMount>
+          <SharedCargoTable items={sharedItems} />
+        </Tabs.Content>
+        <Tabs.Content value="lostCargo" forceMount>
+          <LostCargoTable items={lostItems} />
+        </Tabs.Content>
+        <Tabs.Content value="wastedCargo" forceMount>
+          <WastedCargoTable items={wastedItems} />
+        </Tabs.Content>
+      </Tabs.Root>
+    </>
   );
 };
 

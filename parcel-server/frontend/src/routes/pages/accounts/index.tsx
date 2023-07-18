@@ -1,6 +1,4 @@
 import * as React from "react";
-import PageTitle from "../../../components/page_title";
-import ContentBox from "../../layout/content_box";
 import * as Tabs from "../../../components/tabs";
 import FrontendAccountsTable from "./frontend_accounts_table";
 import { useState } from "react";
@@ -26,21 +24,18 @@ const Accounts = () => {
 
   return (
     <>
-      <PageTitle>Accounts</PageTitle>
-      <ContentBox>
-        <Tabs.Root defaultValue="frontend">
-          <Tabs.List>
-            <Tabs.Trigger value="frontend">Frontend accounts</Tabs.Trigger>
-            <Tabs.Trigger value="game">Game accounts</Tabs.Trigger>
-          </Tabs.List>
-          <Tabs.Content value="frontend" forceMount>
-            <FrontendAccountsTable accounts={frontendAccounts} />
-          </Tabs.Content>
-          <Tabs.Content value="game" forceMount>
-            game
-          </Tabs.Content>
-        </Tabs.Root>
-      </ContentBox>
+      <Tabs.Root defaultValue="frontend">
+        <Tabs.List>
+          <Tabs.Trigger value="frontend">Frontend accounts</Tabs.Trigger>
+          <Tabs.Trigger value="game">Game accounts</Tabs.Trigger>
+        </Tabs.List>
+        <Tabs.Content value="frontend" forceMount>
+          <FrontendAccountsTable accounts={frontendAccounts} />
+        </Tabs.Content>
+        <Tabs.Content value="game" forceMount>
+          game
+        </Tabs.Content>
+      </Tabs.Root>
     </>
   );
 };

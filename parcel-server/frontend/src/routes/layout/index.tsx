@@ -3,6 +3,8 @@ import { Outlet } from "react-router-dom";
 import styled from "styled-components";
 import Header from "./header";
 import Footer from "./footer";
+import PageTitle from "../../components/page_title";
+import ContentBox from "./content_box";
 
 const Wrapper = styled.div`
   height: 100%;
@@ -25,7 +27,10 @@ const Layout = () => {
       <Header />
       <Content>
         <CenterContainer>
-          <Outlet />
+          <PageTitle />
+          <ContentBox>
+            <Outlet />
+          </ContentBox>
         </CenterContainer>
       </Content>
       <Footer />
