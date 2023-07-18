@@ -8,17 +8,17 @@ import {
 export async function getSharedCargo(): Promise<
   ApiResponse<ListSharedCargoResponse>
 > {
-  return await callApi("baggages/sharedCargo", "GET", undefined);
+  return await callApi("baggages/sharedCargo", "GET");
 }
 
 export async function getLostCargo(): Promise<
   ApiResponse<ListLostCargoResponse>
 > {
-  return await callApi("baggages/lostCargo", "GET", undefined);
+  return await callApi("baggages/lostCargo", "GET");
 }
 
 export async function getWastedCargo(): Promise<
   ApiResponse<ListWastedCargoResponse>
 > {
-  return await callApi("baggages/wastedCargo", "GET", undefined);
+  return await callApi("baggages/wastedCargo", "GET");
 }

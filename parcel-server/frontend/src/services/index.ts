@@ -17,7 +17,7 @@ export function getApiUrl(apiRoute: string): string {
 export async function callApi<T>(
   route: string,
   method: string,
-  requestData: any | null
+  requestData?: any
 ): Promise<ApiResponse<T>> {
   let apiResponse: ApiResponse<T>;
 

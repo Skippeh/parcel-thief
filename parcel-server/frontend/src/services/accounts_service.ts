@@ -10,7 +10,7 @@ export async function getAccounts<
   V extends { type: T } & ListAccountsResponse
 >(type: T): Promise<ApiResponse<V>> {
   const query = `?accountsType=${encodeURIComponent(type)}`;
-  return await callApi(`accounts${query}`, "GET", undefined);
+  return await callApi(`accounts${query}`, "GET");
 }
 
 export function permissionToReadableString(
