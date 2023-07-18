@@ -13,7 +13,6 @@ use parcel_game_data::{GameData, Language};
 use crate::{
     data::database::Database,
     frontend::{
-        error::ApiError,
         jwt_session::JwtSession,
         result::{ApiResponse, ApiResult},
     },
