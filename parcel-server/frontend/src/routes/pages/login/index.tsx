@@ -31,7 +31,7 @@ const LoginBox = styled.div`
 `;
 
 const ProviderContent = styled.div`
-  height: 221px;
+  height: 216px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -98,7 +98,7 @@ const TabsContent = styled(Tabs.Content)`
 
 const FormRoot = styled(Form.Root)`
   position: relative;
-  padding-bottom: 47px;
+  padding-bottom: 42px;
 `;
 
 const FormSubmit = styled(Form.Submit)`
