@@ -8,8 +8,10 @@ export const Trigger = styled(DropdownMenu.Trigger)`
   all: unset;
   box-sizing: border-box;
 
-  &:hover {
-    all: unset; // removes button hover styling
+  &:focus,
+  &:hover,
+  &:active {
+    all: unset;
   }
 `;
 export const Portal = DropdownMenu.Portal; // no styling necessary
