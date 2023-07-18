@@ -5,6 +5,7 @@ use actix_web::{
 };
 use anyhow::Context;
 use chrono::Utc;
+use flagset::FlagSet;
 use jwt::SignWithKey;
 use parcel_common::api_types::{
     auth::Provider,
@@ -108,6 +109,10 @@ pub async fn steam_callback(
 
             match account {
                 Ok(account) => {
+                    let permissions =
+                        FlagSet::<FrontendPermissions>::new_truncated(account.permissions);
+                    let permissions = permissions.into_iter().collect();
+
                     let user_summary = steam
                         .get_player_summaries(&[&steam_id])
                         .await?
@@ -116,7 +121,7 @@ pub async fn steam_callback(
 
                     let payload = JwtPayload {
                         expires_at: (Utc::now() + chrono::Duration::days(7)).timestamp(),
-                        game_account_id: account.game_account_id,
+                        account_id: account.id,
                     };
 
                     let auth_token = payload
@@ -127,7 +132,8 @@ pub async fn steam_callback(
                         auth_token,
                         avatar_url: user_summary.avatar_full,
                         name: user_summary.name,
-                        permissions: vec![],
+                        game_account_id: account.game_account_id,
+                        permissions,
                     }
                 }
                 Err(err) => {
@@ -135,7 +141,9 @@ pub async fn steam_callback(
                         // set error to account not found
                         // or should the account be created?
                         CheckAuthResponse::Failure {
-                            error: "Account not found, log in to the game server first".into(),
+                            error:
+                                "Game account not found, log in to the game server and try again"
+                                    .into(),
                         }
                     } else {
                         return Err(anyhow::anyhow!(err).into());

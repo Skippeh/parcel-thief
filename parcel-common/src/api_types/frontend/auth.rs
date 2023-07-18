@@ -31,8 +31,7 @@ flags! {
     #[cfg_attr(feature = "ts", derive(TypeDef))]
     #[repr(i64)]
     pub enum FrontendPermissions: i64 {
-        None = 0,
-        ManageAccounts = 1,
+        ManageAccounts,
     }
 }
 
@@ -45,6 +44,7 @@ pub enum CheckAuthResponse {
         name: String,
         avatar_url: String,
         auth_token: String,
+        game_account_id: Option<String>,
         permissions: Vec<FrontendPermissions>,
     },
     Failure {
@@ -57,5 +57,6 @@ pub enum CheckAuthResponse {
 #[serde(rename_all = "camelCase")]
 pub struct JwtPayload {
     pub expires_at: i64,
-    pub game_account_id: Option<String>,
+    /// Frontend account id, not game account id
+    pub account_id: i64,
 }

@@ -4,10 +4,14 @@ export type Provider=("steam"|"epic");
 export type AuthRequest={"provider":Provider;};
 export type InitAuthResponse={"redirectUrl":string;};
 export type CheckAuthRequest={"callbackToken":string;};
-export type FrontendPermissions=("None"|"ManageAccounts");
-export type CheckAuthResponse=(({"type":"success";}&{"name":string;"avatarUrl":string;"authToken":string;"permissions":(FrontendPermissions)[];})|({"type":"failure";}&{"error":string;}));
+export type FrontendPermissions="ManageAccounts";
+export type CheckAuthResponse=(({"type":"success";}&{"name":string;"avatarUrl":string;"authToken":string;"gameAccountId":(string|null);"permissions":(FrontendPermissions)[];})|({"type":"failure";}&{"error":string;}));
 export type I64=number;
-export type JwtPayload={"expiresAt":I64;"gameAccountId":(string|null);};
+export type JwtPayload={"expiresAt":I64;
+/**
+ * Frontend account id, not game account id
+ */
+"accountId":I64;};
 export type I32=number;
 export type SharedCargoListItem={"name":string;"amount":I32;"category":string;"location":string;"creator":string;};
 export type ListSharedCargoResponse={"baggages":(SharedCargoListItem)[];};
