@@ -16,8 +16,6 @@ export async function getAccounts<
 export function permissionToReadableString(
   permission: FrontendPermissions | undefined | null
 ): string {
-  console.log("permission", permission);
-
   switch (permission) {
     case "manageAccounts":
       return "Manage accounts";
