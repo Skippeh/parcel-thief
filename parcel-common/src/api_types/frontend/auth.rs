@@ -30,6 +30,7 @@ flags! {
     #[derive(PartialOrd, Ord, Hash, serde::Serialize, serde::Deserialize)]
     #[cfg_attr(feature = "ts", derive(TypeDef))]
     #[repr(i64)]
+    #[serde(rename_all = "camelCase")]
     pub enum FrontendPermissions: i64 {
         ManageAccounts,
     }
