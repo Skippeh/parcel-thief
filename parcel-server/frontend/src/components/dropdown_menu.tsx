@@ -3,7 +3,7 @@ import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import styled from "styled-components";
 import * as Colors from "@radix-ui/colors";
 
-export const Root = styled(DropdownMenu.Root)``;
+export const Root = DropdownMenu.Root; // no styling necessary
 export const Trigger = styled(DropdownMenu.Trigger)`
   all: unset;
   box-sizing: border-box;

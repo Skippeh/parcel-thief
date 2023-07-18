@@ -64,17 +64,18 @@ export default createGlobalStyle`
     border-radius: 2px;
     user-select: none;
     transition: background-color 0.1s ease-out;
-
-    
   }
 
   button, input[type=submit], .button {
+    &:hover, &:focus {
+      color: inherit;
+    }
+
     &, &.primary {
       background: ${Colors.blueDark.blue8};
 
       &:hover, &:focus {
         background: ${Colors.indigoDark.indigo9};
-        color: inherit;
       }
     }
   }
