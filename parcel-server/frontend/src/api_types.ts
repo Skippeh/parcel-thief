@@ -23,3 +23,7 @@ export type LostCargoListItem={"name":string;"amount":I32;"category":string;"loc
 export type ListLostCargoResponse={"baggages":(LostCargoListItem)[];};
 export type WastedCargoListItem={"name":string;"category":string;"broken":boolean;"location":string;"creator":string;};
 export type ListWastedCargoResponse={"baggages":(WastedCargoListItem)[];};
+export type ListAccountsType=("frontend"|"game");
+export type FrontendAccountListItem={"id":I64;"gameId":(string|null);"name":string;"permissions":(FrontendPermissions)[];};
+export type GameAccountListItem={"gameId":string;"name":string;"provider":Provider;"providerId":string;"lastLogin":string;};
+export type ListAccountsResponse=({"frontendAccounts":{"accounts":(FrontendAccountListItem)[];};}|{"gameAccounts":{"accounts":(GameAccountListItem)[];};});

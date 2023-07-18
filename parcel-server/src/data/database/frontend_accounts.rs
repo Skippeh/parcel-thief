@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use diesel::prelude::*;
 use parcel_common::api_types::auth::Provider;
 
@@ -5,8 +7,8 @@ use crate::db::{
     models::{
         account::Account as GameAccount,
         frontend_account::{
-            AccountProviderConnection, FrontendAccount, NewAccountProviderConnection,
-            NewFrontendAccount,
+            AccountCredentials, AccountProviderConnection, FrontendAccount,
+            NewAccountProviderConnection, NewFrontendAccount,
         },
     },
     QueryError,
@@ -115,5 +117,31 @@ impl<'db> FrontendAccounts<'db> {
                 }
             }
         })
+    }
+
+    pub async fn get_all(&self) -> Result<Vec<FrontendAccount>, QueryError> {
+        use crate::db::schema::frontend_accounts::dsl;
+
+        let conn = &mut *self.connection.get_pg_connection().await;
+        let accounts = dsl::frontend_accounts.get_results(conn)?;
+
+        Ok(accounts)
+    }
+
+    pub async fn get_login_usernames(
+        &self,
+        account_ids: &[i64],
+    ) -> Result<HashMap<i64, String>, QueryError> {
+        use crate::db::schema::frontend_account_credentials::dsl;
+
+        let conn = &mut *self.connection.get_pg_connection().await;
+        let credentials: Vec<AccountCredentials> = dsl::frontend_account_credentials
+            .filter(dsl::account_id.eq_any(account_ids))
+            .get_results(conn)?;
+
+        Ok(credentials
+            .into_iter()
+            .map(|c| (c.account_id, c.username))
+            .collect())
     }
 }

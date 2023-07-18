@@ -28,10 +28,7 @@ impl AsRef<JwtPayload> for JwtSession {
 }
 
 impl JwtSession {
-    pub async fn has_permissions(
-        &self,
-        permissions: impl Into<FlagSet<FrontendPermissions>>,
-    ) -> bool {
+    pub fn has_permissions(&self, permissions: impl Into<FlagSet<FrontendPermissions>>) -> bool {
         let permissions = permissions.into();
 
         if permissions.is_empty() {

@@ -1,6 +1,10 @@
 use std::{fs::File, path::Path, process::Command};
 
-use parcel_common::api_types::frontend::{auth::*, baggages::*};
+use parcel_common::api_types::frontend::{
+    accounts::{ListAccountsResponse, ListAccountsType},
+    auth::*,
+    baggages::*,
+};
 use typescript_type_def::{write_definition_file, DefinitionFileOptions};
 
 fn main() {
@@ -20,6 +24,8 @@ type Api = (
     ListSharedCargoResponse,
     ListLostCargoResponse,
     ListWastedCargoResponse,
+    ListAccountsType,
+    ListAccountsResponse,
 );
 
 fn generate_ts_types() {

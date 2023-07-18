@@ -10,5 +10,6 @@ pub fn configure_endpoints(cfg: &mut ServiceConfig) {
         .service(auth::steam_callback)
         .service(baggages::list_shared_cargo)
         .service(baggages::list_lost_cargo)
-        .service(baggages::list_wasted_cargo);
+        .service(baggages::list_wasted_cargo)
+        .service(accounts::list_accounts);
 }

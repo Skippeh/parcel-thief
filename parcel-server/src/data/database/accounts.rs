@@ -92,6 +92,13 @@ impl<'db> Accounts<'db> {
         Ok(accounts)
     }
 
+    pub async fn get_all(&self) -> Result<Vec<Account>, QueryError> {
+        let conn = &mut *self.connection.get_pg_connection().await;
+        let accounts = accounts::table.get_results(conn)?;
+
+        Ok(accounts)
+    }
+
     pub async fn update_display_name_and_last_login(
         &self,
         account_id: &str,
