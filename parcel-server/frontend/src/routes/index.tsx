@@ -8,12 +8,19 @@ import ProtectedContent from "./protected_content";
 import Items from "./pages/items";
 import Accounts from "./pages/accounts";
 
+export interface RouteHandle {
+  crumb: string;
+}
+
 export default createBrowserRouter(
   [
     {
       path: "/",
       element: <Layout />,
       errorElement: <PageError />,
+      handle: {
+        crumb: "Home",
+      },
       children: [
         {
           path: "",
@@ -27,12 +34,18 @@ export default createBrowserRouter(
             {
               path: "/items",
               element: <Items />,
+              handle: {
+                crumb: "Items",
+              },
             },
           ],
         },
         {
           path: "/accounts",
           element: <ProtectedContent permissions={["manageAccounts"]} />,
+          handle: {
+            crumb: "Accounts",
+          },
           children: [
             {
               path: "",

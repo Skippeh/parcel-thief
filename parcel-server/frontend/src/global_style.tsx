@@ -23,12 +23,12 @@ export default createGlobalStyle`
     );
 
     & a {
-      color: ${Colors.indigoDark.indigo11};
+      color: ${Colors.skyDark.sky11};
       text-decoration: none;
       transition: color 0.05s ease-out;
 
       &:hover {
-        color: hsl(228 100% 85.9%);
+        color: ${Colors.skyDark.sky12};
       }
     }
   }
