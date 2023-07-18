@@ -27,6 +27,7 @@ const InnerContainer = styled.div`
     & ul {
       list-style: none;
       padding: 0;
+      font-size: 0.9rem;
 
       & li {
         display: inline-block;
