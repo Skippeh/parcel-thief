@@ -59,7 +59,11 @@ const CreateLocalAccountButton = () => {
               </Form.Field>
               <Form.Field name="passwordConfirm">
                 <Form.Label>Confirm password</Form.Label>
-                <Form.Control type="password" autoComplete="new-password" />
+                <Form.Control
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                />
                 <Form.Message match={checkPasswordConfirm}>
                   Passwords do not match
                 </Form.Message>
