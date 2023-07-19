@@ -76,6 +76,11 @@ export default createGlobalStyle`
       color: inherit;
     }
 
+    &:disabled {
+      cursor: not-allowed;
+      color: ${Colors.whiteA.whiteA9};
+    }
+
     &, &.primary {
       background: ${Colors.blueDark.blue8};
 
@@ -88,12 +93,30 @@ export default createGlobalStyle`
       }
 
       &:disabled {
-        cursor: not-allowed;
         background: ${Colors.blueDark.blue7};
-        color: ${Colors.whiteA.whiteA9};
 
         &:hover, &:focus-visible {
           background: ${Colors.blueDark.blue7};
+        }
+      }
+    }
+
+    &.secondary {
+      background: ${Colors.grayDark.gray8};
+
+      &:hover, &:focus-visible {
+        background: ${Colors.grayDark.gray9};
+      }
+
+      &:active {
+        background: ${Colors.grayDark.gray8};
+      }
+
+      &:disabled {
+        background: ${Colors.grayDark.gray7};
+
+        &:hover, &:focus-visible {
+          background: ${Colors.grayDark.gray7};
         }
       }
     }
