@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "ts")]
 use typescript_type_def::TypeDef;
+use validator::Validate;
 
 use crate::api_types::auth::Provider;
 
@@ -82,10 +83,12 @@ pub struct SetAccountPermissionsRequest {
     pub permissions: Vec<FrontendPermissions>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Validate)]
 #[cfg_attr(feature = "ts", derive(TypeDef))]
 #[serde(rename_all = "camelCase")]
 pub struct CreateCredentialsRequest {
+    #[validate(length(min = 1))]
     pub username: String,
+    #[validate(length(min = 1))]
     pub password: String,
 }

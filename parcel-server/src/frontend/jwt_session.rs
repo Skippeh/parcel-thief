@@ -9,7 +9,7 @@ use futures_util::future::LocalBoxFuture;
 use jwt::VerifyWithKey;
 use parcel_common::api_types::frontend::auth::{FrontendPermissions, JwtPayload};
 
-use crate::data::jwt::JwtSecret;
+use crate::data::jwt_secret::JwtSecret;
 
 pub struct JwtSession(JwtPayload);
 

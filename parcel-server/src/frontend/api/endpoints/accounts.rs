@@ -1,24 +1,28 @@
 use std::collections::HashMap;
 
 use actix_web::{
-    get, put,
+    get, post, put,
     web::{Data, Json, Path, Query},
 };
 use flagset::FlagSet;
 use parcel_common::api_types::frontend::{
     accounts::{
-        FrontendAccount as ApiFrontendAccount, FrontendAccountListItem, GameAccountListItem,
-        ListAccountsResponse, ListAccountsType, LocalAccount, ProviderConnection,
-        SetAccountPermissionsRequest,
+        CreateCredentialsRequest, FrontendAccount as ApiFrontendAccount, FrontendAccountListItem,
+        GameAccountListItem, ListAccountsResponse, ListAccountsType, LocalAccount,
+        ProviderConnection, SetAccountPermissionsRequest,
     },
     auth::FrontendPermissions,
 };
 use serde::Deserialize;
+use validator::ValidationErrors;
 
 use crate::{
-    data::database::{Database, DatabaseConnection},
+    data::{
+        database::{Database, DatabaseConnection},
+        hash_secret::HashSecret,
+    },
     db::models::frontend_account::FrontendAccount,
-    endpoints::EmptyResponse,
+    endpoints::{EmptyResponse, ValidatedJson},
     frontend::{
         error::ApiError,
         jwt_session::JwtSession,
@@ -184,6 +188,55 @@ pub async fn set_account_permissions(
         .await?;
 
     ApiResponse::ok(set_permissions.into_iter().collect())
+}
+
+#[post("accounts/createCredentials/{id}")]
+pub async fn create_credentials(
+    session: JwtSession,
+    database: Data<Database>,
+    request: ValidatedJson<CreateCredentialsRequest>,
+    params: Path<i64>,
+    hash_secret: Data<HashSecret>,
+) -> ApiResult<LocalAccount> {
+    let account_id = params.into_inner();
+
+    // Check that we have permission
+    if account_id != session.account_id
+        && !session.has_permissions(FrontendPermissions::ManageAccounts)
+    {
+        return Err(ApiError::Forbidden);
+    }
+
+    let conn = database.connect()?;
+    let accounts = conn.frontend_accounts();
+    let account = accounts.get_by_id(account_id).await?;
+
+    // Verify that the account exists
+    match account {
+        None => return Err(ApiError::NotFound),
+        Some(_account) => {
+            // Verify that the username isn't taken
+            if accounts.username_exists(&request.username).await? {
+                return Err(ApiError::validation_errors(&[(
+                    "username",
+                    "usernameExists",
+                )]));
+            }
+
+            let credentials = accounts
+                .create_credentials(
+                    account_id,
+                    &request.username,
+                    &request.password,
+                    hash_secret.as_ref(),
+                )
+                .await?;
+
+            ApiResponse::ok(LocalAccount {
+                username: credentials.username,
+            })
+        }
+    }
 }
 
 /// Query the names for the specified frontend accounts.

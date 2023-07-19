@@ -4,7 +4,12 @@ import * as Dialog from "../../../../../components/dialog";
 import * as Form from "../../../../../components/form";
 import { styled } from "styled-components";
 import SaveButton from "../../../../../components/save_button";
-import { ApiResponse } from "../../../../../services";
+import {
+  ApiResponse,
+  FormErrors,
+  MappedFormErrors,
+  mapFormErrors,
+} from "../../../../../services";
 import { FrontendAccount, LocalAccount } from "../../../../../api_types";
 import { createLocalAccountFor } from "../../../../../services/accounts_service";
 
@@ -26,6 +31,10 @@ const CreateLocalAccountButton = ({ account, setLocalAccount }: Props) => {
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [passwordConfirm, setPasswordConfirm] = React.useState("");
+  const [formErrors, setFormErrors] = React.useState<MappedFormErrors | null>(
+    null
+  );
+  const [error, setError] = React.useState<string | null>(null);
 
   function checkPasswordConfirm(value: string, formData: FormData) {
     return value !== formData.get("password");
@@ -41,9 +50,19 @@ const CreateLocalAccountButton = ({ account, setLocalAccount }: Props) => {
     if (response.data != null) {
       setLocalAccount(response.data);
       setOpen(false);
+    } else if (response.error != null) {
+      setFormErrors(mapFormErrors(response.formErrors));
+      setError(response.error);
     }
 
     return response;
+  }
+
+  function clearFormErrors() {
+    if (formErrors != null) {
+      setFormErrors(null);
+      setError(null);
+    }
   }
 
   return (
@@ -54,8 +73,11 @@ const CreateLocalAccountButton = ({ account, setLocalAccount }: Props) => {
           <Dialog.Overlay />
           <Dialog.Content>
             <Dialog.Title>Create local account</Dialog.Title>
-            <FormRoot autoComplete="off">
-              <Form.Field name="username">
+            <FormRoot autoComplete="off" onClearServerErrors={clearFormErrors}>
+              <Form.Field
+                name="username"
+                serverInvalid={formErrors?.username != null}
+              >
                 <Form.Label>Username</Form.Label>
                 <Form.Control
                   type="text"
@@ -64,6 +86,9 @@ const CreateLocalAccountButton = ({ account, setLocalAccount }: Props) => {
                   required
                   onChange={(e) => setUsername(e.target.value)}
                 />
+                {formErrors?.username?.usernameExists && (
+                  <Form.Message>The username is taken</Form.Message>
+                )}
               </Form.Field>
               <Form.Field name="password">
                 <Form.Label>Password</Form.Label>
@@ -71,12 +96,8 @@ const CreateLocalAccountButton = ({ account, setLocalAccount }: Props) => {
                   type="password"
                   autoComplete="new-password"
                   required
-                  minLength={8}
                   onChange={(e) => setPassword(e.target.value)}
                 />
-                <Form.Message match="tooShort">
-                  Password must be at least 8 characters long
-                </Form.Message>
               </Form.Field>
               <Form.Field name="passwordConfirm">
                 <Form.Label>Confirm password</Form.Label>

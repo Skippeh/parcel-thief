@@ -30,7 +30,7 @@ impl JwtSecret {
 
             Ok(Self(Hmac::new_from_slice(&secret_bytes)?))
         } else {
-            log::info!("Generating new jwt secret");
+            log::warn!("Generating new jwt secret");
 
             let secret_bytes = parcel_common::rand::generate_u8(32);
             let hmac =

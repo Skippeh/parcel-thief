@@ -112,7 +112,16 @@ const FrontendAccount = () => {
           </Section>
           {account.localAccount && (
             <Section title="Local account">
-              <Form.Root></Form.Root>
+              <FormRoot>
+                <Form.Field name="username">
+                  <Form.Label>Username</Form.Label>
+                  <Form.Control
+                    readOnly
+                    type="text"
+                    value={account.localAccount.username}
+                  />
+                </Form.Field>
+              </FormRoot>
             </Section>
           )}
           {account.providerConnection && (
@@ -139,10 +148,12 @@ const FrontendAccount = () => {
           )}
           <div className="buttons">
             {account.localAccount == null && (
-              <CreateLocalAccountButton
-                account={account}
-                setLocalAccount={updateLocalAccount}
-              />
+              <>
+                <CreateLocalAccountButton
+                  account={account}
+                  setLocalAccount={updateLocalAccount}
+                />
+              </>
             )}
           </div>
         </>

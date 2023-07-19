@@ -1,7 +1,41 @@
+export interface FieldError {
+  code: string;
+}
+
+export type FormErrors = {
+  [key: string]: FieldError[];
+};
+
+export type MappedFormErrors = {
+  [key: string]: {
+    [key: string]: boolean;
+  };
+};
+
+export function mapFormErrors(
+  errors: FormErrors | null | undefined
+): MappedFormErrors {
+  let result = {};
+
+  if (errors == null) {
+    return result;
+  }
+
+  Object.keys(errors).forEach((key) => {
+    result[key] = {};
+    errors[key].forEach((error) => {
+      result[key][error.code] = true;
+    });
+  });
+
+  return result;
+}
+
 export interface ApiResponse<T> {
   data: T | null;
   statusCode: number;
   error: string | null;
+  formErrors: FormErrors | null;
 }
 
 let authToken: string | null = null;

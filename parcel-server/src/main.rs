@@ -23,7 +23,8 @@ use anyhow::{Context, Result};
 use clap::Parser;
 use data::{
     database::Database,
-    jwt::JwtSecret,
+    hash_secret::HashSecret,
+    jwt_secret::JwtSecret,
     platforms::{epic::Epic, steam::Steam},
 };
 use diesel::{pg::Pg, Connection, PgConnection};
@@ -154,6 +155,11 @@ async fn main() -> Result<()> {
             .await
             .context("Failed to load jwt secret")?,
     );
+    let hash_secret = web::Data::new(
+        HashSecret::load_or_generate_secret()
+            .await
+            .context("Failed to load hash secret")?,
+    );
     let game_data = web::Data::new(
         load_gamedata_from_file(&args.game_data_path).context("Could not load game data")?,
     );
@@ -184,6 +190,7 @@ async fn main() -> Result<()> {
             ))
             .app_data(frontend_auth_cache.clone())
             .app_data(jwt_secret.clone())
+            .app_data(hash_secret.clone())
             .app_data(game_data.clone())
             .service(
                 actix_web::web::scope("/ds/e")

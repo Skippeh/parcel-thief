@@ -1,18 +1,21 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, hash};
 
-use diesel::prelude::*;
+use diesel::{dsl::exists, prelude::*, select};
 use flagset::FlagSet;
 use parcel_common::api_types::{auth::Provider, frontend::auth::FrontendPermissions};
 
-use crate::db::{
-    models::{
-        account::Account as GameAccount,
-        frontend_account::{
-            AccountCredentials, AccountProviderConnection, FrontendAccount,
-            NewAccountProviderConnection, NewFrontendAccount,
+use crate::{
+    data::hash_secret::HashSecret,
+    db::{
+        models::{
+            account::Account as GameAccount,
+            frontend_account::{
+                AccountCredentials, AccountProviderConnection, FrontendAccount,
+                NewAccountCredentials, NewAccountProviderConnection, NewFrontendAccount,
+            },
         },
+        QueryError,
     },
-    QueryError,
 };
 
 use super::DatabaseConnection;
@@ -208,5 +211,45 @@ impl<'db> FrontendAccounts<'db> {
             .get_result(conn)?;
 
         Ok(FlagSet::new_truncated(result))
+    }
+
+    pub async fn username_exists(&self, username: &str) -> Result<bool, QueryError> {
+        use crate::db::schema::frontend_account_credentials::dsl;
+
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        Ok(select(exists(
+            dsl::frontend_account_credentials.filter(dsl::username.eq(username)),
+        ))
+        .get_result(conn)?)
+    }
+
+    /// Adds credentials to the frontend account with the given id.
+    ///
+    /// The password is hashed with the secret key and also with a randomly generated salt which is stored with the credentials.
+    pub async fn create_credentials(
+        &self,
+        account_id: i64,
+        username: &str,
+        password: &str,
+        hash_secret: &HashSecret,
+    ) -> Result<AccountCredentials, QueryError> {
+        use crate::db::schema::frontend_account_credentials::dsl;
+
+        let conn = &mut *self.connection.get_pg_connection().await;
+        let salt = parcel_common::rand::generate_u8(64);
+        let password_hash = hex::encode(hash_secret.hash_string(password, &salt));
+
+        let credentials = diesel::insert_into(dsl::frontend_account_credentials)
+            .values(&NewAccountCredentials {
+                account_id,
+                username,
+                password: &password_hash,
+                salt,
+                updated_at: None,
+            })
+            .get_result(conn)?;
+
+        Ok(credentials)
     }
 }

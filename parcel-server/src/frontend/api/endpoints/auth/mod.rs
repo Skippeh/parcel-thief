@@ -19,7 +19,7 @@ use steam_auth::{Redirector, Verifier};
 use crate::{
     data::{
         database::{frontend_accounts::GetOrCreateError, Database},
-        jwt::JwtSecret,
+        jwt_secret::JwtSecret,
         memory_cache::MemoryCache,
         platforms::steam::Steam,
     },
