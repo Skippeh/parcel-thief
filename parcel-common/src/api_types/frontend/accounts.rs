@@ -81,3 +81,11 @@ pub struct FrontendAccount {
 pub struct SetAccountPermissionsRequest {
     pub permissions: Vec<FrontendPermissions>,
 }
+
+#[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
+#[serde(rename_all = "camelCase")]
+pub struct CreateCredentialsRequest {
+    pub username: String,
+    pub password: String,
+}

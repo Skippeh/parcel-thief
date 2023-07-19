@@ -3,7 +3,10 @@ import InfoText from "../../../../../components/info_text";
 import * as Dialog from "../../../../../components/dialog";
 import * as Form from "../../../../../components/form";
 import { styled } from "styled-components";
-import PasswordInput from "../../../../../components/password_input";
+import SaveButton from "../../../../../components/save_button";
+import { ApiResponse } from "../../../../../services";
+import { FrontendAccount, LocalAccount } from "../../../../../api_types";
+import { createLocalAccountFor } from "../../../../../services/accounts_service";
 
 const FormSubmit = styled(Form.Submit)`
   margin-top: 0.3rem;
@@ -13,18 +16,34 @@ const FormRoot = styled(Form.Root)`
   width: 300px;
 `;
 
-const CreateLocalAccountButton = () => {
+interface Props {
+  account: FrontendAccount;
+  setLocalAccount: (localAccount: LocalAccount) => void;
+}
+
+const CreateLocalAccountButton = ({ account, setLocalAccount }: Props) => {
   const [open, setOpen] = React.useState(false);
-
-  function onSubmit(ev: React.FormEvent<HTMLFormElement>) {
-    ev.preventDefault();
-
-    const formData = new FormData(ev.currentTarget);
-    console.log(formData);
-  }
+  const [username, setUsername] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [passwordConfirm, setPasswordConfirm] = React.useState("");
 
   function checkPasswordConfirm(value: string, formData: FormData) {
     return value !== formData.get("password");
+  }
+
+  async function onCreate(): Promise<ApiResponse<LocalAccount>> {
+    const response = await createLocalAccountFor(
+      account.id,
+      username,
+      password
+    );
+
+    if (response.data != null) {
+      setLocalAccount(response.data);
+      setOpen(false);
+    }
+
+    return response;
   }
 
   return (
@@ -35,7 +54,7 @@ const CreateLocalAccountButton = () => {
           <Dialog.Overlay />
           <Dialog.Content>
             <Dialog.Title>Create local account</Dialog.Title>
-            <FormRoot onSubmit={onSubmit}>
+            <FormRoot autoComplete="off">
               <Form.Field name="username">
                 <Form.Label>Username</Form.Label>
                 <Form.Control
@@ -43,6 +62,7 @@ const CreateLocalAccountButton = () => {
                   name="username"
                   autoComplete="off"
                   required
+                  onChange={(e) => setUsername(e.target.value)}
                 />
               </Form.Field>
               <Form.Field name="password">
@@ -52,6 +72,7 @@ const CreateLocalAccountButton = () => {
                   autoComplete="new-password"
                   required
                   minLength={8}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
                 <Form.Message match="tooShort">
                   Password must be at least 8 characters long
@@ -63,13 +84,16 @@ const CreateLocalAccountButton = () => {
                   type="password"
                   autoComplete="new-password"
                   required
+                  onChange={(e) => setPasswordConfirm(e.target.value)}
                 />
                 <Form.Message match={checkPasswordConfirm}>
                   Passwords do not match
                 </Form.Message>
               </Form.Field>
               <Dialog.Buttons>
-                <FormSubmit>Create</FormSubmit>
+                <SaveButton isForm saveAction={onCreate}>
+                  Create
+                </SaveButton>
                 <Dialog.Close className="secondary">Cancel</Dialog.Close>
               </Dialog.Buttons>
             </FormRoot>

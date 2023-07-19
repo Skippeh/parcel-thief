@@ -18,15 +18,6 @@ const permissionNames = Object.fromEntries(
   ])
 );
 
-const FormRoot = styled(Form.Root)`
-  /*display: flex;
-  flex-wrap: wrap;
-  max-width: 300px;
-  //justify-content: space-between;
-  gap: 0.5rem;
-  row-gap: 0.1rem;*/
-`;
-
 const Fields = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -101,16 +92,12 @@ const PermissionsEditor = ({
     return response;
   }
 
-  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-  }
-
   React.useEffect(() => {
     setNewPermissions(permissions);
   }, [permissions]);
 
   return (
-    <FormRoot onSubmit={onSubmit}>
+    <Form.Root>
       <Fields>
         {allPermissions.map((permission) => (
           <FormField name={permission} key={permission}>
@@ -124,9 +111,11 @@ const PermissionsEditor = ({
           </FormField>
         ))}
       </Fields>
-      <SaveButton saveAction={onSave}>Save</SaveButton>
+      <SaveButton saveAction={onSave} isForm>
+        Save
+      </SaveButton>
       {error != null && <ErrorText className="error">{error}</ErrorText>}
-    </FormRoot>
+    </Form.Root>
   );
 };
 

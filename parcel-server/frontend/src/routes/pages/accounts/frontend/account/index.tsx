@@ -1,7 +1,11 @@
 import * as React from "react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { FrontendAccount, FrontendPermissions } from "../../../../../api_types";
+import {
+  FrontendAccount,
+  FrontendPermissions,
+  LocalAccount,
+} from "../../../../../api_types";
 import { getFrontendAccount } from "../../../../../services/accounts_service";
 import * as Form from "../../../../../components/form";
 import { styled } from "styled-components";
@@ -70,10 +74,7 @@ const FrontendAccount = () => {
     })();
   });
 
-  function updatePermissions(
-    accountId: number,
-    permissions: FrontendPermissions[]
-  ) {
+  function updatePermissions(permissions: FrontendPermissions[]) {
     if (account == null) {
       return;
     }
@@ -81,6 +82,17 @@ const FrontendAccount = () => {
     setAccount({
       ...account,
       permissions,
+    });
+  }
+
+  function updateLocalAccount(localAccount: LocalAccount) {
+    if (account == null) {
+      return;
+    }
+
+    setAccount({
+      ...account,
+      localAccount,
     });
   }
 
@@ -95,9 +107,7 @@ const FrontendAccount = () => {
             <PermissionsEditor
               permissions={account.permissions}
               accountId={account.id}
-              updatePermissions={(permissions) =>
-                updatePermissions(account.id, permissions)
-              }
+              updatePermissions={updatePermissions}
             />
           </Section>
           {account.localAccount && (
@@ -128,7 +138,12 @@ const FrontendAccount = () => {
             </Section>
           )}
           <div className="buttons">
-            {account.localAccount == null && <CreateLocalAccountButton />}
+            {account.localAccount == null && (
+              <CreateLocalAccountButton
+                account={account}
+                setLocalAccount={updateLocalAccount}
+              />
+            )}
           </div>
         </>
       )}

@@ -1,9 +1,11 @@
 import { ApiResponse, callApi } from ".";
 import {
+  CreateCredentialsRequest,
   FrontendAccount,
   FrontendPermissions,
   ListAccountsResponse,
   ListAccountsType,
+  LocalAccount,
   SetAccountPermissionsRequest,
 } from "../api_types";
 
@@ -43,6 +45,23 @@ export function setAccountPermissions(
   return callApi(
     `accounts/frontend/${accountId}/permissions`,
     "PUT",
+    requestData
+  );
+}
+
+export function createLocalAccountFor(
+  accountId: number,
+  username: string,
+  password: string
+): Promise<ApiResponse<LocalAccount>> {
+  const requestData: CreateCredentialsRequest = {
+    username,
+    password,
+  };
+
+  return callApi(
+    `accounts/createCredentials/${accountId}`,
+    "POST",
     requestData
   );
 }
