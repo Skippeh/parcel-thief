@@ -5,9 +5,8 @@ import { FrontendAccount, FrontendPermissions } from "../../../../../api_types";
 import { getFrontendAccount } from "../../../../../services/accounts_service";
 import * as Form from "../../../../../components/form";
 import { styled } from "styled-components";
-import { Info } from "@phosphor-icons/react";
-import InfoText from "../../../../../components/info_text";
 import PermissionsEditor from "./permissions_editor";
+import CreateLocalAccountButton from "./create_local_account_button";
 
 const FormRoot = styled(Form.Root)`
   max-width: 350px;
@@ -129,21 +128,7 @@ const FrontendAccount = () => {
             </Section>
           )}
           <div className="buttons">
-            {account.localAccount == null && (
-              <>
-                <button>Create local account</button>
-                <InfoText title="Creating a local account">
-                  <p>
-                    Creating a local account allows a player to log in to the
-                    frontend without needing to go through a provider log in.
-                  </p>
-                  <p>
-                    At the moment this is required for players using Epic Games
-                    Launcher who want to log in to the frontend.
-                  </p>
-                </InfoText>
-              </>
-            )}
+            {account.localAccount == null && <CreateLocalAccountButton />}
           </div>
         </>
       )}
