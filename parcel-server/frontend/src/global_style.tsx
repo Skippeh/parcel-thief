@@ -52,6 +52,11 @@ export default createGlobalStyle`
     &:focus {
       outline: 1px solid ${Colors.indigoDark.indigo11};
     }
+
+    &:read-only {
+      cursor: not-allowed;
+      color: ${Colors.whiteA.whiteA10};
+    }
   }
 
   button, input[type=submit], .button {
