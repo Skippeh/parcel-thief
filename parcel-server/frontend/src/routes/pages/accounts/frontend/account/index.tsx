@@ -38,6 +38,10 @@ const Section = ({
 const Wrapper = styled.div`
   & .buttons {
     margin-top: 1.5rem;
+
+    & > *:first-child {
+      margin-left: 0;
+    }
   }
 `;
 
