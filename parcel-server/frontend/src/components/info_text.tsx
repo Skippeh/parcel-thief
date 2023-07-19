@@ -29,13 +29,9 @@ const InfoText = ({
   children,
   title,
 }: React.PropsWithChildren<{ title?: string }>) => {
-  const showInfo = () => {
-    console.log("info");
-  };
-
   return (
     <Dialog.Root>
-      <DialogTrigger tabIndex={0} onClick={showInfo}>
+      <DialogTrigger tabIndex={0}>
         <Info weight="fill" />
         <span>More info</span>
       </DialogTrigger>
