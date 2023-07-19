@@ -6,6 +6,7 @@ import styled, { keyframes } from "styled-components";
 export const Root = Dialog.Root;
 export const Trigger = Dialog.Trigger;
 export const Portal = Dialog.Portal;
+export const Close = Dialog.Close;
 
 const overlayShow = keyframes`
   0% {
@@ -50,12 +51,14 @@ export const Content = styled(Dialog.Content)`
   border-radius: 4px;
 `;
 
-export const Close = styled(Dialog.Close)`
-  display: block;
-  margin: 0;
-  margin-top: 1rem;
-`;
-
 export const Title = styled(Dialog.Title)`
   margin-top: 0;
+`;
+
+export const Buttons = styled.div`
+  margin-top: 1rem;
+
+  & button:first-child {
+    margin-left: 0;
+  }
 `;

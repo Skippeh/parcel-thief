@@ -40,7 +40,9 @@ const InfoText = ({
         <Dialog.Content>
           <Dialog.Title>{title || "More info"}</Dialog.Title>
           {children}
-          <Dialog.Close>Understood</Dialog.Close>
+          <Dialog.Buttons>
+            <Dialog.Close>Understood</Dialog.Close>
+          </Dialog.Buttons>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
