@@ -37,13 +37,13 @@ export async function callApi<T>(
       headers,
     });
 
-    apiResponse = response.json() as unknown as ApiResponse<T>;
+    apiResponse = (await response.json()) as ApiResponse<T>;
   } catch (err) {
     console.error("Api request failed:", err);
     apiResponse = {
       data: null,
       statusCode: -1,
-      error: "Could not send api request",
+      error: "Could not send api request or read response",
     };
   }
 
