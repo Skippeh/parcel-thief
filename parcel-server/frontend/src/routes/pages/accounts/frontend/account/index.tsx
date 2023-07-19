@@ -11,6 +11,7 @@ import * as Form from "../../../../../components/form";
 import { styled } from "styled-components";
 import PermissionsEditor from "./permissions_editor";
 import CreateLocalAccountButton from "./create_local_account_button";
+import ResetPasswordButton from "./reset_password_button";
 
 const FormRoot = styled(Form.Root)`
   max-width: 350px;
@@ -147,6 +148,9 @@ const FrontendAccount = () => {
             </Section>
           )}
           <div className="buttons">
+            {account.localAccount != null && (
+              <ResetPasswordButton account={account} />
+            )}
             {account.localAccount == null && (
               <>
                 <CreateLocalAccountButton
