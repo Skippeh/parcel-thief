@@ -1,14 +1,15 @@
 use std::collections::HashMap;
 
 use actix_web::{
-    get,
-    web::{Data, Query},
+    get, put,
+    web::{Data, Json, Path, Query},
 };
 use flagset::FlagSet;
 use parcel_common::api_types::frontend::{
     accounts::{
         FrontendAccount as ApiFrontendAccount, FrontendAccountListItem, GameAccountListItem,
         ListAccountsResponse, ListAccountsType, LocalAccount, ProviderConnection,
+        SetAccountPermissionsRequest,
     },
     auth::FrontendPermissions,
 };
@@ -17,6 +18,7 @@ use serde::Deserialize;
 use crate::{
     data::database::{Database, DatabaseConnection},
     db::models::frontend_account::FrontendAccount,
+    endpoints::EmptyResponse,
     frontend::{
         error::ApiError,
         jwt_session::JwtSession,
@@ -96,7 +98,7 @@ pub async fn list_accounts(
 pub async fn get_frontend_account(
     session: JwtSession,
     database: Data<Database>,
-    params: actix_web::web::Path<i64>,
+    params: Path<i64>,
 ) -> ApiResult<ApiFrontendAccount> {
     let account_id = params.into_inner();
 
@@ -141,6 +143,47 @@ pub async fn get_frontend_account(
             })
         }
     }
+}
+
+#[put("accounts/frontend/{id}/permissions")]
+pub async fn set_account_permissions(
+    session: JwtSession,
+    params: Path<i64>,
+    request: Json<SetAccountPermissionsRequest>,
+    database: Data<Database>,
+) -> ApiResult<Vec<FrontendPermissions>> {
+    // Check that we have permission
+    if !session.has_permissions(FrontendPermissions::ManageAccounts) {
+        return Err(ApiError::Forbidden);
+    }
+
+    let account_id = params.into_inner();
+
+    // Check that we're not modifying our own permissions
+    if account_id == session.account_id
+        && !request
+            .permissions
+            .contains(&FrontendPermissions::ManageAccounts)
+    {
+        return Err(ApiError::BadRequest(anyhow::anyhow!(
+            "You cannot remove the 'Manage accounts' permission from your own account"
+        )));
+    }
+
+    let conn = database.connect()?;
+    let accounts = conn.frontend_accounts();
+
+    let mut new_permissions = FlagSet::default();
+
+    for permission in &request.permissions {
+        new_permissions |= *permission;
+    }
+
+    let set_permissions = accounts
+        .set_permissions(account_id, new_permissions)
+        .await?;
+
+    ApiResponse::ok(set_permissions.into_iter().collect())
 }
 
 /// Query the names for the specified frontend accounts.

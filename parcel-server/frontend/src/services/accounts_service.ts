@@ -4,6 +4,7 @@ import {
   FrontendPermissions,
   ListAccountsResponse,
   ListAccountsType,
+  SetAccountPermissionsRequest,
 } from "../api_types";
 
 export async function getAccounts<
@@ -29,4 +30,19 @@ export function permissionToReadableString(
     default:
       return permission ?? "Unknown";
   }
+}
+
+export function setAccountPermissions(
+  accountId: number,
+  permissions: FrontendPermissions[]
+): Promise<ApiResponse<FrontendPermissions[]>> {
+  const requestData: SetAccountPermissionsRequest = {
+    permissions,
+  };
+
+  return callApi(
+    `accounts/frontend/${accountId}/permissions`,
+    "PUT",
+    requestData
+  );
 }

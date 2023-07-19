@@ -30,3 +30,4 @@ export type ListAccountsResponse=(({"type":"frontend";}&{"accounts":(FrontendAcc
 export type ProviderConnection={"provider":Provider;"providerId":string;"name":(string|null);};
 export type LocalAccount={"username":string;};
 export type FrontendAccount={"id":I64;"gameId":(string|null);"permissions":(FrontendPermissions)[];"providerConnection":(ProviderConnection|null);"localAccount":(LocalAccount|null);};
+export type SetAccountPermissionsRequest={"permissions":(FrontendPermissions)[];};

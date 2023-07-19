@@ -74,3 +74,10 @@ pub struct FrontendAccount {
     pub provider_connection: Option<ProviderConnection>,
     pub local_account: Option<LocalAccount>,
 }
+
+#[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
+#[serde(rename_all = "camelCase")]
+pub struct SetAccountPermissionsRequest {
+    pub permissions: Vec<FrontendPermissions>,
+}

@@ -5,9 +5,9 @@ use crate::db::QueryError;
 
 #[derive(Debug, thiserror::Error)]
 pub enum ApiError {
-    #[error("Internal error: {0}")]
+    #[error("{0}")]
     Internal(anyhow::Error),
-    #[error("Bad request: {0}")]
+    #[error("{0}")]
     BadRequest(anyhow::Error),
     #[error("You lack the permissions to access to this resource")]
     Forbidden,

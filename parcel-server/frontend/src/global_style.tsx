@@ -14,6 +14,7 @@ export default createGlobalStyle`
 
   body {
     font-family: "Open Sans";
+    font-size: 0.9rem;
     color: ${Colors.whiteA.whiteA12};
     background: rgb(2, 0, 36);
     background: radial-gradient(
@@ -55,6 +56,7 @@ export default createGlobalStyle`
 
   button, input[type=submit], .button {
     all: unset;
+    font-size: 0.9rem;
     display: inline-block;
     box-sizing: border-box;
     margin: 0.25rem;
@@ -64,9 +66,7 @@ export default createGlobalStyle`
     border-radius: 2px;
     user-select: none;
     transition: background-color 0.1s ease-out;
-  }
 
-  button, input[type=submit], .button {
     &:hover, &:focus {
       color: inherit;
     }
@@ -74,9 +74,33 @@ export default createGlobalStyle`
     &, &.primary {
       background: ${Colors.blueDark.blue8};
 
-      &:hover, &:focus {
+      &:hover, &:focus-visible {
         background: ${Colors.indigoDark.indigo9};
       }
+
+      &:active {
+        background: ${Colors.indigoDark.indigo8};
+      }
+
+      &:disabled {
+        cursor: not-allowed;
+        background: ${Colors.blueDark.blue7};
+        color: ${Colors.whiteA.whiteA9};
+
+        &:hover, &:focus-visible {
+          background: ${Colors.blueDark.blue7};
+        }
+      }
+    }
+  }
+
+  .spin {
+    animation: spin 1.5s linear infinite;
+  }
+
+  span {
+    &.error {
+      color: ${Colors.redDark.red9};
     }
   }
 `;

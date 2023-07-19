@@ -36,6 +36,7 @@ use std::fmt::Display;
 use actix_http::{body::BoxBody, StatusCode};
 use actix_web::{web::ServiceConfig, HttpResponse, Responder};
 use diesel::ConnectionError;
+use serde::{Serialize, Serializer};
 
 pub type ValidatedJson<T> = actix_web_validator::Json<T>;
 
@@ -125,6 +126,16 @@ impl CommonResponseError for InternalError {
 
 /// Returns an empty body with StatusCode::OK
 pub struct EmptyResponse;
+
+// Serialize as null/none
+impl Serialize for EmptyResponse {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_unit()
+    }
+}
 
 impl Responder for EmptyResponse {
     type Body = BoxBody;

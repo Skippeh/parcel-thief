@@ -22,4 +22,6 @@ export const Label = styled(Form.Label)`
 `;
 export const Message = styled(Form.Message)``;
 export const ValidityState = styled(Form.ValidityState)``;
-export const Submit = styled(Form.Submit)``;
+export const Submit = styled(Form.Submit)`
+  margin-top: 1.5rem;
+`;

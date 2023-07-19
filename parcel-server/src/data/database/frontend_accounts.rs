@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
 use diesel::prelude::*;
-use parcel_common::api_types::auth::Provider;
+use flagset::FlagSet;
+use parcel_common::api_types::{auth::Provider, frontend::auth::FrontendPermissions};
 
 use crate::db::{
     models::{
@@ -188,5 +189,24 @@ impl<'db> FrontendAccounts<'db> {
             .into_iter()
             .map(|c| (c.account_id, c.username))
             .collect())
+    }
+
+    pub async fn set_permissions(
+        &self,
+        account_id: i64,
+        permissions: impl Into<FlagSet<FrontendPermissions>>,
+    ) -> Result<FlagSet<FrontendPermissions>, QueryError> {
+        use crate::db::schema::frontend_accounts::dsl;
+
+        let conn = &mut *self.connection.get_pg_connection().await;
+        let bits = permissions.into().bits();
+
+        let result: i64 = diesel::update(dsl::frontend_accounts)
+            .filter(dsl::id.eq(account_id))
+            .set(dsl::permissions.eq(bits))
+            .returning(dsl::permissions)
+            .get_result(conn)?;
+
+        Ok(FlagSet::new_truncated(result))
     }
 }
