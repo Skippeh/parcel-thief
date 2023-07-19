@@ -112,7 +112,7 @@ const FrontendAccount = () => {
             />
           </Section>
           {account.localAccount && (
-            <Section title="Local account">
+            <Section title="Local Account">
               <FormRoot>
                 <Form.Field name="username">
                   <Form.Label>Username</Form.Label>
