@@ -9,6 +9,10 @@ import { Info } from "@phosphor-icons/react";
 import InfoText from "../../../../../components/info_text";
 import PermissionsEditor from "./permissions_editor";
 
+const FormRoot = styled(Form.Root)`
+  max-width: 350px;
+`;
+
 const SectionWrapper = styled.div`
   &:first-child h2 {
     margin-top: 0;
@@ -30,6 +34,12 @@ const Section = ({
     </SectionWrapper>
   );
 };
+
+const Wrapper = styled.div`
+  & .buttons {
+    margin-top: 1.5rem;
+  }
+`;
 
 const FrontendAccount = () => {
   const { id } = useParams();
@@ -72,7 +82,7 @@ const FrontendAccount = () => {
   }
 
   return (
-    <>
+    <Wrapper>
       {loadError != null && <p>{loadError}</p>}
       {account === null && loadError == null && <p>Account not found</p>}
       {account === undefined && <p>Loading...</p>}
@@ -93,8 +103,25 @@ const FrontendAccount = () => {
             </Section>
           )}
           {account.providerConnection && (
-            <Section title="Provider">
-              <Form.Root></Form.Root>
+            <Section title="Provider Connection">
+              <FormRoot>
+                <Form.Field name="providerName">
+                  <Form.Label>Type</Form.Label>
+                  <Form.Control
+                    readOnly
+                    type="text"
+                    value={account.providerConnection.provider}
+                  />
+                </Form.Field>
+                <Form.Field name="providerId">
+                  <Form.Label>Identity</Form.Label>
+                  <Form.Control
+                    readOnly
+                    type="text"
+                    value={account.providerConnection.providerId}
+                  />
+                </Form.Field>
+              </FormRoot>
             </Section>
           )}
           <div className="buttons">
@@ -116,7 +143,7 @@ const FrontendAccount = () => {
           </div>
         </>
       )}
-    </>
+    </Wrapper>
   );
 };
 
