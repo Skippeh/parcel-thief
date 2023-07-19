@@ -139,7 +139,7 @@ const FrontendAccount = () => {
                   </p>
                   <p>
                     At the moment this is required for players using Epic Games
-                    Launcher.
+                    Launcher who want to log in to the frontend.
                   </p>
                 </InfoText>
               </>
