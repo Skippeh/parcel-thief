@@ -34,3 +34,4 @@ export type LocalAccount={"username":string;};
 export type FrontendAccount={"id":I64;"gameId":(string|null);"permissions":(FrontendPermissions)[];"providerConnection":(ProviderConnection|null);"localAccount":(LocalAccount|null);};
 export type SetAccountPermissionsRequest={"permissions":(FrontendPermissions)[];};
 export type CreateCredentialsRequest={"username":string;"password":string;};
+export type ResetPasswordRequest={"currentPassword":(string|null);"newPassword":string;};

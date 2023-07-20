@@ -12,6 +12,7 @@ import { styled } from "styled-components";
 import PermissionsEditor from "./permissions_editor";
 import CreateLocalAccountButton from "./create_local_account_button";
 import ResetPasswordButton from "./reset_password_button";
+import useSession from "../../../../../hooks/use_session";
 
 const FormRoot = styled(Form.Root)`
   max-width: 350px;
@@ -55,6 +56,8 @@ const FrontendAccount = () => {
   const [account, setAccount] = useState<FrontendAccount | null | undefined>(
     undefined
   );
+  const { getJwtPayload } = useSession();
+  const { accountId: sessionAccountId } = getJwtPayload()!; // payload will never be null at this point
 
   React.useEffect(() => {
     (async () => {
@@ -149,7 +152,12 @@ const FrontendAccount = () => {
           )}
           <div className="buttons">
             {account.localAccount != null && (
-              <ResetPasswordButton account={account} />
+              <ResetPasswordButton
+                account={account}
+                // always prompt current password if user is trying to reset their own password
+                // server side also checks that the user has permission to reset other account's passwords if relevant
+                promptCurrentPassword={account.id == sessionAccountId}
+              />
             )}
             {account.localAccount == null && (
               <>

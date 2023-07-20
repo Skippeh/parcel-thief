@@ -6,6 +6,7 @@ import {
   ListAccountsResponse,
   ListAccountsType,
   LocalAccount,
+  ResetPasswordRequest,
   SetAccountPermissionsRequest,
 } from "../api_types";
 
@@ -64,4 +65,17 @@ export function createLocalAccountFor(
     "POST",
     requestData
   );
+}
+
+export function resetAccountPassword(
+  accountId: number,
+  currentPassword: string | null,
+  newPassword: string
+): Promise<ApiResponse<void>> {
+  const requestData: ResetPasswordRequest = {
+    currentPassword,
+    newPassword,
+  };
+
+  return callApi(`accounts/resetPassword/${accountId}`, "POST", requestData);
 }

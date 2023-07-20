@@ -1,5 +1,11 @@
 import { useContext } from "react";
 import { SessionContext, User } from "../context/session_context";
+import { JwtPayload } from "../api_types";
+
+function decodeJwtPayload(authToken: string): JwtPayload {
+  let b64Payload = authToken.split(".")[1];
+  return JSON.parse(atob(b64Payload));
+}
 
 const useSession = () => {
   const session = useContext(SessionContext);
@@ -22,8 +28,23 @@ const useSession = () => {
       },
       authToken,
     });
+  const getJwtPayload = (): JwtPayload | null => {
+    if (session.authToken == null) {
+      return null;
+    }
 
-  return { getUser, getAuthToken, isLoggedIn, logout, setSession };
+    const jwtPayload = decodeJwtPayload(session.authToken);
+    return jwtPayload;
+  };
+
+  return {
+    getUser,
+    getAuthToken,
+    isLoggedIn,
+    logout,
+    setSession,
+    getJwtPayload,
+  };
 };
 
 export default useSession;

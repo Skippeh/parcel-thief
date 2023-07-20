@@ -92,3 +92,11 @@ pub struct CreateCredentialsRequest {
     #[validate(length(min = 1))]
     pub password: String,
 }
+
+#[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
+#[serde(rename_all = "camelCase")]
+pub struct ResetPasswordRequest {
+    pub current_password: Option<String>,
+    pub new_password: String,
+}

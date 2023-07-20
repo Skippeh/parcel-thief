@@ -7,7 +7,7 @@ use parcel_common::api_types::frontend::{
     accounts::{
         CreateCredentialsRequest, FrontendAccount as ApiFrontendAccount, FrontendAccountListItem,
         GameAccountListItem, ListAccountsResponse, ListAccountsType, LocalAccount,
-        ProviderConnection, SetAccountPermissionsRequest,
+        ProviderConnection, ResetPasswordRequest, SetAccountPermissionsRequest,
     },
     auth::FrontendPermissions,
 };
@@ -15,7 +15,7 @@ use serde::Deserialize;
 
 use crate::{
     data::{database::Database, hash_secret::HashSecret},
-    endpoints::ValidatedJson,
+    endpoints::{EmptyResponse, ValidatedJson},
     frontend::{
         error::ApiError,
         jwt_session::JwtSession,
@@ -232,4 +232,17 @@ pub async fn create_credentials(
             })
         }
     }
+}
+
+#[post("accounts/resetPassword/{id}")]
+pub async fn reset_password(
+    session: JwtSession,
+    params: Path<i64>,
+    request: Json<ResetPasswordRequest>,
+    database: Data<Database>,
+    hash_secret: Data<HashSecret>,
+) -> ApiResult<EmptyResponse> {
+    let account_id = params.into_inner();
+
+    Err(anyhow::anyhow!("Not implemented").into())
 }
