@@ -6,7 +6,7 @@ use crate::db::schema::{
     frontend_account_credentials, frontend_account_provider_connections, frontend_accounts,
 };
 
-#[derive(Queryable)]
+#[derive(Debug, Queryable)]
 pub struct FrontendAccount {
     pub id: i64,
     pub game_account_id: Option<String>,
@@ -15,7 +15,7 @@ pub struct FrontendAccount {
     pub permissions: i64,
 }
 
-#[derive(Insertable)]
+#[derive(Debug, Insertable)]
 #[diesel(table_name = frontend_accounts)]
 pub struct NewFrontendAccount<'a> {
     pub game_account_id: Option<&'a str>,
@@ -23,7 +23,7 @@ pub struct NewFrontendAccount<'a> {
     pub permissions: i64,
 }
 
-#[derive(Queryable)]
+#[derive(Debug, Queryable)]
 pub struct AccountCredentials {
     pub account_id: i64,
     pub username: String,
@@ -32,7 +32,7 @@ pub struct AccountCredentials {
     pub updated_at: NaiveDateTime,
 }
 
-#[derive(Insertable)]
+#[derive(Debug, Insertable)]
 #[diesel(table_name = frontend_account_credentials)]
 pub struct NewAccountCredentials<'a> {
     pub account_id: i64,
@@ -42,7 +42,7 @@ pub struct NewAccountCredentials<'a> {
     pub updated_at: Option<NaiveDateTime>,
 }
 
-#[derive(Queryable)]
+#[derive(Debug, Queryable)]
 pub struct AccountProviderConnection {
     pub account_id: i64,
     pub provider: Provider,
@@ -50,7 +50,7 @@ pub struct AccountProviderConnection {
     pub created_at: NaiveDateTime,
 }
 
-#[derive(Insertable)]
+#[derive(Debug, Insertable)]
 #[diesel(table_name = frontend_account_provider_connections)]
 pub struct NewAccountProviderConnection<'a> {
     pub account_id: i64,
