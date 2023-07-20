@@ -78,6 +78,7 @@ export async function callApi<T>(
       data: null,
       statusCode: -1,
       error: "Could not send api request or read response",
+      formErrors: null,
     };
   }
 
