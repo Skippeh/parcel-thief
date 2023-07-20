@@ -22,5 +22,6 @@ CREATE TABLE frontend_account_provider_connections (
     account_id BIGINT PRIMARY KEY REFERENCES frontend_accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
     provider INTEGER NOT NULL,
     provider_id VARCHAR NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (provider, provider_id)
 );
