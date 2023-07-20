@@ -20,6 +20,7 @@ fn main() {
 
 type Api = (
     AuthRequest,
+    LocalAuthRequest,
     InitAuthResponse,
     CheckAuthRequest,
     CheckAuthResponse,

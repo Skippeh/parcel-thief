@@ -22,6 +22,25 @@ pub struct InitAuthResponse {
 #[derive(Debug, serde::Deserialize)]
 #[cfg_attr(feature = "ts", derive(TypeDef))]
 #[serde(rename_all = "camelCase")]
+pub struct LocalAuthRequest {
+    pub username: String,
+    pub password: String,
+}
+
+#[derive(Debug, Clone, serde::Serialize)]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
+#[serde(rename_all = "camelCase")]
+pub struct AuthAccountInfo {
+    pub name: String,
+    pub avatar_url: Option<String>,
+    pub auth_token: String,
+    pub game_account_id: Option<String>,
+    pub permissions: Vec<FrontendPermissions>,
+}
+
+#[derive(Debug, serde::Deserialize)]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
+#[serde(rename_all = "camelCase")]
 pub struct CheckAuthRequest {
     pub callback_token: String,
 }
@@ -41,13 +60,7 @@ flags! {
 #[serde(rename_all = "camelCase", tag = "type")]
 pub enum CheckAuthResponse {
     #[serde(rename_all = "camelCase")]
-    Success {
-        name: String,
-        avatar_url: String,
-        auth_token: String,
-        game_account_id: Option<String>,
-        permissions: Vec<FrontendPermissions>,
-    },
+    Success(AuthAccountInfo),
     Failure {
         error: String,
     },

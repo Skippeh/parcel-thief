@@ -6,8 +6,9 @@ import * as Api from "../services";
 
 export interface User {
   name: string;
-  avatarUrl: string;
+  avatarUrl: string | null;
   permissions: FrontendPermissions[];
+  gameId: string | null;
 }
 
 interface Session {

@@ -18,6 +18,7 @@ const useSession = () => {
         name: user.name,
         avatarUrl: user.avatarUrl,
         permissions: user.permissions,
+        gameId: user.gameId,
       },
       authToken,
     });

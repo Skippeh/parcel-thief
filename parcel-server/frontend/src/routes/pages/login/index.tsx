@@ -129,6 +129,8 @@ const Login = () => {
   const [state, setState] = React.useState(LoginState.WaitingForLoginOption);
   const [error, setError] = React.useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [username, setUsername] = React.useState("");
+  const [password, setPassword] = React.useState("");
   const session = useSession();
   const navigate = useNavigate();
 
@@ -148,10 +150,25 @@ const Login = () => {
   const loginWithAccount = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault(); // prevent form submission
 
-    const formData = new FormData(event.currentTarget);
-    console.log(formData);
+    const response = await AuthService.loginLocal(username, password);
+    console.log(response);
 
-    setError("Not implemented");
+    if (response.error != null) {
+      setError(response.error);
+      return;
+    } else if (response.data != null) {
+      session.setSession(
+        {
+          name: response.data.name,
+          avatarUrl: response.data.avatarUrl,
+          permissions: response.data.permissions,
+          gameId: response.data.gameAccountId,
+        },
+        response.data.authToken
+      );
+
+      navigate("/", { replace: true });
+    }
   };
 
   React.useEffect(() => {
@@ -182,6 +199,7 @@ const Login = () => {
               name: data.name,
               avatarUrl: data.avatarUrl,
               permissions: data.permissions,
+              gameId: data.gameAccountId,
             },
             data.authToken
           );
@@ -215,11 +233,21 @@ const Login = () => {
                 <Fields>
                   <Form.Field name="Username">
                     <Form.Label>Username</Form.Label>
-                    <Form.Control type="text" name="username" required />
+                    <Form.Control
+                      onChange={(e) => setUsername(e.target.value)}
+                      type="text"
+                      name="username"
+                      required
+                    />
                   </Form.Field>
                   <Form.Field name="Password">
                     <Form.Label>Password</Form.Label>
-                    <Form.Control type="password" name="password" required />
+                    <Form.Control
+                      onChange={(e) => setPassword(e.target.value)}
+                      type="password"
+                      name="password"
+                      required
+                    />
                   </Form.Field>
                   <FormError>{error}</FormError>
                 </Fields>

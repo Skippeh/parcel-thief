@@ -2,7 +2,6 @@ use std::borrow::Cow;
 
 use actix_http::StatusCode;
 use actix_web::{web::BufMut, ResponseError};
-use pbkdf2::password_hash::errors;
 use validator::{ValidationError, ValidationErrors};
 
 use crate::db::QueryError;
@@ -15,6 +14,8 @@ pub enum ApiError {
     BadRequest(anyhow::Error),
     #[error("You lack the permissions to access to this resource")]
     Forbidden,
+    #[error("{0}")]
+    Unauthorized(anyhow::Error),
     #[error("The resource could not be found")]
     NotFound,
     #[error("{0}")]
@@ -80,6 +81,7 @@ impl ResponseError for ApiError {
             ApiError::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::BadRequest(_) => StatusCode::BAD_REQUEST,
             ApiError::Forbidden => StatusCode::FORBIDDEN,
+            ApiError::Unauthorized(_) => StatusCode::UNAUTHORIZED,
             ApiError::NotFound => StatusCode::NOT_FOUND,
             ApiError::Unprocessable(_) => StatusCode::UNPROCESSABLE_ENTITY,
             ApiError::ValidationErrors(_) => StatusCode::UNPROCESSABLE_ENTITY,

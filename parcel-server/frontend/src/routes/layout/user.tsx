@@ -47,7 +47,9 @@ const User = ({ user }: Props) => {
       <DropdownMenu.Trigger>
         <Wrapper>
           <span className="name">{user.name}</span>
-          <img className="avatar" src={user.avatarUrl} alt="avatar" />
+          {user.avatarUrl && (
+            <img className="avatar" src={user.avatarUrl} alt="avatar" />
+          )}
         </Wrapper>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>

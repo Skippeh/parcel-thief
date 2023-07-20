@@ -1,4 +1,4 @@
-use std::{collections::HashMap, hash};
+use std::collections::HashMap;
 
 use diesel::{dsl::exists, prelude::*, select};
 use flagset::FlagSet;
@@ -47,6 +47,51 @@ impl From<diesel::result::Error> for GetOrCreateError {
 impl<'db> FrontendAccounts<'db> {
     pub fn new(connection: &'db DatabaseConnection) -> Self {
         Self { connection }
+    }
+
+    pub async fn get_by_credentials(
+        &self,
+        username: &str,
+        password: &str,
+        hash_secret: &HashSecret,
+    ) -> Result<Option<FrontendAccount>, QueryError> {
+        use crate::db::schema::frontend_account_credentials::dsl;
+
+        let conn = &mut *self.connection.get_pg_connection().await;
+        let salt: Option<Vec<u8>> = {
+            dsl::frontend_account_credentials
+                .filter(dsl::username.eq(username))
+                .select(dsl::salt)
+                .first(conn)
+                .optional()?
+        };
+
+        match salt {
+            None => Ok(None),
+            Some(salt) => {
+                let password_hash = hex::encode(hash_secret.hash_string(password, &salt));
+
+                let account_id: Option<i64> = dsl::frontend_account_credentials
+                    .filter(dsl::username.eq(username))
+                    .filter(dsl::password.eq(password_hash))
+                    .select(dsl::account_id)
+                    .first(conn)
+                    .optional()?;
+
+                match account_id {
+                    None => Ok(None),
+                    Some(account_id) => {
+                        use crate::db::schema::frontend_accounts::dsl;
+
+                        let account: FrontendAccount = dsl::frontend_accounts
+                            .filter(dsl::id.eq(account_id))
+                            .first(conn)?; // no need for optional at this point
+
+                        Ok(Some(account))
+                    }
+                }
+            }
+        }
     }
 
     /// Gets or creates a frontend account for the given provider account.

@@ -1,8 +1,10 @@
 import { ApiResponse, callApi } from ".";
 import {
+  AuthAccountInfo,
   CheckAuthRequest,
   CheckAuthResponse,
   InitAuthResponse,
+  LocalAuthRequest,
   Provider,
 } from "../api_types";
 
@@ -30,5 +32,18 @@ export async function checkAuthResult(
     requestData
   );
 
+  return response;
+}
+
+export async function loginLocal(
+  username: string,
+  password: string
+): Promise<ApiResponse<AuthAccountInfo>> {
+  const requestData: LocalAuthRequest = {
+    username,
+    password,
+  };
+
+  const response = callApi<AuthAccountInfo>("auth/local", "POST", requestData);
   return response;
 }

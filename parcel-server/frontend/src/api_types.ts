@@ -2,10 +2,12 @@
 
 export type Provider=("steam"|"epic");
 export type AuthRequest={"provider":Provider;};
+export type LocalAuthRequest={"username":string;"password":string;};
 export type InitAuthResponse={"redirectUrl":string;};
 export type CheckAuthRequest={"callbackToken":string;};
 export type FrontendPermissions="manageAccounts";
-export type CheckAuthResponse=(({"type":"success";}&{"name":string;"avatarUrl":string;"authToken":string;"gameAccountId":(string|null);"permissions":(FrontendPermissions)[];})|({"type":"failure";}&{"error":string;}));
+export type AuthAccountInfo={"name":string;"avatarUrl":(string|null);"authToken":string;"gameAccountId":(string|null);"permissions":(FrontendPermissions)[];};
+export type CheckAuthResponse=(({"type":"success";}&AuthAccountInfo)|({"type":"failure";}&{"error":string;}));
 export type I64=number;
 export type JwtPayload={"expiresAt":I64;
 /**
