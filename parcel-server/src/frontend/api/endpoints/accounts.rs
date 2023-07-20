@@ -164,7 +164,7 @@ pub async fn set_account_permissions(
             .permissions
             .contains(&FrontendPermissions::ManageAccounts)
     {
-        return Err(ApiError::BadRequest(anyhow::anyhow!(
+        return Err(ApiError::Unprocessable(anyhow::anyhow!(
             "You cannot remove the 'Manage accounts' permission from your own account"
         )));
     }
