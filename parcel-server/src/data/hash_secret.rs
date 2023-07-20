@@ -48,6 +48,6 @@ impl HashSecret {
         salt_with_secret.extend_from_slice(salt);
         salt_with_secret.extend_from_slice(&self.0);
 
-        pbkdf2_hmac_array::<Sha256, 64>(bytes, &salt_with_secret, 100_000)
+        pbkdf2_hmac_array::<Sha256, 64>(bytes, &salt_with_secret, 20_000)
     }
 }
