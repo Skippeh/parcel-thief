@@ -54,8 +54,9 @@ pub async fn list_accounts(
             let mut result = Vec::new();
 
             let data_accounts = frontend_accounts.get_all().await?;
-            let account_names =
-                get_frontend_account_names(conn, &data_accounts.iter().collect::<Vec<_>>()).await?;
+            let account_names = frontend_accounts
+                .get_display_names(&data_accounts.iter().collect::<Vec<_>>())
+                .await?;
 
             for account in data_accounts {
                 let name = account_names
@@ -125,7 +126,8 @@ pub async fn get_frontend_account(
                 .into_iter()
                 .collect();
 
-            let name = get_frontend_account_names(conn, &[&account])
+            let name = accounts
+                .get_display_names(&[&account])
                 .await?
                 .into_iter()
                 .next()
@@ -236,64 +238,4 @@ pub async fn create_credentials(
             })
         }
     }
-}
-
-/// Query the names for the specified frontend accounts.
-///
-/// * Accounts with a game account id will use their provider/in-game names
-/// * Accounts without a game account id will use their login names (if any)
-/// * Accounts without a game account id or login names will not be added to the returned hash map
-async fn get_frontend_account_names(
-    conn: DatabaseConnection<'_>,
-    accounts: &[&FrontendAccount],
-) -> Result<HashMap<i64, String>, ApiError> {
-    let game_accounts = conn.accounts();
-
-    // Get the account ids where the game account id is Some
-    let game_account_ids = accounts
-        .iter()
-        .filter(|account| account.game_account_id.is_some())
-        .map(|account| {
-            (
-                account
-                    .game_account_id
-                    .as_ref()
-                    .expect("Game account id should always be Some"),
-                account.id,
-            )
-        })
-        .collect::<HashMap<_, _>>();
-
-    let credential_account_ids = accounts
-        .iter()
-        .filter(|account| account.game_account_id.is_none())
-        .map(|account| account.id)
-        .collect::<Vec<_>>();
-
-    // Query names from game accounts
-    let game_account_names = game_accounts
-        .get_by_ids(&game_account_ids.keys().collect::<Vec<_>>())
-        .await?
-        .into_iter()
-        .map(|acc| {
-            (
-                *game_account_ids
-                    .get(&acc.id)
-                    .expect("Game account ids should always contain the account id"),
-                acc.display_name.clone(),
-            )
-        })
-        .collect::<HashMap<_, _>>();
-
-    // Query usernames from accounts without a game account id
-    let frontend_accounts = conn.frontend_accounts();
-    let usernames = frontend_accounts
-        .get_login_usernames(&credential_account_ids)
-        .await?;
-
-    let mut result = HashMap::new();
-    result.extend(game_account_names.into_iter());
-    result.extend(usernames.into_iter());
-
-    Ok(result)
 }

@@ -297,4 +297,83 @@ impl<'db> FrontendAccounts<'db> {
 
         Ok(credentials)
     }
+
+    /// Query the names for the specified frontend accounts.
+    ///
+    /// * Accounts with a game account id will use their provider/in-game names
+    /// * Accounts without a game account id will use their login names (if any)
+    /// * Accounts without a game account id or login names will not be added to the returned hash map
+    pub async fn get_display_names(
+        &self,
+        accounts: &[&FrontendAccount], // todo: remove the need to pass a whole FrontendAccount struct and only require account_id and game_account_id
+    ) -> Result<HashMap<i64, String>, QueryError> {
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        // Get the account ids where the game account id is Some
+        let game_account_ids = accounts
+            .iter()
+            .filter(|account| account.game_account_id.is_some())
+            .map(|account| {
+                (
+                    account
+                        .game_account_id
+                        .as_ref()
+                        .expect("Game account id should always be Some"),
+                    account.id,
+                )
+            })
+            .collect::<HashMap<_, _>>();
+
+        let credential_account_ids = accounts
+            .iter()
+            .filter(|account| account.game_account_id.is_none())
+            .map(|account| account.id)
+            .collect::<Vec<_>>();
+
+        // Query names from game accounts
+        let game_account_names: HashMap<i64, String> = {
+            use crate::db::schema::accounts::dsl;
+
+            if game_account_ids.is_empty() {
+                HashMap::default()
+            } else {
+                dsl::accounts
+                    .filter(dsl::id.eq_any(game_account_ids.keys()))
+                    .select((dsl::id, dsl::display_name))
+                    .get_results::<(String, String)>(conn)?
+                    .into_iter()
+                    .map(|(id, display_name)| {
+                        (
+                            *game_account_ids
+                                .get(&id)
+                                .expect("Game account ids should always contain the account id"),
+                            display_name,
+                        )
+                    })
+                    .collect()
+            }
+        };
+
+        // Query usernames from accounts without a game account id
+        let usernames: HashMap<i64, String> = {
+            use crate::db::schema::frontend_account_credentials::dsl;
+
+            if credential_account_ids.is_empty() {
+                HashMap::default()
+            } else {
+                dsl::frontend_account_credentials
+                    .select(dsl::account_id.eq_any(&credential_account_ids))
+                    .select((dsl::account_id, dsl::username))
+                    .get_results(conn)?
+                    .into_iter()
+                    .collect()
+            }
+        };
+
+        let mut result = HashMap::new();
+        result.extend(game_account_names.into_iter());
+        result.extend(usernames.into_iter());
+
+        Ok(result)
+    }
 }
