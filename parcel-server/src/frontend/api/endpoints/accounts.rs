@@ -14,7 +14,6 @@ use parcel_common::api_types::frontend::{
     auth::FrontendPermissions,
 };
 use serde::Deserialize;
-use validator::ValidationErrors;
 
 use crate::{
     data::{
@@ -22,7 +21,7 @@ use crate::{
         hash_secret::HashSecret,
     },
     db::models::frontend_account::FrontendAccount,
-    endpoints::{EmptyResponse, ValidatedJson},
+    endpoints::ValidatedJson,
     frontend::{
         error::ApiError,
         jwt_session::JwtSession,

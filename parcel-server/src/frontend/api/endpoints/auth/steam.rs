@@ -4,12 +4,10 @@ use actix_web::{
     HttpRequest,
 };
 use anyhow::Context;
-use chrono::Utc;
 use flagset::FlagSet;
-use jwt::SignWithKey;
 use parcel_common::api_types::{
     auth::Provider,
-    frontend::auth::{AuthAccountInfo, CheckAuthResponse, FrontendPermissions, JwtPayload},
+    frontend::auth::{AuthAccountInfo, CheckAuthResponse},
 };
 use steam_auth::Verifier;
 
