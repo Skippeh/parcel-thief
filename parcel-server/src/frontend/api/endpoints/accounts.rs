@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use actix_web::{
     get, post, put,
     web::{Data, Json, Path, Query},
@@ -16,11 +14,7 @@ use parcel_common::api_types::frontend::{
 use serde::Deserialize;
 
 use crate::{
-    data::{
-        database::{Database, DatabaseConnection},
-        hash_secret::HashSecret,
-    },
-    db::models::frontend_account::FrontendAccount,
+    data::{database::Database, hash_secret::HashSecret},
     endpoints::ValidatedJson,
     frontend::{
         error::ApiError,
