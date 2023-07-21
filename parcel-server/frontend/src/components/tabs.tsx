@@ -30,7 +30,11 @@ export const Trigger = styled(Tabs.Trigger)`
     background: ${Colors.blueDark.blue7};
   }
 `;
-export const Content = styled(Tabs.Content)`
+export const Content = styled(Tabs.Content)<{ $padded?: boolean }>`
+  & > *:first-child {
+    margin-top: ${(props) => (props.$padded ? "1.5rem" : "inherit")};
+  }
+
   &[data-state="inactive"] {
     display: none;
   }
