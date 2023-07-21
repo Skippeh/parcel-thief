@@ -6,9 +6,10 @@ use flagset::FlagSet;
 use lazy_static::__Deref;
 use parcel_common::api_types::frontend::{
     accounts::{
-        CreateCredentialsRequest, FrontendAccount as ApiFrontendAccount, FrontendAccountListItem,
-        GameAccountListItem, ListAccountsResponse, ListAccountsType, LocalAccount,
-        ProviderConnection, ResetPasswordRequest, SetAccountPermissionsRequest,
+        CreateCredentialsRequest, CreateFrontendAccountRequest,
+        FrontendAccount as ApiFrontendAccount, FrontendAccountListItem, GameAccountListItem,
+        ListAccountsResponse, ListAccountsType, LocalAccount, ProviderConnection,
+        ResetPasswordRequest, SetAccountPermissionsRequest,
     },
     auth::FrontendPermissions,
 };
@@ -289,5 +290,37 @@ pub async fn reset_password(
             ApiResponse::ok(EmptyResponse)
         }
         None => Err(ApiError::NotFound),
+    }
+}
+
+#[post("accounts/createFrontendAccount")]
+pub async fn create_frontend_account(
+    session: JwtSession,
+    database: Data<Database>,
+    request: Json<CreateFrontendAccountRequest>,
+) -> ApiResult<LocalAccount> {
+    // Check that we have permission
+    if !session.has_permissions(FrontendPermissions::ManageAccounts) {
+        return Err(ApiError::Forbidden);
+    }
+
+    let conn = database.connect()?;
+    let accounts = conn.frontend_accounts();
+
+    match request.into_inner() {
+        CreateFrontendAccountRequest::WithCredentials(CreateCredentialsRequest {
+            username,
+            password,
+        }) => {
+            // todo
+            Err(anyhow::anyhow!("WithCredentials not implemented").into())
+        }
+        CreateFrontendAccountRequest::WithProvider {
+            provider,
+            provider_id,
+        } => {
+            // todo
+            Err(anyhow::anyhow!("WithProvider not implemented").into())
+        }
     }
 }

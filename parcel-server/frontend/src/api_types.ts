@@ -35,3 +35,4 @@ export type FrontendAccount={"id":I64;"gameId":(string|null);"permissions":(Fron
 export type SetAccountPermissionsRequest={"permissions":(FrontendPermissions)[];};
 export type CreateCredentialsRequest={"username":string;"password":string;};
 export type ResetPasswordRequest={"currentPassword":(string|null);"newPassword":string;};
+export type CreateFrontendAccountRequest=(({"type":"withCredentials";}&CreateCredentialsRequest)|({"type":"withProvider";}&{"provider":Provider;"providerId":string;}));

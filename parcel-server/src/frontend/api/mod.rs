@@ -16,5 +16,6 @@ pub fn configure_endpoints(cfg: &mut ServiceConfig) {
         .service(accounts::get_frontend_account)
         .service(accounts::set_account_permissions)
         .service(accounts::create_credentials)
-        .service(accounts::reset_password);
+        .service(accounts::reset_password)
+        .service(accounts::create_frontend_account);
 }

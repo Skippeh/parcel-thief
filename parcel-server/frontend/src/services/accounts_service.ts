@@ -1,6 +1,7 @@
 import { ApiResponse, callApi } from ".";
 import {
   CreateCredentialsRequest,
+  CreateFrontendAccountRequest,
   FrontendAccount,
   FrontendPermissions,
   ListAccountsResponse,
@@ -78,4 +79,10 @@ export function resetAccountPassword(
   };
 
   return callApi(`accounts/resetPassword/${accountId}`, "POST", requestData);
+}
+
+export function createFrontendAccount(
+  request: CreateFrontendAccountRequest
+): Promise<ApiResponse<number>> {
+  return callApi("accounts/createFrontendAccount", "POST", request);
 }

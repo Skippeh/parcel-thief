@@ -2,8 +2,8 @@ use std::{fs::File, path::Path, process::Command};
 
 use parcel_common::api_types::frontend::{
     accounts::{
-        CreateCredentialsRequest, FrontendAccount, ListAccountsResponse, ListAccountsType,
-        ResetPasswordRequest, SetAccountPermissionsRequest,
+        CreateCredentialsRequest, CreateFrontendAccountRequest, FrontendAccount,
+        ListAccountsResponse, ListAccountsType, ResetPasswordRequest, SetAccountPermissionsRequest,
     },
     auth::*,
     baggages::*,
@@ -34,6 +34,7 @@ type Api = (
     SetAccountPermissionsRequest,
     CreateCredentialsRequest,
     ResetPasswordRequest,
+    CreateFrontendAccountRequest,
 );
 
 fn generate_ts_types() {

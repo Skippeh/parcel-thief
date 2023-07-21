@@ -2,32 +2,42 @@ import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 import * as React from "react";
 import { useState } from "react";
-import { styled } from "styled-components";
-import { FrontendAccount, GameAccountListItem } from "../../../api_types";
+import { GameAccountListItem } from "../../../api_types";
 import { formatDate } from "../../../utils/table_value_formatters/date";
 import { TableButtons, TableWrapper } from "./table_base";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Gear, Plus } from "@phosphor-icons/react";
 import * as Dialog from "../../../components/dialog";
-import SaveButton from "../../../components/save_button";
+import SaveButton, { CooldownDelay } from "../../../components/save_button";
 import { ApiResponse } from "../../../services";
+import { createFrontendAccount } from "../../../services/accounts_service";
 
 const Buttons = (props: ICellRendererParams<GameAccountListItem>) => {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   if (props.data == null) {
     return null;
   }
 
-  async function onCreateLocalAccount(): Promise<ApiResponse<FrontendAccount>> {
-    setError("Not implemented");
-    return {
-      data: null,
-      error: "Not implemented",
-      statusCode: 500,
-      formErrors: null,
-    };
+  async function onCreateLocalAccount(): Promise<ApiResponse<number>> {
+    setError(null);
+    const response = await createFrontendAccount({
+      type: "withProvider",
+      provider: props.data.provider,
+      providerId: props.data.providerId,
+    });
+
+    if (response.data != null) {
+      setTimeout(() => {
+        navigate(`/frontend/${response.data}`);
+      }, CooldownDelay);
+    } else {
+      setError(response.error);
+    }
+
+    return response;
   }
 
   function onOpenChange(open: boolean) {

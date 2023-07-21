@@ -115,3 +115,15 @@ fn is_valid_password(str: &str) -> Result<(), ValidationError> {
         Err(ValidationError::new("disallowedCharacters"))
     }
 }
+
+#[derive(Debug, Clone, Deserialize)]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
+#[serde(rename_all = "camelCase", tag = "type")]
+pub enum CreateFrontendAccountRequest {
+    WithCredentials(CreateCredentialsRequest),
+    #[serde(rename_all = "camelCase")]
+    WithProvider {
+        provider: Provider,
+        provider_id: String,
+    },
+}
