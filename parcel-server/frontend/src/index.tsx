@@ -9,7 +9,7 @@ import GlobalStyle from "./global_style";
 import isPropValid from "@emotion/is-prop-valid";
 
 const shouldForwardProp = (propName: string, target: WebTarget): boolean => {
-  if (!isPropValid(propName) && typeof target == "string") {
+  if (typeof target == "string" && !isPropValid(propName)) {
     console.warn(`Not forwarding prop '${propName}' on`, target);
     return false;
   }
