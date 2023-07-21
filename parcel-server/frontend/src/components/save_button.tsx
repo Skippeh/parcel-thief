@@ -4,6 +4,13 @@ import { Submit as FormSubmit } from "./form";
 import { CheckFat, FloppyDisk, Icon, Spinner, X } from "@phosphor-icons/react";
 import styled from "styled-components";
 
+/**
+ * Amount of time before re-enabling the button after sending the save request.
+ *
+ * The unit is in milliseconds.
+ */
+export const CooldownDelay = 2000;
+
 const Submit = styled(FormSubmit)`
   & .icon {
     margin-right: 0.2rem;
@@ -82,7 +89,7 @@ function SaveButton<T>({ saveAction, isForm, children }: Props<T>) {
 
     setTimeout(() => {
       setWaitingForCooldown(false);
-    }, 2000);
+    }, CooldownDelay);
   };
 
   return (
