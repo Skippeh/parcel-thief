@@ -3,6 +3,7 @@ use actix_web::{
     web::{Data, Json, Path, Query},
 };
 use flagset::FlagSet;
+use lazy_static::__Deref;
 use parcel_common::api_types::frontend::{
     accounts::{
         CreateCredentialsRequest, FrontendAccount as ApiFrontendAccount, FrontendAccountListItem,
@@ -74,11 +75,22 @@ pub async fn list_accounts(
         }
         ListAccountsType::Game => {
             let accounts = conn.accounts();
+            let frontend_accounts = conn.frontend_accounts();
             let mut result = Vec::new();
             let data_accounts = accounts.get_all().await?;
 
+            let mut frontend_ids = frontend_accounts
+                .get_ids_from_game_ids(
+                    &data_accounts
+                        .iter()
+                        .map(|acc| acc.id.deref())
+                        .collect::<Vec<_>>(),
+                )
+                .await?;
+
             for account in data_accounts {
                 result.push(GameAccountListItem {
+                    frontend_id: frontend_ids.remove(&account.id),
                     game_id: account.id,
                     name: account.display_name,
                     provider: account.provider,

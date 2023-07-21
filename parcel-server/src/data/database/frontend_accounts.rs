@@ -400,4 +400,22 @@ impl<'db> FrontendAccounts<'db> {
 
         Ok(result)
     }
+
+    pub async fn get_ids_from_game_ids(
+        &self,
+        game_ids: &[&str],
+    ) -> Result<HashMap<String, i64>, QueryError> {
+        use crate::db::schema::frontend_accounts::dsl;
+
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        let account_ids = dsl::frontend_accounts
+            .filter(dsl::game_account_id.eq_any(game_ids))
+            .select((dsl::game_account_id.assume_not_null(), dsl::id))
+            .get_results::<(String, i64)>(conn)?
+            .into_iter()
+            .collect();
+
+        Ok(account_ids)
+    }
 }

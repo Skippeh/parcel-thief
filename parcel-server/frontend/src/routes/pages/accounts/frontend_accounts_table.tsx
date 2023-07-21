@@ -17,6 +17,7 @@ import { Link } from "react-router-dom";
 import { UserGear } from "@phosphor-icons/react";
 import styled from "styled-components";
 import * as Colors from "@radix-ui/colors";
+import { formatPermissions } from "../../../utils/table_value_formatters/permissions";
 
 interface Props {
   accounts: FrontendAccountListItem[] | null | undefined;
@@ -28,16 +29,6 @@ const Permissions = (
   return props.value?.map((permission) => (
     <Tag key={permission}>{permissionToReadableString(permission)}</Tag>
   ));
-};
-
-const formatPermissions = (
-  params: ValueFormatterParams<FrontendAccountListItem, FrontendPermissions[]>
-): string => {
-  return (
-    params.value
-      ?.map((permission) => permissionToReadableString(permission))
-      .join(", ") ?? ""
-  );
 };
 
 const Wrapper = styled.div`
@@ -78,7 +69,7 @@ const FrontendAccountsTable = ({ accounts }: Props) => {
     sortable: true,
     filter: true,
     resizable: false,
-    flex: 2,
+    flex: 1,
   });
 
   const [columnDefs] = useState<ColDef[]>([

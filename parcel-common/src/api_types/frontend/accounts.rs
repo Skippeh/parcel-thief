@@ -23,6 +23,7 @@ pub struct FrontendAccountListItem {
 #[cfg_attr(feature = "ts", derive(TypeDef))]
 #[serde(rename_all = "camelCase")]
 pub struct GameAccountListItem {
+    pub frontend_id: Option<i64>,
     pub game_id: String,
     pub name: String,
     pub provider: Provider,
