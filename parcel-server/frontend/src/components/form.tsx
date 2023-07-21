@@ -20,6 +20,10 @@ export const Label = styled(Form.Label)`
   font-weight: bold;
   font-size: 0.9rem;
 `;
+export const SubLabel = styled.span`
+  display: block;
+  font-size: 0.7rem;
+`;
 export const Message = styled(Form.Message)``;
 export const ValidityState = styled(Form.ValidityState)``;
 export const Submit = styled(Form.Submit)`

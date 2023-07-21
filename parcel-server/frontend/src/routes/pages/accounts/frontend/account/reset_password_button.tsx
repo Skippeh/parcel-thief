@@ -20,6 +20,10 @@ const ResetPasswordButton = ({ account, promptCurrentPassword }: Props) => {
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
 
+  function checkPasswordConfirm(value: string, formData: FormData) {
+    return value !== formData.get("currentPassword");
+  }
+
   const resetPassword = async (): Promise<ApiResponse<unknown>> => {
     const response = await resetAccountPassword(
       account.id,
@@ -59,23 +63,37 @@ const ResetPasswordButton = ({ account, promptCurrentPassword }: Props) => {
             )}
             <Form.Field name="newPassword">
               <Form.Label>New password</Form.Label>
+              <Form.SubLabel>Max 127 characters long</Form.SubLabel>
               <Form.Control
                 type="password"
                 required
+                minLength={1}
+                maxLength={127}
                 autoComplete="new-password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
               />
+              <Form.Message match="tooShort">
+                Password must contain at least 1 character
+              </Form.Message>
+              <Form.Message match="tooLong">
+                Password must contain less than 128 characters
+              </Form.Message>
             </Form.Field>
             <Form.Field name="newPasswordConfirm">
               <Form.Label>Password confirmation</Form.Label>
               <Form.Control
                 type="password"
                 required
+                minLength={1}
+                maxLength={127}
                 autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
+              <Form.Message match={checkPasswordConfirm}>
+                Passwords do not match
+              </Form.Message>
             </Form.Field>
             <span className="error">{error}</span>
             <Dialog.Buttons>

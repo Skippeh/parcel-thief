@@ -88,18 +88,26 @@ const CreateLocalAccountButton = ({ account, setLocalAccount }: Props) => {
                   name="username"
                   autoComplete="off"
                   required
+                  minLength={1}
+                  maxLength={200}
                   onChange={(e) => setUsername(e.target.value)}
                 />
                 {formErrors?.username?.usernameExists && (
                   <Form.Message>The username is taken</Form.Message>
                 )}
+                <Form.Message match="tooLong">
+                  Username must contain 200 characters or less
+                </Form.Message>
               </Form.Field>
               <Form.Field name="password">
                 <Form.Label>Password</Form.Label>
+                <Form.SubLabel>Max 127 characters long</Form.SubLabel>
                 <Form.Control
                   type="password"
                   autoComplete="new-password"
                   required
+                  minLength={1}
+                  maxLength={127}
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </Form.Field>
