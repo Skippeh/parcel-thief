@@ -1,11 +1,15 @@
 {
   "name": "parcel-server-frontend",
   "private": true,
-  "license": "UNLICENCED",
+  "license": "UNLICENSED",
   "source": "src/index.html",
   "scripts": {
-    "watch": "parcel watch --public-url /frontend",
-    "build": "parcel build --public-url /frontend"
+    "watch": "concurrently --kill-others \"yarn watch:dist\" \"yarn watch:tsc\"",
+    "watch:dist": "parcel watch --public-url /frontend",
+    "watch:tsc": "tsc -p . --watch --noEmit",
+    "build": "parcel build --public-url /frontend",
+    "checkTypings": "tsc --noEmit",
+    "checkTypingsAndBuild": "yarn checkTypings && yarn build"
   },
   "repository": {
     "type": "git",
@@ -20,8 +24,10 @@
     "@types/react": "^18.2.14",
     "@types/react-dom": "^18.2.6",
     "@types/react-router-dom": "^5.3.3",
+    "concurrently": "^8.2.0",
     "parcel": "^2.9.3",
-    "process": "^0.11.10"
+    "process": "^0.11.10",
+    "typescript": "^5.1.6"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "^1.2.1",

@@ -59,7 +59,7 @@ fn build_frontend_client() {
     }
 
     let build_result = Command::new(&yarn_path)
-        .arg("build")
+        .arg("checkTypingsAndBuild")
         .current_dir(&frontend_dir)
         .status()
         .expect("Could not run 'yarn build'");
