@@ -3,17 +3,80 @@ import { AgGridReact } from "ag-grid-react";
 import * as React from "react";
 import { useState } from "react";
 import { styled } from "styled-components";
-import { GameAccountListItem } from "../../../api_types";
+import { FrontendAccount, GameAccountListItem } from "../../../api_types";
 import { formatDate } from "../../../utils/table_value_formatters/date";
-
-const Wrapper = styled.div``;
+import { TableButtons, TableWrapper } from "./table_base";
+import { Link } from "react-router-dom";
+import { Gear, Plus } from "@phosphor-icons/react";
+import * as Dialog from "../../../components/dialog";
+import SaveButton from "../../../components/save_button";
+import { ApiResponse } from "../../../services";
 
 const Buttons = (props: ICellRendererParams<GameAccountListItem>) => {
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   if (props.data == null) {
     return null;
   }
 
-  return <div></div>;
+  async function onCreateLocalAccount(): Promise<ApiResponse<FrontendAccount>> {
+    setError("Not implemented");
+    return {
+      data: null,
+      error: "Not implemented",
+      statusCode: 500,
+      formErrors: null,
+    };
+  }
+
+  function onOpenChange(open: boolean) {
+    setOpen(open);
+
+    if (!open) {
+      setError(null);
+    }
+  }
+
+  return (
+    <TableButtons>
+      {props.data.frontendId && (
+        <Link
+          to={`frontend/${props.data.frontendId}`}
+          title="View frontend account"
+        >
+          <Gear weight="regular" />
+        </Link>
+      )}
+      {props.data.frontendId == null && (
+        <Dialog.Root onOpenChange={onOpenChange}>
+          <Dialog.Trigger asChild>
+            <a title="Create frontend account">
+              <Plus weight="regular" />
+            </a>
+          </Dialog.Trigger>
+          <Dialog.Portal>
+            <Dialog.Overlay />
+            <Dialog.Content>
+              <Dialog.Title>Create frontend account</Dialog.Title>
+              <Dialog.Buttons>
+                <p>
+                  Are you sure you want to allow{" "}
+                  <strong>{props.data.name}</strong> to log in to the frontend?
+                  By default no permissions are given.
+                </p>
+                <div>
+                  <span className="error">{error}</span>
+                </div>
+                <SaveButton saveAction={onCreateLocalAccount}>Yes</SaveButton>
+                <Dialog.Close className="secondary">No</Dialog.Close>
+              </Dialog.Buttons>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
+      )}
+    </TableButtons>
+  );
 };
 
 interface Props {
@@ -43,7 +106,7 @@ const GameAccountsTable = ({ accounts }: Props) => {
   ]);
 
   return (
-    <Wrapper className="ag-theme-alpine-dark">
+    <TableWrapper>
       <AgGridReact
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}
@@ -55,7 +118,7 @@ const GameAccountsTable = ({ accounts }: Props) => {
         suppressRowClickSelection={true}
         enableCellTextSelection={true}
       />
-    </Wrapper>
+    </TableWrapper>
   );
 };
 
