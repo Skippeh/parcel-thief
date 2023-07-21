@@ -238,11 +238,44 @@ pub async fn create_credentials(
 pub async fn reset_password(
     session: JwtSession,
     params: Path<i64>,
-    request: Json<ResetPasswordRequest>,
+    request: ValidatedJson<ResetPasswordRequest>,
     database: Data<Database>,
     hash_secret: Data<HashSecret>,
 ) -> ApiResult<EmptyResponse> {
     let account_id = params.into_inner();
 
-    Err(anyhow::anyhow!("Not implemented").into())
+    // Check that we have permission
+    if account_id != session.account_id
+        && !session.has_permissions(FrontendPermissions::ManageAccounts)
+    {
+        return Err(ApiError::Forbidden);
+    }
+
+    let conn = database.connect()?;
+    let accounts = conn.frontend_accounts();
+
+    let credentials = accounts.get_credentials(account_id).await?;
+
+    match credentials {
+        Some(credentials) => {
+            // If account id matches current session if make sure current password is correct
+            let current_password_hash = hash_secret.hash_string(
+                &request.current_password.as_deref().unwrap_or_else(|| ""),
+                &credentials.salt,
+            );
+
+            if hex::encode(current_password_hash) != credentials.password {
+                return Err(ApiError::Unprocessable(anyhow::anyhow!(
+                    "The current password is incorrect"
+                )));
+            }
+
+            accounts
+                .set_credentials_password(account_id, &request.new_password, hash_secret.as_ref())
+                .await?;
+
+            ApiResponse::ok(EmptyResponse)
+        }
+        None => Err(ApiError::NotFound),
+    }
 }

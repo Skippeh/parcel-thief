@@ -2,7 +2,9 @@ import * as React from "react";
 import * as Dialog from "../../../../../components/dialog";
 import * as Form from "../../../../../components/form";
 import FrontendAccount from ".";
-import SaveButton from "../../../../../components/save_button";
+import SaveButton, {
+  CooldownDelay,
+} from "../../../../../components/save_button";
 import { ApiResponse } from "../../../../../services";
 import { resetAccountPassword } from "../../../../../services/accounts_service";
 
@@ -17,6 +19,7 @@ const ResetPasswordButton = ({ account, promptCurrentPassword }: Props) => {
   const [newPassword, setNewPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
+
   const resetPassword = async (): Promise<ApiResponse<unknown>> => {
     const response = await resetAccountPassword(
       account.id,
@@ -24,8 +27,10 @@ const ResetPasswordButton = ({ account, promptCurrentPassword }: Props) => {
       newPassword
     );
 
-    if (response.data != null) {
-      setOpen(false);
+    if (response.statusCode == 200) {
+      setTimeout(() => {
+        setOpen(false);
+      }, CooldownDelay);
     } else if (response.error != null) {
       setError(response.error);
     }
@@ -44,7 +49,12 @@ const ResetPasswordButton = ({ account, promptCurrentPassword }: Props) => {
             {promptCurrentPassword && (
               <Form.Field name="currentPassword">
                 <Form.Label>Current password</Form.Label>
-                <Form.Control type="password" required />
+                <Form.Control
+                  type="password"
+                  required
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                />
               </Form.Field>
             )}
             <Form.Field name="newPassword">
@@ -53,6 +63,8 @@ const ResetPasswordButton = ({ account, promptCurrentPassword }: Props) => {
                 type="password"
                 required
                 autoComplete="new-password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
               />
             </Form.Field>
             <Form.Field name="newPasswordConfirm">
@@ -61,6 +73,8 @@ const ResetPasswordButton = ({ account, promptCurrentPassword }: Props) => {
                 type="password"
                 required
                 autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </Form.Field>
             <span className="error">{error}</span>

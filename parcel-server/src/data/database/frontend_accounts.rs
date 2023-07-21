@@ -298,6 +298,30 @@ impl<'db> FrontendAccounts<'db> {
         Ok(credentials)
     }
 
+    pub async fn set_credentials_password(
+        &self,
+        account_id: i64,
+        password: &str,
+        hash_secret: &HashSecret,
+    ) -> Result<(), QueryError> {
+        use crate::db::schema::frontend_account_credentials::dsl;
+
+        let conn = &mut *self.connection.get_pg_connection().await;
+        let salt = parcel_common::rand::generate_u8(64);
+        let password_hash = hex::encode(hash_secret.hash_string(password, &salt));
+
+        diesel::update(dsl::frontend_account_credentials)
+            .filter(dsl::account_id.eq(account_id))
+            .set((
+                dsl::password.eq(&password_hash),
+                dsl::salt.eq(&salt),
+                dsl::updated_at.eq(diesel::dsl::now),
+            ))
+            .execute(conn)?;
+
+        Ok(())
+    }
+
     /// Query the names for the specified frontend accounts.
     ///
     /// * Accounts with a game account id will use their provider/in-game names
