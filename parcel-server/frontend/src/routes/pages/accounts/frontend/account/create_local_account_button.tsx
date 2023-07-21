@@ -3,7 +3,9 @@ import InfoText from "../../../../../components/info_text";
 import * as Dialog from "../../../../../components/dialog";
 import * as Form from "../../../../../components/form";
 import { styled } from "styled-components";
-import SaveButton from "../../../../../components/save_button";
+import SaveButton, {
+  CooldownDelay,
+} from "../../../../../components/save_button";
 import {
   ApiResponse,
   FormErrors,
@@ -48,8 +50,10 @@ const CreateLocalAccountButton = ({ account, setLocalAccount }: Props) => {
     );
 
     if (response.data != null) {
-      setLocalAccount(response.data);
-      setOpen(false);
+      setTimeout(() => {
+        setLocalAccount(response.data!);
+        setOpen(false);
+      }, CooldownDelay);
     } else if (response.error != null) {
       setFormErrors(mapFormErrors(response.formErrors));
       setError(response.error);
