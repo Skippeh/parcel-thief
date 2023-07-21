@@ -88,7 +88,7 @@ pub struct SetAccountPermissionsRequest {
 #[cfg_attr(feature = "ts", derive(TypeDef))]
 #[serde(rename_all = "camelCase")]
 pub struct CreateCredentialsRequest {
-    #[validate(length(min = 1))]
+    #[validate(length(min = 1, max = 200))]
     pub username: String,
     // max is 127 due to salt + secret taking up 128 bytes, and sha512 max input length is 255 characters (assuming ascii)
     #[validate(length(min = 1, max = 127), custom = "is_valid_password")]
