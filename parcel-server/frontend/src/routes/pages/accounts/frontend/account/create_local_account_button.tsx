@@ -52,7 +52,7 @@ const CreateLocalAccountButton = ({ account, setLocalAccount }: Props) => {
     if (response.data != null) {
       setTimeout(() => {
         setLocalAccount(response.data!);
-        setOpen(false);
+        onOpenChange(false);
       }, CooldownDelay);
     } else if (response.error != null) {
       setFormErrors(mapFormErrors(response.formErrors));
@@ -69,9 +69,19 @@ const CreateLocalAccountButton = ({ account, setLocalAccount }: Props) => {
     }
   }
 
+  function onOpenChange(open: boolean) {
+    setOpen(open);
+
+    if (!open) {
+      setUsername("");
+      setPassword("");
+      setPasswordConfirm("");
+    }
+  }
+
   return (
     <>
-      <Dialog.Root open={open} onOpenChange={setOpen}>
+      <Dialog.Root open={open} onOpenChange={onOpenChange}>
         <Dialog.Trigger>Create local account</Dialog.Trigger>
         <Dialog.Portal>
           <Dialog.Overlay />

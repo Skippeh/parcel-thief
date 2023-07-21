@@ -33,7 +33,7 @@ const ResetPasswordButton = ({ account, promptCurrentPassword }: Props) => {
 
     if (response.statusCode == 200) {
       setTimeout(() => {
-        setOpen(false);
+        onOpenChange(false);
       }, CooldownDelay);
     } else if (response.error != null) {
       setError(response.error);
@@ -42,8 +42,18 @@ const ResetPasswordButton = ({ account, promptCurrentPassword }: Props) => {
     return response;
   };
 
+  function onOpenChange(open: boolean) {
+    setOpen(open);
+
+    if (open) {
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    }
+  }
+
   return (
-    <Dialog.Root open={open} onOpenChange={setOpen}>
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Trigger>Reset password</Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay />
