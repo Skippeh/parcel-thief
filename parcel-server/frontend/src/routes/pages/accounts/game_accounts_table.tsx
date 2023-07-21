@@ -71,9 +71,9 @@ const Buttons = (props: ICellRendererParams<GameAccountListItem>) => {
               <Dialog.Title>Create frontend account</Dialog.Title>
               <Dialog.Buttons>
                 <p>
-                  Are you sure you want to allow{" "}
-                  <strong>{props.data.name}</strong> to log in to the frontend?
-                  By default no permissions are given.
+                  Do you want to allow <strong>{props.data.name}</strong> to log
+                  in to the frontend? By default no additional permissions are
+                  given.
                 </p>
                 <div>
                   <span className="error">{error}</span>
