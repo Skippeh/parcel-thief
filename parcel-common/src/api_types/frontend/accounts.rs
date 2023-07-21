@@ -2,7 +2,8 @@ use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "ts")]
 use typescript_type_def::TypeDef;
-use validator::Validate;
+
+use validator::{Validate, ValidationError};
 
 use crate::api_types::auth::Provider;
 
@@ -89,14 +90,27 @@ pub struct SetAccountPermissionsRequest {
 pub struct CreateCredentialsRequest {
     #[validate(length(min = 1))]
     pub username: String,
-    #[validate(length(min = 1))]
+    // max is 127 due to salt + secret taking up 128 bytes, and sha512 max input length is 255 characters (assuming ascii)
+    #[validate(length(min = 1, max = 127), custom = "is_valid_password")]
     pub password: String,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Validate)]
 #[cfg_attr(feature = "ts", derive(TypeDef))]
 #[serde(rename_all = "camelCase")]
 pub struct ResetPasswordRequest {
+    #[validate(length(min = 1, max = 127), custom = "is_valid_password")]
     pub current_password: Option<String>,
+    #[validate(length(min = 1, max = 127), custom = "is_valid_password")]
     pub new_password: String,
+}
+
+fn is_valid_password(str: &str) -> Result<(), ValidationError> {
+    // todo: Use a character whitelist? At the moment newline characters etc are permitted.
+    // While they wouldn't cause a problem for the server, it might still be better to disallow unconventional characters.
+    if str.is_ascii() {
+        Ok(())
+    } else {
+        Err(ValidationError::new("disallowedCharacters"))
+    }
 }
