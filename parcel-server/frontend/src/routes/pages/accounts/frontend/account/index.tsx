@@ -13,32 +13,11 @@ import PermissionsEditor from "./permissions_editor";
 import CreateLocalAccountButton from "./create_local_account_button";
 import ResetPasswordButton from "./reset_password_button";
 import useSession from "../../../../../hooks/use_session";
+import * as Tabs from "../../../../../components/tabs";
 
 const FormRoot = styled(Form.Root)`
   max-width: 350px;
 `;
-
-const SectionWrapper = styled.div`
-  &:first-child h2 {
-    margin-top: 0;
-  }
-`;
-
-interface SectionProps {
-  title: string;
-}
-
-const Section = ({
-  title,
-  children,
-}: React.PropsWithChildren<SectionProps>) => {
-  return (
-    <SectionWrapper>
-      <h2>{title}</h2>
-      {children}
-    </SectionWrapper>
-  );
-};
 
 const Wrapper = styled.div`
   & .buttons {
@@ -107,67 +86,89 @@ const FrontendAccount = () => {
       {account === undefined && <p>Loading...</p>}
       {account != null && (
         <>
-          <Section title="Permissions">
-            <PermissionsEditor
-              permissions={account.permissions}
-              accountId={account.id}
-              updatePermissions={updatePermissions}
-            />
-          </Section>
-          {account.localAccount && (
-            <Section title="Local Account">
-              <FormRoot>
-                <Form.Field name="username">
-                  <Form.Label>Username</Form.Label>
-                  <Form.Control
-                    readOnly
-                    type="text"
-                    value={account.localAccount.username}
-                  />
-                </Form.Field>
-              </FormRoot>
-            </Section>
-          )}
-          {account.providerConnection && (
-            <Section title="Provider Connection">
-              <FormRoot>
-                <Form.Field name="providerName">
-                  <Form.Label>Type</Form.Label>
-                  <Form.Control
-                    readOnly
-                    type="text"
-                    value={account.providerConnection.provider}
-                  />
-                </Form.Field>
-                <Form.Field name="providerId">
-                  <Form.Label>Identity</Form.Label>
-                  <Form.Control
-                    readOnly
-                    type="text"
-                    value={account.providerConnection.providerId}
-                  />
-                </Form.Field>
-              </FormRoot>
-            </Section>
-          )}
-          <div className="buttons">
-            {account.localAccount != null && (
-              <ResetPasswordButton
-                account={account}
-                // always prompt current password if user is trying to reset their own password
-                // server side also checks that the user has permission to reset other account's passwords if relevant
-                promptCurrentPassword={account.id == sessionAccountId}
+          <Tabs.Root defaultValue="permissions">
+            <Tabs.List>
+              <Tabs.Trigger value="permissions">Permissions</Tabs.Trigger>
+              <Tabs.Trigger value="localAccount">Local account</Tabs.Trigger>
+              <Tabs.Trigger value="providerConnection">
+                Provider connection
+              </Tabs.Trigger>
+            </Tabs.List>
+            <Tabs.Content value="permissions" $padded>
+              <PermissionsEditor
+                permissions={account.permissions}
+                accountId={account.id}
+                updatePermissions={updatePermissions}
               />
-            )}
-            {account.localAccount == null && (
+            </Tabs.Content>
+            <Tabs.Content value="localAccount" $padded>
               <>
-                <CreateLocalAccountButton
-                  account={account}
-                  setLocalAccount={updateLocalAccount}
-                />
+                {account.localAccount && (
+                  <>
+                    <FormRoot>
+                      <Form.Field name="username">
+                        <Form.Label>Username</Form.Label>
+                        <Form.Control
+                          readOnly
+                          type="text"
+                          value={account.localAccount.username}
+                        />
+                      </Form.Field>
+                    </FormRoot>
+                    <div className="buttons">
+                      <ResetPasswordButton
+                        account={account}
+                        // always prompt current password if user is trying to reset their own password
+                        // server side also checks that the user has permission to reset other account's passwords if relevant
+                        promptCurrentPassword={account.id == sessionAccountId}
+                      />
+                    </div>
+                  </>
+                )}
+                {account.localAccount == null && (
+                  <>
+                    <p>
+                      No credentials are currently associated with this account.
+                    </p>
+                    <div className="buttons">
+                      <CreateLocalAccountButton
+                        account={account}
+                        setLocalAccount={updateLocalAccount}
+                      />
+                    </div>
+                  </>
+                )}
               </>
-            )}
-          </div>
+            </Tabs.Content>
+            <Tabs.Content value="providerConnection" $padded>
+              {account.providerConnection && (
+                <FormRoot>
+                  <Form.Field name="providerName">
+                    <Form.Label>Type</Form.Label>
+                    <Form.Control
+                      readOnly
+                      type="text"
+                      value={account.providerConnection.provider}
+                    />
+                  </Form.Field>
+                  <Form.Field name="providerId">
+                    <Form.Label>Identity</Form.Label>
+                    <Form.Control
+                      readOnly
+                      type="text"
+                      value={account.providerConnection.providerId}
+                    />
+                  </Form.Field>
+                </FormRoot>
+              )}
+              {account.providerConnection == null && (
+                <p>
+                  No provider connection is currently associated with this
+                  account.
+                </p>
+              )}
+            </Tabs.Content>
+          </Tabs.Root>
         </>
       )}
     </Wrapper>
