@@ -25,6 +25,7 @@ export default createGlobalStyle`
 
     & a {
       color: ${Colors.skyDark.sky11};
+      cursor: pointer;
       text-decoration: none;
       transition: color 0.05s ease-out;
 

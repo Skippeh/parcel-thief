@@ -14,10 +14,9 @@ import {
 import Tag from "../../../components/tag";
 import { permissionToReadableString } from "../../../services/accounts_service";
 import { Link } from "react-router-dom";
-import { UserGear } from "@phosphor-icons/react";
-import styled from "styled-components";
-import * as Colors from "@radix-ui/colors";
+import { Gear } from "@phosphor-icons/react";
 import { formatPermissions } from "../../../utils/table_value_formatters/permissions";
+import { TableButtons, TableWrapper } from "./table_base";
 
 interface Props {
   accounts: FrontendAccountListItem[] | null | undefined;
@@ -31,36 +30,17 @@ const Permissions = (
   ));
 };
 
-const Wrapper = styled.div`
-  & .ag-row .buttons {
-    opacity: 0.5;
-    transition: opacity 0.1s ease-out;
-  }
-
-  & .ag-row:hover .buttons {
-    opacity: 1;
-  }
-`;
-
-const ButtonsWrapper = styled.div`
-  & a {
-    color: ${Colors.whiteA.whiteA12};
-    font-size: 1.3rem;
-    vertical-align: middle;
-  }
-`;
-
 const Buttons = (props: ICellRendererParams<FrontendAccountListItem>) => {
   if (props.data == null) {
     return null;
   }
 
   return (
-    <ButtonsWrapper className="buttons">
+    <TableButtons>
       <Link to={`frontend/${props.data.id}`} title="Edit">
-        <UserGear weight="fill" />
+        <Gear weight="regular" />
       </Link>
-    </ButtonsWrapper>
+    </TableButtons>
   );
 };
 
@@ -90,7 +70,7 @@ const FrontendAccountsTable = ({ accounts }: Props) => {
   ]);
 
   return (
-    <Wrapper className="ag-theme-alpine-dark">
+    <TableWrapper>
       <AgGridReact
         columnDefs={columnDefs}
         defaultColDef={defaultColDef}
@@ -102,7 +82,7 @@ const FrontendAccountsTable = ({ accounts }: Props) => {
         suppressRowClickSelection={true}
         enableCellTextSelection={true}
       />
-    </Wrapper>
+    </TableWrapper>
   );
 };
 
