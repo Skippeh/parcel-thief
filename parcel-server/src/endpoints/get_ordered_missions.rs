@@ -13,7 +13,7 @@ pub async fn get_ordered_missions(
     session: Session,
     database: Data<Database>,
 ) -> Result<Json<GetOrderedMissionsResponse>, InternalError> {
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let missions = conn.missions();
     let ordered_missions = missions.get_ordered_missions(&session.account_id).await?;
     let ordered_missions = missions

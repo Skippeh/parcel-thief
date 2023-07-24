@@ -64,7 +64,7 @@ pub async fn get_road_data(
     _session: Session,
     database: Data<Database>,
 ) -> Result<Json<GetRoadDataResponse>, Error> {
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let roads = conn.roads();
 
     let road_data = roads.get_road_data(&request.0.road_id).await?;

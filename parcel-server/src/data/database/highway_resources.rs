@@ -2,6 +2,9 @@ use std::collections::HashMap;
 
 use chrono::{DateTime, Utc};
 use diesel::{dsl::not, prelude::*};
+use diesel_async::{
+    scoped_futures::ScopedFutureExt, AsyncConnection, AsyncPgConnection, RunQueryDsl,
+};
 use itertools::Itertools;
 use parcel_common::api_types::requests::devote_highway_resources::PutHistory;
 
@@ -31,33 +34,40 @@ impl<'db> HighwayResources<'db> {
     ) -> Result<(), QueryError> {
         use crate::db::schema::devoted_highway_resources::dsl;
         let conn = &mut *self.connection.get_pg_connection().await;
+        let resources = resources.into_iter().collect::<Vec<_>>();
 
         conn.transaction(|conn| {
-            let time = Utc::now().naive_utc();
+            async move {
+                let time = Utc::now().naive_utc();
 
-            // Ideally we wouldn't insert one at a time, but realistically only one (up to 3)
-            // resource(s) is sent by the client at a time, so i'm not gonna bother for now.
-            for resource in resources {
-                diesel::insert_into(dsl::devoted_highway_resources)
-                    .values(&NewDevotedHighwayResources {
-                        account_id,
-                        construction_id: resource.construction_id,
-                        time: &time,
-                        resource_id: resource.resource_id,
-                        num_resources: resource.put_num,
-                    })
-                    .execute(conn)?;
+                // Ideally we wouldn't insert one at a time, but realistically only one (up to 3)
+                // resource(s) is sent by the client at a time, so i'm not gonna bother for now.
+                for resource in resources {
+                    diesel::insert_into(dsl::devoted_highway_resources)
+                        .values(&NewDevotedHighwayResources {
+                            account_id,
+                            construction_id: resource.construction_id,
+                            time: &time,
+                            resource_id: resource.resource_id,
+                            num_resources: resource.put_num,
+                        })
+                        .execute(conn)
+                        .await?;
 
-                self.add_total_resources(
-                    conn,
-                    resource.construction_id,
-                    resource.resource_id,
-                    resource.put_num as i64,
-                )?;
+                    self.add_total_resources(
+                        conn,
+                        resource.construction_id,
+                        resource.resource_id,
+                        resource.put_num as i64,
+                    )
+                    .await?;
+                }
+
+                Ok(())
             }
-
-            Ok(())
+            .scope_boxed()
         })
+        .await
     }
 
     pub async fn get_contributors(
@@ -86,7 +96,8 @@ impl<'db> HighwayResources<'db> {
             .filter(not(dsl::account_id.eq(account_id)))
             .filter(dsl::time.gt(earliest_date))
             .distinct_on(dsl::account_id)
-            .get_results(conn)?;
+            .get_results(conn)
+            .await?;
 
         let mut by_construction_id = resources
             .into_iter()
@@ -125,14 +136,15 @@ impl<'db> HighwayResources<'db> {
         let resources = dsl::total_highway_resources
             .filter(dsl::construction_id.eq_any(construction_ids.into_iter()))
             .filter(dsl::resource_id.eq_any(resource_ids.into_iter()))
-            .get_results(conn)?;
+            .get_results(conn)
+            .await?;
 
         Ok(resources)
     }
 
-    fn add_total_resources(
+    async fn add_total_resources(
         &self,
-        conn: &mut PgConnection,
+        conn: &mut AsyncPgConnection,
         construction_id: i32,
         resource_id: i16,
         num_resources: i64,
@@ -148,7 +160,8 @@ impl<'db> HighwayResources<'db> {
             .on_conflict((dsl::construction_id, dsl::resource_id))
             .do_update()
             .set(dsl::num_resources.eq(dsl::num_resources + num_resources))
-            .execute(conn)?;
+            .execute(conn)
+            .await?;
 
         Ok(())
     }

@@ -16,7 +16,7 @@ pub async fn delete_missions(
     session: Session,
     database: Data<Database>,
 ) -> Result<EmptyResponse, InternalError> {
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let missions = conn.missions();
     let mission_ids = request
         .0

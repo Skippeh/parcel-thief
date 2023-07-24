@@ -42,7 +42,7 @@ pub async fn list_accounts(
         return Err(ApiError::Forbidden);
     }
 
-    let conn = db.connect()?;
+    let conn = db.connect().await?;
 
     match query.accounts_type {
         ListAccountsType::Frontend => {
@@ -120,7 +120,7 @@ pub async fn get_frontend_account(
         return Err(ApiError::Forbidden);
     }
 
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let accounts = conn.frontend_accounts();
     let account = accounts.get_by_id(account_id).await?;
     let credentials = accounts.get_credentials(account_id).await?;
@@ -182,7 +182,7 @@ pub async fn set_account_permissions(
         )));
     }
 
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let accounts = conn.frontend_accounts();
 
     let mut new_permissions = FlagSet::default();
@@ -215,7 +215,7 @@ pub async fn create_credentials(
         return Err(ApiError::Forbidden);
     }
 
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let accounts = conn.frontend_accounts();
     let account = accounts.get_by_id(account_id).await?;
 
@@ -264,7 +264,7 @@ pub async fn reset_password(
         return Err(ApiError::Forbidden);
     }
 
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let accounts = conn.frontend_accounts();
 
     let credentials = accounts.get_credentials(account_id).await?;
@@ -304,7 +304,7 @@ pub async fn create_frontend_account(
         return Err(ApiError::Forbidden);
     }
 
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let accounts = conn.frontend_accounts();
 
     match request.into_inner() {

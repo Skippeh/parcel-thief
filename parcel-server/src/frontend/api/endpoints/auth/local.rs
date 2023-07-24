@@ -26,7 +26,7 @@ pub async fn auth_local(
     hash_secret: Data<HashSecret>,
     steam: Data<Steam>,
 ) -> ApiResult<AuthAccountInfo> {
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let accounts = conn.frontend_accounts();
 
     let account = accounts

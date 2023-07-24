@@ -18,7 +18,7 @@ pub async fn set_mission_progress(
     session: Session,
     database: Data<Database>,
 ) -> Result<Json<SetMissionProgressResponse>, InternalError> {
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let missions = conn.missions();
     let accounts = conn.accounts();
 

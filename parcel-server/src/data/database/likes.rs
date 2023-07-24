@@ -2,6 +2,7 @@ use std::{collections::HashMap, fmt::Display};
 
 use chrono::{NaiveDateTime, Utc};
 use diesel::prelude::*;
+use diesel_async::{scoped_futures::ScopedFutureExt, AsyncConnection, RunQueryDsl};
 
 use crate::db::{
     models::like::{Like, NewLike, NewTotalHighwayLikes, TotalHighwayLikes},
@@ -70,74 +71,84 @@ impl<'db> Likes<'db> {
         let conn = &mut *self.connection.get_pg_connection().await;
 
         conn.transaction(|conn| {
-            let total_likes = num_likes_auto as i64 + num_likes_manual as i64;
+            async move {
+                let total_likes = num_likes_auto as i64 + num_likes_manual as i64;
 
-            match &target_online_id {
-                LikeTarget::Object(object_id) => {
-                    use crate::db::schema::qpid_objects::dsl as object_dsl;
+                match &target_online_id {
+                    LikeTarget::Object(object_id) => {
+                        use crate::db::schema::qpid_objects::dsl as object_dsl;
 
-                    let new_total = diesel::update(object_dsl::qpid_objects)
-                        .filter(object_dsl::id.eq(object_id))
-                        .set(object_dsl::likes.eq(object_dsl::likes + total_likes))
-                        .returning(object_dsl::likes)
-                        .get_result::<i64>(conn)
-                        .optional()?;
+                        let new_total = diesel::update(object_dsl::qpid_objects)
+                            .filter(object_dsl::id.eq(object_id))
+                            .set(object_dsl::likes.eq(object_dsl::likes + total_likes))
+                            .returning(object_dsl::likes)
+                            .get_result::<i64>(conn)
+                            .await
+                            .optional()?;
 
-                    match new_total {
-                        Some(new_total) => {
-                            log::debug!(
-                                "Added {} likes to {}, new total = {}",
-                                total_likes,
-                                object_id,
-                                new_total
-                            );
-                        }
-                        None => {
-                            log::warn!("Could not find object to increment likes on: {}", object_id)
+                        match new_total {
+                            Some(new_total) => {
+                                log::debug!(
+                                    "Added {} likes to {}, new total = {}",
+                                    total_likes,
+                                    object_id,
+                                    new_total
+                                );
+                            }
+                            None => {
+                                log::warn!(
+                                    "Could not find object to increment likes on: {}",
+                                    object_id
+                                )
+                            }
                         }
                     }
-                }
-                LikeTarget::Highway(_) => {
-                    use crate::db::schema::total_highway_likes::dsl;
+                    LikeTarget::Highway(_) => {
+                        use crate::db::schema::total_highway_likes::dsl;
 
-                    let new_total = diesel::insert_into(dsl::total_highway_likes)
-                        .values(&NewTotalHighwayLikes {
-                            account_id: to_id,
-                            likes: total_likes,
-                        })
-                        .on_conflict(dsl::account_id)
-                        .do_update()
-                        .set(dsl::likes.eq(dsl::likes + total_likes))
-                        .returning(dsl::likes)
-                        .get_result::<i64>(conn)?;
+                        let new_total = diesel::insert_into(dsl::total_highway_likes)
+                            .values(&NewTotalHighwayLikes {
+                                account_id: to_id,
+                                likes: total_likes,
+                            })
+                            .on_conflict(dsl::account_id)
+                            .do_update()
+                            .set(dsl::likes.eq(dsl::likes + total_likes))
+                            .returning(dsl::likes)
+                            .get_result::<i64>(conn)
+                            .await?;
 
-                    log::debug!("New total highway likes for {} = {}", to_id, new_total);
+                        log::debug!("New total highway likes for {} = {}", to_id, new_total);
+                    }
+                    _ => (),
                 }
-                _ => (),
+
+                let target_online_id = match target_online_id {
+                    LikeTarget::Dummy => "idummy".into(),
+                    LikeTarget::Shared => "ishared".into(),
+                    LikeTarget::Highway(id) => format!("h{id}"),
+                    LikeTarget::Object(id) => id.into(),
+                };
+
+                diesel::insert_into(dsl::likes)
+                    .values(NewLike {
+                        time: &Utc::now().naive_utc(),
+                        from_id,
+                        to_id,
+                        online_id: &target_online_id,
+                        likes_manual: num_likes_manual,
+                        likes_auto: num_likes_auto,
+                        ty: like_type,
+                        acknowledged: false,
+                    })
+                    .execute(conn)
+                    .await?;
+
+                Ok(())
             }
-
-            let target_online_id = match target_online_id {
-                LikeTarget::Dummy => "idummy".into(),
-                LikeTarget::Shared => "ishared".into(),
-                LikeTarget::Highway(id) => format!("h{id}"),
-                LikeTarget::Object(id) => id.into(),
-            };
-
-            diesel::insert_into(dsl::likes)
-                .values(NewLike {
-                    time: &Utc::now().naive_utc(),
-                    from_id,
-                    to_id,
-                    online_id: &target_online_id,
-                    likes_manual: num_likes_manual,
-                    likes_auto: num_likes_auto,
-                    ty: like_type,
-                    acknowledged: false,
-                })
-                .execute(conn)?;
-
-            Ok(())
+            .scope_boxed()
         })
+        .await
     }
 
     pub async fn set_acknowledged(
@@ -149,7 +160,8 @@ impl<'db> Likes<'db> {
         diesel::update(dsl::likes)
             .filter(dsl::id.eq_any(like_ids))
             .set(dsl::acknowledged.eq(acknowledged))
-            .execute(conn)?;
+            .execute(conn)
+            .await?;
 
         Ok(())
     }
@@ -163,7 +175,8 @@ impl<'db> Likes<'db> {
         Ok(dsl::likes
             .filter(dsl::to_id.eq(account_id))
             .filter(dsl::time.gt(since))
-            .get_results(conn)?)
+            .get_results(conn)
+            .await?)
     }
 
     pub async fn get_unacknowleged_likes(&self, account_id: &str) -> Result<Vec<Like>, QueryError> {
@@ -171,7 +184,8 @@ impl<'db> Likes<'db> {
         Ok(dsl::likes
             .filter(dsl::to_id.eq(account_id))
             .filter(dsl::acknowledged.eq(false))
-            .get_results(conn)?)
+            .get_results(conn)
+            .await?)
     }
 
     pub async fn get_total_highway_likes<'a>(
@@ -183,7 +197,8 @@ impl<'db> Likes<'db> {
 
         let likes = dsl::total_highway_likes
             .filter(dsl::account_id.eq_any(account_ids))
-            .get_results::<TotalHighwayLikes>(conn)?;
+            .get_results::<TotalHighwayLikes>(conn)
+            .await?;
 
         let mut result = HashMap::new();
 

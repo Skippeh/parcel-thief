@@ -23,7 +23,7 @@ pub async fn get_like_history(
     session: Session,
     database: Data<Database>,
 ) -> Result<Json<GetLikeHistoryResponse>, InternalError> {
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let likes = conn.likes();
 
     let given_likes = if request.since <= 0 {

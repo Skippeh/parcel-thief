@@ -1,6 +1,7 @@
 use base64::Engine;
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
+use diesel_async::RunQueryDsl;
 use parcel_common::{api_types::auth::Provider, rand};
 
 use crate::db::{
@@ -40,7 +41,8 @@ impl<'db> Accounts<'db> {
                 provider_id,
                 last_login_date,
             })
-            .get_result(conn)?;
+            .get_result(conn)
+            .await?;
 
         Ok(account)
     }
@@ -55,6 +57,7 @@ impl<'db> Accounts<'db> {
             .filter(accounts::provider_id.eq(&provider_id))
             .filter(accounts::provider.eq(&provider))
             .first(conn)
+            .await
             .optional()?;
 
         Ok(account)
@@ -70,7 +73,8 @@ impl<'db> Accounts<'db> {
         let accounts = accounts::table
             .filter(accounts::provider.eq(&provider))
             .filter(accounts::provider_id.eq_any(provider_ids))
-            .get_results::<Account>(conn)?;
+            .get_results::<Account>(conn)
+            .await?;
 
         Ok(accounts)
     }
@@ -87,14 +91,15 @@ impl<'db> Accounts<'db> {
         let account_ids: Vec<&str> = account_ids.iter().map(|id| id.as_ref()).collect();
         let accounts = accounts::table
             .filter(accounts::id.eq_any(account_ids))
-            .get_results::<Account>(conn)?;
+            .get_results::<Account>(conn)
+            .await?;
 
         Ok(accounts)
     }
 
     pub async fn get_all(&self) -> Result<Vec<Account>, QueryError> {
         let conn = &mut *self.connection.get_pg_connection().await;
-        let accounts = accounts::table.get_results(conn)?;
+        let accounts = accounts::table.get_results(conn).await?;
 
         Ok(accounts)
     }
@@ -112,7 +117,8 @@ impl<'db> Accounts<'db> {
                 accounts::display_name.eq(display_name),
                 accounts::last_login_date.eq(last_login),
             ))
-            .get_result::<Account>(conn)?;
+            .get_result::<Account>(conn)
+            .await?;
 
         Ok(())
     }
@@ -130,12 +136,14 @@ impl<'db> Accounts<'db> {
                 .filter(dsl::account_id.eq(account_id))
                 .order_by(dsl::encountered_at.desc())
                 .limit(limit)
-                .get_results::<AccountHistory>(conn)?
+                .get_results::<AccountHistory>(conn)
+                .await?
         } else {
             dsl::account_histories
                 .filter(dsl::account_id.eq(account_id))
                 .order_by(dsl::encountered_at.desc())
-                .get_results::<AccountHistory>(conn)?
+                .get_results::<AccountHistory>(conn)
+                .await?
         };
 
         Ok(account_histories)
@@ -165,7 +173,8 @@ impl<'db> Accounts<'db> {
             .on_conflict((dsl::account_id, dsl::encountered_id))
             .do_update()
             .set(dsl::encountered_at.eq(encountered_at))
-            .execute(conn)?;
+            .execute(conn)
+            .await?;
 
         Ok(())
     }
@@ -190,7 +199,8 @@ impl<'db> Accounts<'db> {
                     .collect::<Vec<NewAccountStrandContract>>(),
             )
             .on_conflict_do_nothing()
-            .execute(conn)?;
+            .execute(conn)
+            .await?;
 
         Ok(())
     }
@@ -208,7 +218,8 @@ impl<'db> Accounts<'db> {
                 .filter(dsl::owner_account_id.eq(account_id))
                 .filter(dsl::contract_account_id.eq_any(contract_account_ids)),
         )
-        .execute(conn)?;
+        .execute(conn)
+        .await?;
 
         Ok(())
     }
@@ -222,7 +233,8 @@ impl<'db> Accounts<'db> {
 
         Ok(dsl::account_strand_contracts
             .filter(dsl::owner_account_id.eq(account_id))
-            .get_results::<AccountStrandContract>(conn)?)
+            .get_results::<AccountStrandContract>(conn)
+            .await?)
     }
 }
 

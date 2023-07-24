@@ -52,7 +52,7 @@ pub async fn steam_callback(
     let response_token = generate_response_token();
     let response = match verifier.verify_response(text) {
         Ok(steam_id) => {
-            let conn = database.connect()?;
+            let conn = database.connect().await?;
             let accounts = conn.frontend_accounts();
 
             let account = accounts

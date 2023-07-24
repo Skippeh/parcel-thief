@@ -164,9 +164,7 @@ async fn main() -> Result<()> {
         load_gamedata_from_file(&args.game_data_path).context("Could not load game data")?,
     );
 
-    migrate_database(&database_url)
-        .await
-        .context("Could not apply pending database migrations")?;
+    migrate_database(&database_url).context("Could not apply pending database migrations")?;
 
     let gateway_url = args.gateway_url.as_ref().map(|url| format!("{}/ds", url));
 
@@ -266,7 +264,7 @@ fn load_rustls_config(
     Ok(config.with_single_cert(cert_chain, keys.remove(0))?)
 }
 
-async fn migrate_database(database_url: &str) -> Result<(), anyhow::Error> {
+fn migrate_database(database_url: &str) -> Result<(), anyhow::Error> {
     let mut pg_conn =
         PgConnection::establish(database_url).context("Could not connect to database")?;
 

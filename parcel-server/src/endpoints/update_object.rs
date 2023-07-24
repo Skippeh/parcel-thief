@@ -79,7 +79,7 @@ pub async fn update_object(
     session: Session,
     database: Data<Database>,
 ) -> Result<EmptyResponse, Error> {
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let objects = conn.qpid_objects();
     let accounts = conn.accounts();
 

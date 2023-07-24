@@ -24,7 +24,7 @@ pub async fn list_shared_cargo(
     database: Data<Database>,
     game_data: Data<GameData>,
 ) -> ApiResult<ListSharedCargoResponse> {
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let missions = conn.missions(); // shared and lost cargo are saved as missions
 
     let data_missions = missions
@@ -103,7 +103,7 @@ pub async fn list_lost_cargo(
     database: Data<Database>,
     game_data: Data<GameData>,
 ) -> ApiResult<ListLostCargoResponse> {
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let missions = conn.missions();
 
     let data_missions = missions
@@ -188,7 +188,7 @@ pub async fn list_wasted_cargo(
     database: Data<Database>,
     game_data: Data<GameData>,
 ) -> ApiResult<ListWastedCargoResponse> {
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let wasteds = conn.wasted_baggages();
     let data_baggages = wasteds.get_all_baggages().await?;
 

@@ -76,7 +76,7 @@ pub async fn set_player_profile(
     database: Data<Database>,
 ) -> Result<Json<SetPlayerProfileResponse>, Error> {
     let account_id = session.account_id.clone();
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let profiles = conn.player_profiles();
 
     profiles

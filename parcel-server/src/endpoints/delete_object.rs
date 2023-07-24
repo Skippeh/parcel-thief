@@ -89,7 +89,7 @@ pub async fn delete_object(
         return Err(Error::NoIdSpecified);
     }
 
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let objects = conn.qpid_objects();
 
     let object = objects.get_by_id(&request.object_id).await?;

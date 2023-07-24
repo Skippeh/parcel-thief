@@ -15,7 +15,7 @@ pub async fn add_missions(
     session: Session,
     database: Data<Database>,
 ) -> Result<Json<AddMissionsResponse>, InternalError> {
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let missions = conn.missions();
     let mut saved_missions = Vec::new();
 

@@ -13,7 +13,7 @@ pub async fn get_relationships(
     session: Session,
     database: Data<Database>,
 ) -> Result<Json<GetRelationshipsResponse>, InternalError> {
-    let db = database.connect()?;
+    let db = database.connect().await?;
     let accounts = db.accounts();
 
     const HISTORY_LIMIT: i64 = 10;

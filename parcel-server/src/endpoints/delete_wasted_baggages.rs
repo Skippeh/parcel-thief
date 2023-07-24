@@ -14,7 +14,7 @@ pub async fn delete_wasted_baggages(
     _session: Session,
     database: Data<Database>,
 ) -> Result<EmptyResponse, InternalError> {
-    let db = database.connect()?;
+    let db = database.connect().await?;
     let wasted_baggages = db.wasted_baggages();
 
     wasted_baggages
