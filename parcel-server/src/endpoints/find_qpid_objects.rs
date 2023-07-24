@@ -25,7 +25,7 @@ pub async fn find_qpid_objects(
         }
     }
 
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let objects = conn.qpid_objects();
     let request = request.into_inner();
     let area_hash = request.area_hash;

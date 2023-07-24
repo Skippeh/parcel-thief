@@ -15,7 +15,7 @@ pub async fn set_recycle_materials(
     session: Session,
     database: Data<Database>,
 ) -> Result<Json<Object>, InternalError> {
-    let db = database.connect()?;
+    let db = database.connect().await?;
     let qpid_objects = db.qpid_objects();
 
     let object = qpid_objects

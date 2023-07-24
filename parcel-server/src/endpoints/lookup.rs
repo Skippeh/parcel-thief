@@ -15,7 +15,7 @@ pub async fn lookup(
     _session: Session,
     database: Data<Database>,
 ) -> Result<Json<LookupResponse>, InternalError> {
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let users = conn
         .accounts()
         .get_by_ids(&request.account_ids)

@@ -19,7 +19,7 @@ pub async fn find_missions(
     database: Data<Database>,
 ) -> Result<Json<FindMissionsResponse>, InternalError> {
     let request = request.into_inner();
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let db_missions = conn.missions();
 
     const MISSION_TYPES: &[MissionType] = &[

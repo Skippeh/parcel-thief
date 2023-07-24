@@ -175,6 +175,7 @@ pub async fn auth(
     // create account if one doesn't exist
     let db = &mut db
         .connect()
+        .await
         .map_err(|err| Error::InternalError(err.into()))?;
     let accounts = db.accounts();
 

@@ -27,7 +27,7 @@ pub async fn create_object(
         log::warn!("Creating object with unknown type: {}", val);
     }
 
-    let db = database.connect()?;
+    let db = database.connect().await?;
     let qpid_objects = db.qpid_objects();
     let result = qpid_objects
         .create_from_request(&request, &session.account_id)

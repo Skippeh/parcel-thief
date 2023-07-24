@@ -16,7 +16,7 @@ pub async fn put_wasted_baggages(
     session: Session,
     database: Data<Database>,
 ) -> Result<EmptyResponse, InternalError> {
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let wasted_baggages = conn.wasted_baggages();
 
     wasted_baggages

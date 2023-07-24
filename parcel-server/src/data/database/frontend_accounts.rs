@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use diesel::{dsl::exists, prelude::*, select};
+use diesel_async::{scoped_futures::ScopedFutureExt, AsyncConnection, RunQueryDsl};
 use flagset::FlagSet;
 use parcel_common::api_types::{auth::Provider, frontend::auth::FrontendPermissions};
 
@@ -63,6 +64,7 @@ impl<'db> FrontendAccounts<'db> {
                 .filter(dsl::username.eq(username))
                 .select(dsl::salt)
                 .first(conn)
+                .await
                 .optional()?
         };
 
@@ -76,6 +78,7 @@ impl<'db> FrontendAccounts<'db> {
                     .filter(dsl::password.eq(password_hash))
                     .select(dsl::account_id)
                     .first(conn)
+                    .await
                     .optional()?;
 
                 match account_id {
@@ -85,7 +88,8 @@ impl<'db> FrontendAccounts<'db> {
 
                         let account: FrontendAccount = dsl::frontend_accounts
                             .filter(dsl::id.eq(account_id))
-                            .first(conn)?; // no need for optional at this point
+                            .first(conn)
+                            .await?; // no need for optional at this point
 
                         Ok(Some(account))
                     }
@@ -106,11 +110,13 @@ impl<'db> FrontendAccounts<'db> {
         let conn = &mut *self.connection.get_pg_connection().await;
 
         conn.transaction(|conn| {
+            async move {
             let connection: Option<AccountProviderConnection> =
                 dsl::frontend_account_provider_connections
                     .filter(dsl::provider.eq(&provider))
                     .filter(dsl::provider_id.eq(provider_id))
                     .first(conn)
+                    .await
                     .optional()?;
 
             match connection {
@@ -119,7 +125,8 @@ impl<'db> FrontendAccounts<'db> {
 
                     let account = dsl::frontend_accounts
                         .filter(dsl::id.eq(connection.account_id))
-                        .first(conn)?;
+                        .first(conn)
+                        .await?;
 
                     Ok(account)
                 }
@@ -131,6 +138,7 @@ impl<'db> FrontendAccounts<'db> {
                         .filter(dsl::provider.eq(&provider))
                         .filter(dsl::provider_id.eq(provider_id))
                         .first(conn)
+                        .await
                         .optional()?;
 
                     match account {
@@ -145,7 +153,8 @@ impl<'db> FrontendAccounts<'db> {
                                     created_at: None,
                                     permissions: 0,
                                 })
-                                .get_result::<FrontendAccount>(conn)?;
+                                .get_result::<FrontendAccount>(conn)
+                                .await?;
 
                             // Create the provider connection
                             {
@@ -157,7 +166,7 @@ impl<'db> FrontendAccounts<'db> {
                                         provider_id: &provider_id,
                                         created_at: None,
                                     })
-                                    .execute(conn)?;
+                                    .execute(conn).await?;
                             }
 
                             Ok(frontend_account)
@@ -165,7 +174,9 @@ impl<'db> FrontendAccounts<'db> {
                     }
                 }
             }
+        }.scope_boxed()
         })
+        .await
     }
 
     pub async fn get_by_id(&self, id: i64) -> Result<Option<FrontendAccount>, QueryError> {
@@ -176,6 +187,7 @@ impl<'db> FrontendAccounts<'db> {
         let account = dsl::frontend_accounts
             .filter(dsl::id.eq(id))
             .first(conn)
+            .await
             .optional()?;
 
         Ok(account)
@@ -192,6 +204,7 @@ impl<'db> FrontendAccounts<'db> {
         let connection = dsl::frontend_account_provider_connections
             .filter(dsl::account_id.eq(account_id))
             .first(conn)
+            .await
             .optional()?;
 
         Ok(connection)
@@ -208,6 +221,7 @@ impl<'db> FrontendAccounts<'db> {
         let credentials = dsl::frontend_account_credentials
             .filter(dsl::account_id.eq(account_id))
             .first(conn)
+            .await
             .optional()?;
 
         Ok(credentials)
@@ -217,7 +231,7 @@ impl<'db> FrontendAccounts<'db> {
         use crate::db::schema::frontend_accounts::dsl;
 
         let conn = &mut *self.connection.get_pg_connection().await;
-        let accounts = dsl::frontend_accounts.get_results(conn)?;
+        let accounts = dsl::frontend_accounts.get_results(conn).await?;
 
         Ok(accounts)
     }
@@ -231,7 +245,8 @@ impl<'db> FrontendAccounts<'db> {
         let conn = &mut *self.connection.get_pg_connection().await;
         let credentials: Vec<AccountCredentials> = dsl::frontend_account_credentials
             .filter(dsl::account_id.eq_any(account_ids))
-            .get_results(conn)?;
+            .get_results(conn)
+            .await?;
 
         Ok(credentials
             .into_iter()
@@ -253,7 +268,8 @@ impl<'db> FrontendAccounts<'db> {
             .filter(dsl::id.eq(account_id))
             .set(dsl::permissions.eq(bits))
             .returning(dsl::permissions)
-            .get_result(conn)?;
+            .get_result(conn)
+            .await?;
 
         Ok(FlagSet::new_truncated(result))
     }
@@ -266,7 +282,8 @@ impl<'db> FrontendAccounts<'db> {
         Ok(select(exists(
             dsl::frontend_account_credentials.filter(dsl::username.eq(username)),
         ))
-        .get_result(conn)?)
+        .get_result(conn)
+        .await?)
     }
 
     /// Adds credentials to the frontend account with the given id.
@@ -293,7 +310,8 @@ impl<'db> FrontendAccounts<'db> {
                 salt,
                 updated_at: None,
             })
-            .get_result(conn)?;
+            .get_result(conn)
+            .await?;
 
         Ok(credentials)
     }
@@ -317,7 +335,8 @@ impl<'db> FrontendAccounts<'db> {
                 dsl::salt.eq(&salt),
                 dsl::updated_at.eq(diesel::dsl::now),
             ))
-            .execute(conn)?;
+            .execute(conn)
+            .await?;
 
         Ok(())
     }
@@ -364,7 +383,8 @@ impl<'db> FrontendAccounts<'db> {
                 dsl::accounts
                     .filter(dsl::id.eq_any(game_account_ids.keys()))
                     .select((dsl::id, dsl::display_name))
-                    .get_results::<(String, String)>(conn)?
+                    .get_results::<(String, String)>(conn)
+                    .await?
                     .into_iter()
                     .map(|(id, display_name)| {
                         (
@@ -388,7 +408,8 @@ impl<'db> FrontendAccounts<'db> {
                 dsl::frontend_account_credentials
                     .select(dsl::account_id.eq_any(&credential_account_ids))
                     .select((dsl::account_id, dsl::username))
-                    .get_results(conn)?
+                    .get_results(conn)
+                    .await?
                     .into_iter()
                     .collect()
             }
@@ -412,7 +433,8 @@ impl<'db> FrontendAccounts<'db> {
         let account_ids = dsl::frontend_accounts
             .filter(dsl::game_account_id.eq_any(game_ids))
             .select((dsl::game_account_id.assume_not_null(), dsl::id))
-            .get_results::<(String, i64)>(conn)?
+            .get_results::<(String, i64)>(conn)
+            .await?
             .into_iter()
             .collect();
 

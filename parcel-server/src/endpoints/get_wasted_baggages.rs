@@ -16,7 +16,7 @@ pub async fn get_wasted_baggages(
     _session: Session,
     database: Data<Database>,
 ) -> Result<Json<GetWastedBaggagesResponse>, InternalError> {
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let wasted_baggages = conn.wasted_baggages();
     let mut baggages = Vec::new();
 

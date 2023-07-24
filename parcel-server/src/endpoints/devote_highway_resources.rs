@@ -13,7 +13,7 @@ async fn devote_highway_resources(
     session: Session,
     database: Data<Database>,
 ) -> Result<EmptyResponse, InternalError> {
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let highway_resources = conn.highway_resources();
 
     highway_resources

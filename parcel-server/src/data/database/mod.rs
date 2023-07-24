@@ -10,16 +10,12 @@ pub mod wasted_baggages;
 
 use std::sync::Arc;
 
-use diesel::{
-    connection::{AnsiTransactionManager, TransactionManager},
-    result::Error as DieselError,
-    Connection, ConnectionResult, PgConnection,
+use diesel::{result::Error as DieselError, ConnectionResult};
+use diesel_async::{
+    scoped_futures::ScopedBoxFuture, AnsiTransactionManager, AsyncConnection, AsyncPgConnection,
+    TransactionManager,
 };
-use diesel_async::scoped_futures::{ScopedBoxFuture, ScopedFuture};
-use futures_util::{
-    future::BoxFuture,
-    lock::{Mutex, MutexLockFuture},
-};
+use futures_util::lock::{Mutex, MutexLockFuture};
 
 use crate::db::QueryError;
 
@@ -40,21 +36,21 @@ impl Database {
         }
     }
 
-    pub fn connect(&self) -> ConnectionResult<DatabaseConnection> {
-        let conn = PgConnection::establish(&self.database_url)?;
+    pub async fn connect(&self) -> ConnectionResult<DatabaseConnection> {
+        let conn = AsyncPgConnection::establish(&self.database_url).await?;
         Ok(DatabaseConnection::new(self, conn))
     }
 }
 
 pub struct DatabaseConnection<'db> {
-    connection: Arc<Mutex<PgConnection>>,
+    connection: Arc<Mutex<AsyncPgConnection>>,
 
     /// Technically not used for anything, but it's borrowed so we can't accidentally leave a connection somewhere past the database struct's life
     _db: &'db Database,
 }
 
 impl<'db> DatabaseConnection<'db> {
-    pub fn new(db: &'db Database, connection: PgConnection) -> Self {
+    pub fn new(db: &'db Database, connection: AsyncPgConnection) -> Self {
         Self {
             _db: db,
             connection: Arc::new(Mutex::new(connection)),
@@ -67,19 +63,19 @@ impl<'db> DatabaseConnection<'db> {
         T: 'a,
     {
         let mut conn_guard = self.get_pg_connection().await;
-        AnsiTransactionManager::begin_transaction(&mut *conn_guard)?;
+        AnsiTransactionManager::begin_transaction(&mut *conn_guard).await?;
         std::mem::drop(conn_guard); // release mutex lock to avoid deadlocks from callback
 
         match callback(self).await {
             Ok(result) => {
                 let conn = &mut *self.get_pg_connection().await;
-                AnsiTransactionManager::commit_transaction(conn)?;
+                AnsiTransactionManager::commit_transaction(conn).await?;
 
                 Ok(result)
             }
             Err(user_err) => {
                 let conn = &mut *self.get_pg_connection().await;
-                match AnsiTransactionManager::rollback_transaction(conn) {
+                match AnsiTransactionManager::rollback_transaction(conn).await {
                     Ok(_) => Err(user_err),
                     Err(DieselError::BrokenTransactionManager) => Err(user_err),
                     Err(err) => Err(err.into()),
@@ -88,7 +84,7 @@ impl<'db> DatabaseConnection<'db> {
         }
     }
 
-    fn get_pg_connection(&self) -> MutexLockFuture<PgConnection> {
+    fn get_pg_connection(&self) -> MutexLockFuture<AsyncPgConnection> {
         self.connection.lock()
     }
 

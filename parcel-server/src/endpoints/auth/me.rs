@@ -22,7 +22,7 @@ pub async fn me(
     gateway_url: Data<Option<GatewayUrl>>,
     http_request: HttpRequest,
 ) -> Result<Json<AuthResponse>, InternalError> {
-    let db = database.connect()?;
+    let db = database.connect().await?;
     let accounts = db.accounts();
     let account = accounts
         .get_by_provider_id(session.provider, &session.provider_id)

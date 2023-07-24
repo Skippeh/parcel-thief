@@ -15,7 +15,7 @@ pub async fn update_objects_tag(
     _session: Session,
     database: Data<Database>,
 ) -> Result<Json<UpdateObjectsTagResponse>, InternalError> {
-    let db = database.connect()?;
+    let db = database.connect().await?;
     let objects = db.qpid_objects();
 
     objects

@@ -15,7 +15,7 @@ pub async fn create_road(
     session: Session,
     database: Data<Database>,
 ) -> Result<Json<CreateRoadResponse>, InternalError> {
-    let db = database.connect()?;
+    let db = database.connect().await?;
     let roads = db.roads();
 
     let road = roads

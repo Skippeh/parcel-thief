@@ -18,7 +18,7 @@ pub async fn reverse_lookup(
     _session: Session,
     database: Data<Database>,
 ) -> Result<Json<ReverseLookupResponse>, InternalError> {
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let accounts = conn.accounts();
 
     let account_ids = accounts
