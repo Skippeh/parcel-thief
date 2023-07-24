@@ -10,8 +10,18 @@ pub mod wasted_baggages;
 
 use std::sync::Arc;
 
-use diesel::{Connection, ConnectionResult, PgConnection};
-use futures_util::lock::{Mutex, MutexLockFuture};
+use diesel::{
+    connection::{AnsiTransactionManager, TransactionManager},
+    result::Error as DieselError,
+    Connection, ConnectionResult, PgConnection,
+};
+use diesel_async::scoped_futures::{ScopedBoxFuture, ScopedFuture};
+use futures_util::{
+    future::BoxFuture,
+    lock::{Mutex, MutexLockFuture},
+};
+
+use crate::db::QueryError;
 
 use self::{
     accounts::Accounts, frontend_accounts::FrontendAccounts, highway_resources::HighwayResources,
@@ -51,6 +61,37 @@ impl<'db> DatabaseConnection<'db> {
         }
     }
 
+    pub async fn transaction<'a, T, F>(&self, callback: F) -> Result<T, QueryError>
+    where
+        F: for<'b> FnOnce(&'b Self) -> ScopedBoxFuture<'a, 'b, Result<T, QueryError>> + Send + 'a,
+        T: 'a,
+    {
+        let mut conn_guard = self.get_pg_connection().await;
+        AnsiTransactionManager::begin_transaction(&mut *conn_guard)?;
+        std::mem::drop(conn_guard); // release mutex lock to avoid deadlocks from callback
+
+        match callback(self).await {
+            Ok(result) => {
+                let conn = &mut *self.get_pg_connection().await;
+                AnsiTransactionManager::commit_transaction(conn)?;
+
+                Ok(result)
+            }
+            Err(user_err) => {
+                let conn = &mut *self.get_pg_connection().await;
+                match AnsiTransactionManager::rollback_transaction(conn) {
+                    Ok(_) => Err(user_err),
+                    Err(DieselError::BrokenTransactionManager) => Err(user_err),
+                    Err(err) => Err(err.into()),
+                }
+            }
+        }
+    }
+
+    fn get_pg_connection(&self) -> MutexLockFuture<PgConnection> {
+        self.connection.lock()
+    }
+
     pub fn accounts(&self) -> Accounts {
         Accounts::new(self)
     }
@@ -85,9 +126,5 @@ impl<'db> DatabaseConnection<'db> {
 
     pub fn roads(&self) -> Roads {
         Roads::new(self)
-    }
-
-    fn get_pg_connection(&self) -> MutexLockFuture<PgConnection> {
-        self.connection.lock()
     }
 }
