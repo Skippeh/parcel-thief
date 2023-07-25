@@ -21,7 +21,7 @@ const ResetPasswordButton = ({ account, promptCurrentPassword }: Props) => {
   const [error, setError] = React.useState<string | null>(null);
 
   function checkPasswordConfirm(value: string, formData: FormData) {
-    return value !== formData.get("currentPassword");
+    return value !== formData.get("newPassword");
   }
 
   const resetPassword = async (): Promise<ApiResponse<void>> => {
