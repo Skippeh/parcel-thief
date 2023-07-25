@@ -270,21 +270,22 @@ pub async fn reset_password(
 
     let conn = database.connect().await?;
     let accounts = conn.frontend_accounts();
-
     let credentials = accounts.get_credentials(account_id).await?;
 
     match credentials {
         Some(credentials) => {
-            // If account id matches current session if make sure current password is correct
-            let current_password_hash = hash_secret.hash_string(
-                &request.current_password.as_deref().unwrap_or_else(|| ""),
-                &credentials.salt,
-            );
+            // If account id matches current session make sure current password is correct
+            if account_id == session.account_id {
+                let current_password_hash = hash_secret.hash_string(
+                    &request.current_password.as_deref().unwrap_or_else(|| ""),
+                    &credentials.salt,
+                );
 
-            if hex::encode(current_password_hash) != credentials.password {
-                return Err(ApiError::Unprocessable(anyhow::anyhow!(
-                    "The current password is incorrect"
-                )));
+                if hex::encode(current_password_hash) != credentials.password {
+                    return Err(ApiError::Unprocessable(anyhow::anyhow!(
+                        "The current password is incorrect"
+                    )));
+                }
             }
 
             accounts

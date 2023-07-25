@@ -24,10 +24,10 @@ const ResetPasswordButton = ({ account, promptCurrentPassword }: Props) => {
     return value !== formData.get("currentPassword");
   }
 
-  const resetPassword = async (): Promise<ApiResponse<unknown>> => {
+  const resetPassword = async (): Promise<ApiResponse<void>> => {
     const response = await resetAccountPassword(
       account.id,
-      currentPassword,
+      promptCurrentPassword ? currentPassword : null,
       newPassword
     );
 
