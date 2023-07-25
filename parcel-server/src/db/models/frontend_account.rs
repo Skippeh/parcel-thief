@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use diesel::{Insertable, Queryable};
+use diesel::{AsChangeset, Insertable, Queryable};
 use parcel_common::api_types::auth::Provider;
 
 use crate::db::schema::{
@@ -21,6 +21,14 @@ pub struct NewFrontendAccount<'a> {
     pub game_account_id: Option<&'a str>,
     pub created_at: Option<&'a NaiveDateTime>,
     pub permissions: i64,
+}
+
+#[derive(Debug, AsChangeset, Default)]
+#[diesel(table_name = frontend_accounts)]
+pub struct ChangeFrontendAccount<'a> {
+    pub game_account_id: Option<Option<&'a str>>,
+    pub created_at: Option<&'a NaiveDateTime>,
+    pub permissions: Option<i64>,
 }
 
 #[derive(Debug, Queryable)]

@@ -11,8 +11,9 @@ use crate::{
         models::{
             account::Account as GameAccount,
             frontend_account::{
-                AccountCredentials, AccountProviderConnection, FrontendAccount,
-                NewAccountCredentials, NewAccountProviderConnection, NewFrontendAccount,
+                AccountCredentials, AccountProviderConnection, ChangeFrontendAccount,
+                FrontendAccount, NewAccountCredentials, NewAccountProviderConnection,
+                NewFrontendAccount,
             },
         },
         QueryError,
@@ -439,5 +440,55 @@ impl<'db> FrontendAccounts<'db> {
             .collect();
 
         Ok(account_ids)
+    }
+
+    pub async fn add_account(
+        &self,
+        account: &NewFrontendAccount<'_>,
+    ) -> Result<FrontendAccount, QueryError> {
+        use crate::db::schema::frontend_accounts::dsl;
+
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        let account = diesel::insert_into(dsl::frontend_accounts)
+            .values(account)
+            .get_result(conn)
+            .await?;
+
+        Ok(account)
+    }
+
+    pub async fn update_account(
+        &self,
+        account_id: i64,
+        updates: &ChangeFrontendAccount<'_>,
+    ) -> Result<(), QueryError> {
+        use crate::db::schema::frontend_accounts::dsl;
+
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        diesel::update(dsl::frontend_accounts)
+            .filter(dsl::id.eq(account_id))
+            .set(updates)
+            .execute(conn)
+            .await?;
+
+        Ok(())
+    }
+
+    pub async fn add_provider_connection(
+        &self,
+        connection: &NewAccountProviderConnection<'_>,
+    ) -> Result<AccountProviderConnection, QueryError> {
+        use crate::db::schema::frontend_account_provider_connections::dsl;
+
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        let connection = diesel::insert_into(dsl::frontend_account_provider_connections)
+            .values(connection)
+            .get_result(conn)
+            .await?;
+
+        Ok(connection)
     }
 }

@@ -2,6 +2,7 @@ use actix_web::{
     get, post, put,
     web::{Data, Json, Path, Query},
 };
+use diesel_async::scoped_futures::ScopedFutureExt;
 use flagset::FlagSet;
 use lazy_static::__Deref;
 use parcel_common::api_types::frontend::{
@@ -17,6 +18,9 @@ use serde::Deserialize;
 
 use crate::{
     data::{database::Database, hash_secret::HashSecret},
+    db::models::frontend_account::{
+        ChangeFrontendAccount, NewAccountProviderConnection, NewFrontendAccount,
+    },
     endpoints::{EmptyResponse, ValidatedJson},
     frontend::{
         error::ApiError,
@@ -298,29 +302,77 @@ pub async fn create_frontend_account(
     session: JwtSession,
     database: Data<Database>,
     request: Json<CreateFrontendAccountRequest>,
-) -> ApiResult<LocalAccount> {
+    hash_secret: Data<HashSecret>,
+) -> ApiResult<i64> {
     // Check that we have permission
     if !session.has_permissions(FrontendPermissions::ManageAccounts) {
         return Err(ApiError::Forbidden);
     }
 
     let conn = database.connect().await?;
-    let accounts = conn.frontend_accounts();
 
-    match request.into_inner() {
-        CreateFrontendAccountRequest::WithCredentials(CreateCredentialsRequest {
-            username,
-            password,
-        }) => {
-            // todo
-            Err(anyhow::anyhow!("WithCredentials not implemented").into())
-        }
-        CreateFrontendAccountRequest::WithProvider {
-            provider,
-            provider_id,
-        } => {
-            // todo
-            Err(anyhow::anyhow!("WithProvider not implemented").into())
-        }
-    }
+    let account = conn
+        .transaction(|conn| {
+            async move {
+                let accounts = conn.frontend_accounts();
+                let account = accounts
+                    .add_account(&NewFrontendAccount {
+                        game_account_id: None,
+                        created_at: None,
+                        permissions: 0,
+                    })
+                    .await?;
+
+                match request.into_inner() {
+                    CreateFrontendAccountRequest::WithCredentials(CreateCredentialsRequest {
+                        username,
+                        password,
+                    }) => {
+                        accounts
+                            .create_credentials(
+                                account.id,
+                                &username,
+                                &password,
+                                hash_secret.as_ref(),
+                            )
+                            .await?;
+                    }
+                    CreateFrontendAccountRequest::WithProvider {
+                        provider,
+                        provider_id,
+                    } => {
+                        accounts
+                            .add_provider_connection(&NewAccountProviderConnection {
+                                account_id: account.id,
+                                created_at: None,
+                                provider: provider,
+                                provider_id: &provider_id,
+                            })
+                            .await?;
+
+                        let game_accounts = conn.accounts();
+                        if let Some(game_account) = game_accounts
+                            .get_by_provider_id(provider, &provider_id)
+                            .await?
+                        {
+                            accounts
+                                .update_account(
+                                    account.id,
+                                    &ChangeFrontendAccount {
+                                        game_account_id: Some(Some(&game_account.id)),
+                                        ..Default::default()
+                                    },
+                                )
+                                .await?;
+                        }
+                    }
+                }
+
+                Ok(account)
+            }
+            .scope_boxed()
+        })
+        .await?;
+
+    ApiResponse::ok(account.id)
 }
