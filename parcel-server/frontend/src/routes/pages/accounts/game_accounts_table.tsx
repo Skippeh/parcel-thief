@@ -31,7 +31,7 @@ const Buttons = (props: ICellRendererParams<GameAccountListItem>) => {
 
     if (response.data != null) {
       setTimeout(() => {
-        navigate(`/frontend/${response.data}`);
+        navigate(`frontend/${response.data}`);
       }, CooldownDelay);
     } else {
       setError(response.error);
