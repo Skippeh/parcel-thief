@@ -26,6 +26,7 @@ use data::{
     database::Database,
     hash_secret::HashSecret,
     jwt_secret::JwtSecret,
+    memory_cache::PersistentCache,
     platforms::{epic::Epic, steam::Steam},
 };
 use diesel::{pg::Pg, Connection, PgConnection};
@@ -138,6 +139,9 @@ async fn main() -> Result<()> {
         anyhow::bail!("Both or none of the public and private keys needs to be specified");
     }
 
+    // make sure data directory exists
+    std::fs::create_dir_all("data").context("Could not create data directory")?;
+
     let database_url = embedded::postgresql::setup_postgresql(&args)
         .await
         .context("Failed to setup and launch postgresql server")?;
@@ -155,11 +159,16 @@ async fn main() -> Result<()> {
         "FrontendAuthCache",
         60 * 2,
     ));
-    let session_blacklist_cache = web::Data::new(SessionBlacklistCache::from_builder(
-        CacheBuilder::default()
-            .name("SessionBlacklistCache")
-            .expire_after(SessionBlacklistCacheExpiry),
-    ));
+    let session_blacklist_cache = web::Data::new(
+        SessionBlacklistCache::from_builder(
+            CacheBuilder::default()
+                .name("SessionBlacklistCache")
+                .expire_after(SessionBlacklistCacheExpiry),
+        )
+        .load_from_file(Path::new("data/blacklist"))
+        .await
+        .context("Could not load session blacklist")?,
+    );
     let session_permissions_cache = web::Data::new(SessionPermissionsCache::from_builder(
         CacheBuilder::default()
             .name("SessionPermissionsCache")

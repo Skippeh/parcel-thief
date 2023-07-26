@@ -30,7 +30,7 @@ reqwest = { version = "0.11.14", features = [
 hex = "0.4.3"
 rand = "0.8.5"
 rand_chacha = "0.3.1"
-chrono = "0.4.25"
+chrono = { version = "0.4.25", features = ["serde"] }
 async-trait = "0.1.64"
 base64 = "0.21.0"
 diesel = { version = "2.1.0" }

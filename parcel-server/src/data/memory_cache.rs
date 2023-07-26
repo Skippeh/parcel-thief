@@ -1,9 +1,13 @@
 use std::{
+    collections::HashMap,
     ops::{Deref, DerefMut},
+    path::Path,
     time::Duration,
 };
 
+use bincode::Options;
 use moka::future::{Cache as MokaCache, CacheBuilder};
+use serde::{de::DeserializeOwned, Serialize};
 
 pub struct MemoryCache<K, V>
 where
@@ -52,4 +56,71 @@ where
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.cache
     }
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum CacheError {
+    /// Serialize or deserialize error
+    #[error("{0}")]
+    Serialize(bincode::Error),
+    #[error("{0}")]
+    Io(std::io::Error),
+}
+
+#[async_trait::async_trait]
+pub trait PersistentCache: Sized {
+    async fn save_to_file(&self, file_path: &Path) -> Result<(), CacheError>;
+    async fn load_from_file(self, file_path: &Path) -> Result<Self, CacheError>;
+}
+
+#[async_trait::async_trait]
+impl<K, V> PersistentCache for MemoryCache<K, V>
+where
+    K: Serialize + DeserializeOwned + Eq + PartialEq + std::hash::Hash + Send + Sync + 'static,
+    V: Serialize + DeserializeOwned + Send + Sync + Clone + 'static,
+{
+    async fn save_to_file(&self, file_path: &Path) -> Result<(), CacheError> {
+        let values = self.cache.iter().collect::<HashMap<_, _>>();
+        let serialized = get_bincode_options()
+            .serialize(&values)
+            .map_err(|err| CacheError::Serialize(err))?;
+
+        tokio::fs::write(file_path, serialized)
+            .await
+            .map_err(|err| CacheError::Io(err))?;
+
+        Ok(())
+    }
+
+    /// Loads cache values from the specified file path. If the file does not exist `Self::default()` is returned.
+    async fn load_from_file(self, file_path: &Path) -> Result<Self, CacheError> {
+        if !tokio::fs::try_exists(file_path)
+            .await
+            .map_err(|err| CacheError::Io(err))?
+        {
+            self.save_to_file(file_path).await?;
+            return Ok(self);
+        }
+
+        let deserialized = tokio::fs::read(file_path)
+            .await
+            .map_err(|err| CacheError::Io(err))?;
+        let values: HashMap<K, V> = get_bincode_options()
+            .deserialize(&deserialized)
+            .map_err(|err| CacheError::Serialize(err))?;
+
+        let result = self;
+
+        for (key, value) in values {
+            result.cache.insert(key, value).await;
+        }
+
+        Ok(result)
+    }
+}
+
+fn get_bincode_options() -> impl bincode::Options {
+    bincode::DefaultOptions::new()
+        .with_varint_encoding()
+        .with_little_endian()
 }
