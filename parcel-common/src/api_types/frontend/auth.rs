@@ -51,7 +51,8 @@ flags! {
     #[repr(i64)]
     #[serde(rename_all = "camelCase")]
     pub enum FrontendPermissions: i64 {
-        ManageAccounts,
+        ManageAccounts = 1 << 0,
+        ManageServerSettings = 1 << 1,
     }
 }
 

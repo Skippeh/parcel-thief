@@ -31,6 +31,8 @@ export function permissionToReadableString(
   switch (permission) {
     case "manageAccounts":
       return "Manage accounts";
+    case "manageServerSettings":
+      return "Manage server settings";
     default:
       return permission ?? "Unknown";
   }

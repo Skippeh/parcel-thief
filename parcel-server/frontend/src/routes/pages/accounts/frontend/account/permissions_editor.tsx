@@ -10,7 +10,10 @@ import { useState } from "react";
 import SaveButton from "../../../../../components/save_button";
 import { ApiResponse } from "../../../../../services";
 
-const allPermissions: FrontendPermissions[] = ["manageAccounts"];
+const allPermissions: FrontendPermissions[] = [
+  "manageAccounts",
+  "manageServerSettings",
+];
 const permissionNames = Object.fromEntries(
   allPermissions.map((permission) => [
     permission,
