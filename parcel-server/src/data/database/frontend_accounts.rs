@@ -237,24 +237,6 @@ impl<'db> FrontendAccounts<'db> {
         Ok(accounts)
     }
 
-    pub async fn get_login_usernames(
-        &self,
-        account_ids: &[i64],
-    ) -> Result<HashMap<i64, String>, QueryError> {
-        use crate::db::schema::frontend_account_credentials::dsl;
-
-        let conn = &mut *self.connection.get_pg_connection().await;
-        let credentials: Vec<AccountCredentials> = dsl::frontend_account_credentials
-            .filter(dsl::account_id.eq_any(account_ids))
-            .get_results(conn)
-            .await?;
-
-        Ok(credentials
-            .into_iter()
-            .map(|c| (c.account_id, c.username))
-            .collect())
-    }
-
     pub async fn set_permissions(
         &self,
         account_id: i64,
