@@ -389,7 +389,7 @@ impl<'db> FrontendAccounts<'db> {
                 HashMap::default()
             } else {
                 dsl::frontend_account_credentials
-                    .select(dsl::account_id.eq_any(&credential_account_ids))
+                    .filter(dsl::account_id.eq_any(&credential_account_ids))
                     .select((dsl::account_id, dsl::username))
                     .get_results(conn)
                     .await?
