@@ -165,6 +165,9 @@ async fn main() -> Result<()> {
     );
 
     migrate_database(&database_url).context("Could not apply pending database migrations")?;
+    create_admin_account_if_not_exists(&*database, &*hash_secret)
+        .await
+        .context("Could not check for or create admin account")?;
 
     let gateway_url = args.gateway_url.as_ref().map(|url| format!("{}/ds", url));
 
@@ -291,4 +294,23 @@ fn load_gamedata_from_file(game_data_path: &Path) -> Result<GameData, anyhow::Er
     let game_data = serde_json::from_slice(&bytes)?;
 
     Ok(game_data)
+}
+
+async fn create_admin_account_if_not_exists(
+    database: &Database,
+    hash_secret: &HashSecret,
+) -> Result<(), anyhow::Error> {
+    let conn = database.connect().await?;
+    if let Some((username, password)) = conn
+        .frontend_accounts()
+        .create_admin_account_if_not_exists(hash_secret)
+        .await?
+    {
+        log::warn!("Could not find an existing admin account");
+        log::info!(
+            "Created admin account with username \"{username}\" and password \"{password}\""
+        );
+    }
+
+    Ok(())
 }

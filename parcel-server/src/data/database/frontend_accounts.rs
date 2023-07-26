@@ -491,4 +491,67 @@ impl<'db> FrontendAccounts<'db> {
 
         Ok(connection)
     }
+
+    /// Creates an account with all permissions if no account with the ManageAccounts permission is found.
+    ///
+    /// At the moment the account username is always set to "admin" but this may change in the future.
+    ///
+    /// The returned value is the username and unhashed password of the created account.
+    pub async fn create_admin_account_if_not_exists(
+        &self,
+        hash_secret: &HashSecret,
+    ) -> Result<Option<(String, String)>, QueryError> {
+        use crate::db::schema::frontend_accounts::dsl;
+
+        let mut conn_guard = self.connection.get_pg_connection().await;
+
+        let permissions = dsl::frontend_accounts
+            .select(dsl::permissions)
+            .get_results::<i64>(&mut *conn_guard)
+            .await?
+            .into_iter()
+            .map(|perm| FlagSet::<FrontendPermissions>::new_truncated(perm))
+            .collect::<Vec<_>>();
+
+        let mut create_account = true;
+
+        for permission in permissions {
+            if permission.contains(FrontendPermissions::ManageAccounts) {
+                create_account = false;
+                break;
+            }
+        }
+
+        if create_account {
+            let username = "admin".to_string();
+            let password = generate_password();
+            // using i64::MAX will make this account also inherit any new permissions added later in time,
+            // as long as the permissions are not edited in the frontend.
+            let permissions = i64::MAX;
+
+            let account: FrontendAccount = diesel::insert_into(dsl::frontend_accounts)
+                .values(&NewFrontendAccount {
+                    game_account_id: None,
+                    created_at: None,
+                    permissions,
+                })
+                .get_result(&mut *conn_guard)
+                .await?;
+
+            // drop guard to avoid deadlock
+            std::mem::drop(conn_guard);
+
+            self.create_credentials(account.id, &username, &password, hash_secret)
+                .await?;
+
+            Ok(Some((username, password)))
+        } else {
+            Ok(None)
+        }
+    }
+}
+
+fn generate_password() -> String {
+    let chars = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    parcel_common::rand::generate_string(12, chars)
 }
