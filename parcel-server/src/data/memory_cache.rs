@@ -92,7 +92,7 @@ where
         Ok(())
     }
 
-    /// Loads cache values from the specified file path. If the file does not exist `Self::default()` is returned.
+    /// Loads cache values from the specified file path. If the file does not exist the current values in the cache are saved to the file and then `self` is returned unchanged.
     async fn load_from_file(self, file_path: &Path) -> Result<Self, CacheError> {
         if !tokio::fs::try_exists(file_path)
             .await
