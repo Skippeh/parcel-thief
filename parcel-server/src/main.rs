@@ -12,6 +12,7 @@ use std::{
     io::BufReader,
     net::IpAddr,
     path::{Path, PathBuf},
+    time::Duration,
 };
 
 use actix_web::{
@@ -29,7 +30,11 @@ use data::{
 };
 use diesel::{pg::Pg, Connection, PgConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
-use frontend::api::endpoints::auth::FrontendAuthCache;
+use frontend::{
+    api::endpoints::auth::FrontendAuthCache,
+    jwt_session::{SessionBlacklistCache, SessionBlacklistCacheExpiry, SessionPermissionsCache},
+};
+use moka::future::CacheBuilder;
 use parcel_game_data::GameData;
 use rustls::{Certificate, PrivateKey};
 use rustls_pemfile::{certs, pkcs8_private_keys};
@@ -150,6 +155,16 @@ async fn main() -> Result<()> {
         "FrontendAuthCache",
         60 * 2,
     ));
+    let session_blacklist_cache = web::Data::new(SessionBlacklistCache::from_builder(
+        CacheBuilder::default()
+            .name("SessionBlacklistCache")
+            .expire_after(SessionBlacklistCacheExpiry),
+    ));
+    let session_permissions_cache = web::Data::new(SessionPermissionsCache::from_builder(
+        CacheBuilder::default()
+            .name("SessionPermissionsCache")
+            .time_to_idle(Duration::from_secs(60 * 5)),
+    ));
     let jwt_secret = web::Data::new(
         JwtSecret::load_or_generate_secret()
             .await
@@ -190,6 +205,8 @@ async fn main() -> Result<()> {
                 gateway_url.as_ref().map(|url| GatewayUrl(url.clone())),
             ))
             .app_data(frontend_auth_cache.clone())
+            .app_data(session_blacklist_cache.clone())
+            .app_data(session_permissions_cache.clone())
             .app_data(jwt_secret.clone())
             .app_data(hash_secret.clone())
             .app_data(game_data.clone())

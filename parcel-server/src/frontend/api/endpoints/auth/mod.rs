@@ -7,13 +7,11 @@ use actix_web::{
     HttpRequest,
 };
 use chrono::Utc;
-use flagset::FlagSet;
 use jwt::SignWithKey;
 use parcel_common::api_types::{
     auth::Provider,
     frontend::auth::{
-        AuthRequest, CheckAuthRequest, CheckAuthResponse, FrontendPermissions, InitAuthResponse,
-        JwtPayload,
+        AuthRequest, CheckAuthRequest, CheckAuthResponse, InitAuthResponse, JwtPayload,
     },
 };
 use steam_auth::Redirector;
@@ -87,11 +85,9 @@ fn create_auth_token(
     account: &FrontendAccount,
     jwt_secret: &JwtSecret,
 ) -> Result<String, jwt::error::Error> {
-    let permissions = FlagSet::<FrontendPermissions>::new_truncated(account.permissions);
     let payload = JwtPayload {
         expires_at: (Utc::now() + chrono::Duration::days(7)).timestamp(),
         account_id: account.id,
-        permissions: permissions.bits(),
     };
 
     let auth_token = payload.sign_with_key(jwt_secret)?;

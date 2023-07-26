@@ -24,7 +24,7 @@ use crate::{
     endpoints::{EmptyResponse, ValidatedJson},
     frontend::{
         error::ApiError,
-        jwt_session::JwtSession,
+        jwt_session::{JwtSession, SessionPermissionsCache},
         result::{ApiResponse, ApiResult},
     },
 };
@@ -169,6 +169,7 @@ pub async fn set_account_permissions(
     params: Path<i64>,
     request: Json<SetAccountPermissionsRequest>,
     database: Data<Database>,
+    session_permissions_cache: Data<SessionPermissionsCache>,
 ) -> ApiResult<Vec<FrontendPermissions>> {
     // Check that we have permission
     if !session.has_permissions(FrontendPermissions::ManageAccounts) {
@@ -197,11 +198,15 @@ pub async fn set_account_permissions(
         new_permissions |= *permission;
     }
 
-    let set_permissions = accounts
+    let new_permissions = accounts
         .set_permissions(account_id, new_permissions)
         .await?;
 
-    ApiResponse::ok(set_permissions.into_iter().collect())
+    session_permissions_cache
+        .insert(account_id, new_permissions)
+        .await;
+
+    ApiResponse::ok(new_permissions.into_iter().collect())
 }
 
 #[post("accounts/createCredentials/{id}")]
