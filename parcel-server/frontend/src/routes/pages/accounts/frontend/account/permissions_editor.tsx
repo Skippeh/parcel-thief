@@ -24,8 +24,8 @@ const permissionNames = Object.fromEntries(
 const Fields = styled.div`
   display: flex;
   flex-wrap: wrap;
-  max-width: 300px;
-  //justify-content: space-between;
+  max-width: 350px;
+  justify-content: space-between;
   gap: 0.5rem;
   row-gap: 0.1rem;
 `;
