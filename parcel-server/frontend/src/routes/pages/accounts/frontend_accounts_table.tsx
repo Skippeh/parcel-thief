@@ -53,7 +53,7 @@ const FrontendAccountsTable = ({ accounts }: Props) => {
   });
 
   const [columnDefs] = useState<ColDef[]>([
-    { field: "name" },
+    { field: "name", sort: "asc" },
     { field: "gameId" },
     {
       field: "permissions",

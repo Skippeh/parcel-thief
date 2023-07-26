@@ -76,6 +76,7 @@ pub async fn list_accounts(
                 });
             }
 
+            result.sort_unstable_by(|a, b| a.name.cmp(&b.name));
             ApiResponse::ok(ListAccountsResponse::Frontend { accounts: result })
         }
         ListAccountsType::Game => {
@@ -104,6 +105,7 @@ pub async fn list_accounts(
                 });
             }
 
+            result.sort_unstable_by(|a, b| a.name.cmp(&b.name));
             ApiResponse::ok(ListAccountsResponse::Game { accounts: result })
         }
     }

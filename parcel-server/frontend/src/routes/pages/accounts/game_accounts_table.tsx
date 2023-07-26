@@ -102,7 +102,7 @@ const GameAccountsTable = ({ accounts }: Props) => {
   });
 
   const [columnDefs] = useState<ColDef[]>([
-    { field: "name" },
+    { field: "name", sort: "asc" },
     { field: "gameId" },
     { field: "provider" },
     { field: "lastLogin", valueFormatter: formatDate },
