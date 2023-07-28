@@ -1,12 +1,14 @@
 pub mod local;
 pub mod steam;
 
+use std::path::Path;
+
 use actix_web::{
     post,
     web::{Data, Json},
     HttpRequest,
 };
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use jwt::SignWithKey;
 use parcel_common::api_types::{
     auth::Provider,
@@ -17,10 +19,16 @@ use parcel_common::api_types::{
 use steam_auth::Redirector;
 
 use crate::{
-    data::{jwt_secret::JwtSecret, memory_cache::MemoryCache},
+    data::{
+        database::Database,
+        jwt_secret::JwtSecret,
+        memory_cache::{MemoryCache, PersistentCache},
+    },
     db::models::frontend_account::FrontendAccount,
+    endpoints::EmptyResponse,
     frontend::{
         error::ApiError,
+        jwt_session::{JwtSession, SessionBlacklistCache, BLACKLIST_CACHE_PATH},
         result::{ApiResponse, ApiResult},
     },
 };
@@ -68,6 +76,33 @@ pub async fn check_auth(
     }
 }
 
+#[post("auth/logout")]
+pub async fn logout(
+    session: JwtSession,
+    session_blacklist_cache: Data<SessionBlacklistCache>,
+    database: Data<Database>,
+) -> ApiResult<EmptyResponse> {
+    database
+        .connect()
+        .await?
+        .frontend_accounts()
+        .delete_session_by_token(&session.token)
+        .await?;
+
+    let expiry_time = chrono::NaiveDateTime::from_timestamp_opt(session.expires_at, 0)
+        .ok_or_else(|| anyhow::anyhow!("Invalid expiry time"))?
+        .and_utc();
+    session_blacklist_cache
+        .insert(session.token, expiry_time)
+        .await;
+    session_blacklist_cache
+        .save_to_file(Path::new(BLACKLIST_CACHE_PATH))
+        .await
+        .map_err(|err| ApiError::Internal(anyhow::anyhow!(err)))?;
+
+    ApiResponse::ok(EmptyResponse)
+}
+
 fn get_site_url(request: &HttpRequest) -> String {
     let uri = request.connection_info();
 
@@ -84,12 +119,13 @@ fn generate_response_token() -> String {
 fn create_auth_token(
     account: &FrontendAccount,
     jwt_secret: &JwtSecret,
-) -> Result<String, jwt::error::Error> {
+) -> Result<(String, DateTime<Utc>), jwt::error::Error> {
+    let expire_date = Utc::now() + chrono::Duration::days(7);
     let payload = JwtPayload {
-        expires_at: (Utc::now() + chrono::Duration::days(7)).timestamp(),
+        expires_at: expire_date.timestamp(),
         account_id: account.id,
     };
 
     let auth_token = payload.sign_with_key(jwt_secret)?;
-    Ok(auth_token)
+    Ok((auth_token, expire_date))
 }

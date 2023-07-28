@@ -3,7 +3,8 @@ use diesel::{AsChangeset, Insertable, Queryable};
 use parcel_common::api_types::auth::Provider;
 
 use crate::db::schema::{
-    frontend_account_credentials, frontend_account_provider_connections, frontend_accounts,
+    frontend_account_credentials, frontend_account_provider_connections, frontend_account_sessions,
+    frontend_accounts,
 };
 
 #[derive(Debug, Queryable)]
@@ -65,4 +66,22 @@ pub struct NewAccountProviderConnection<'a> {
     pub provider: Provider,
     pub provider_id: &'a str,
     pub created_at: Option<&'a NaiveDateTime>,
+}
+
+#[derive(Debug, Queryable)]
+pub struct AccountSession {
+    pub id: i64,
+    pub account_id: i64,
+    pub created_at: NaiveDateTime,
+    pub expires_at: NaiveDateTime,
+    token: String,
+}
+
+#[derive(Debug, Insertable)]
+#[diesel(table_name = frontend_account_sessions)]
+pub struct NewAccountSession<'a> {
+    pub account_id: i64,
+    pub created_at: Option<&'a NaiveDateTime>,
+    pub expires_at: &'a NaiveDateTime,
+    pub token: &'a str,
 }

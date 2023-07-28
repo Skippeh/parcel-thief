@@ -63,8 +63,12 @@ pub async fn steam_callback(
                 Ok(account) => {
                     let permissions = FlagSet::new_truncated(account.permissions);
                     let permissions_vec = permissions.into_iter().collect();
-                    let auth_token = super::create_auth_token(&account, &jwt_secret)
+                    let (auth_token, expire_date) = super::create_auth_token(&account, &jwt_secret)
                         .map_err(anyhow::Error::msg)?;
+
+                    accounts
+                        .add_session(account.id, &auth_token, &expire_date.naive_utc())
+                        .await?;
 
                     let user_summary = steam
                         .get_player_summaries(&[&steam_id])

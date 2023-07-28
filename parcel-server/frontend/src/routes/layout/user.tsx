@@ -37,9 +37,10 @@ const User = ({ user }: Props) => {
   const { logout } = useSession();
   const navigate = useNavigate();
 
-  function doLogout() {
-    logout();
-    navigate("/login");
+  async function doLogout() {
+    if (await logout()) {
+      navigate("/login");
+    }
   }
 
   return (

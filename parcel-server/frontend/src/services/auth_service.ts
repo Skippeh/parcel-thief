@@ -47,3 +47,7 @@ export async function loginLocal(
   const response = callApi<AuthAccountInfo>("auth/local", "POST", requestData);
   return response;
 }
+
+export async function logout(): Promise<ApiResponse<void>> {
+  return callApi("auth/logout", "POST");
+}

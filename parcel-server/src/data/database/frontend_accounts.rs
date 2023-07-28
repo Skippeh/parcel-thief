@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use chrono::NaiveDateTime;
 use diesel::{dsl::exists, prelude::*, select};
 use diesel_async::{scoped_futures::ScopedFutureExt, AsyncConnection, RunQueryDsl};
 use flagset::FlagSet;
@@ -11,9 +12,9 @@ use crate::{
         models::{
             account::Account as GameAccount,
             frontend_account::{
-                AccountCredentials, AccountProviderConnection, ChangeFrontendAccount,
-                FrontendAccount, NewAccountCredentials, NewAccountProviderConnection,
-                NewFrontendAccount,
+                AccountCredentials, AccountProviderConnection, AccountSession,
+                ChangeFrontendAccount, FrontendAccount, NewAccountCredentials,
+                NewAccountProviderConnection, NewAccountSession, NewFrontendAccount,
             },
         },
         QueryError,
@@ -530,6 +531,81 @@ impl<'db> FrontendAccounts<'db> {
         } else {
             Ok(None)
         }
+    }
+
+    pub async fn add_session(
+        &self,
+        account_id: i64,
+        auth_token: &str,
+        expires_at: &NaiveDateTime,
+    ) -> Result<(), QueryError> {
+        use crate::db::schema::frontend_account_sessions::dsl;
+
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        diesel::insert_into(dsl::frontend_account_sessions)
+            .values(&NewAccountSession {
+                account_id,
+                created_at: None,
+                expires_at,
+                token: auth_token,
+            })
+            .execute(conn)
+            .await?;
+
+        Ok(())
+    }
+
+    pub async fn get_sessions_by_account_id(
+        &self,
+        account_id: i64,
+    ) -> Result<Vec<AccountSession>, QueryError> {
+        use crate::db::schema::frontend_account_sessions::dsl;
+
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        Ok(dsl::frontend_account_sessions
+            .filter(dsl::account_id.eq(account_id))
+            .get_results(conn)
+            .await?)
+    }
+
+    pub async fn delete_session_by_token(&self, token: &str) -> Result<(), QueryError> {
+        use crate::db::schema::frontend_account_sessions::dsl;
+
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        diesel::delete(dsl::frontend_account_sessions)
+            .filter(dsl::token.eq(token))
+            .execute(conn)
+            .await?;
+
+        Ok(())
+    }
+
+    pub async fn delete_sessions_by_id(&self, ids: &[i64]) -> Result<(), QueryError> {
+        use crate::db::schema::frontend_account_sessions::dsl;
+
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        diesel::delete(dsl::frontend_account_sessions.filter(dsl::id.eq_any(ids)))
+            .execute(conn)
+            .await?;
+
+        Ok(())
+    }
+
+    pub async fn delete_expired_sessions(&self) -> Result<(), QueryError> {
+        use crate::db::schema::frontend_account_sessions::dsl;
+
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        diesel::delete(dsl::frontend_account_sessions)
+            .filter(dsl::expires_at.lt(diesel::dsl::now))
+            .execute(conn)
+            .await?;
+
+        Ok(())
     }
 }
 

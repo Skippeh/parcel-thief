@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { SessionContext, User } from "../context/session_context";
 import { JwtPayload } from "../api_types";
+import { logout as authServiceLogout } from "../services/auth_service";
 
 function decodeJwtPayload(authToken: string): JwtPayload {
   let b64Payload = authToken.split(".")[1];
@@ -17,7 +18,16 @@ const useSession = () => {
   const getUser = () => session.user;
   const getAuthToken = () => session.authToken;
   const isLoggedIn = () => session.user != null && session.authToken != null;
-  const logout = () => session.setUserAndToken(null);
+  const logout = async (): Promise<boolean> => {
+    const logoutResponse = await authServiceLogout();
+
+    if (logoutResponse.statusCode == 200) {
+      session.setUserAndToken(null);
+      return true;
+    }
+
+    return false;
+  };
   const setSession = (user: User, authToken: string) =>
     session.setUserAndToken({
       user: {

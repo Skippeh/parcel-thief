@@ -18,22 +18,27 @@ use crate::{
 
 use super::error::ApiError;
 
+pub const BLACKLIST_CACHE_PATH: &str = "data/blacklist";
 pub type SessionBlacklistCache = MemoryCache<String, DateTime<Utc>>; // value = token expire date
 pub type SessionPermissionsCache = MemoryCache<i64, FlagSet<FrontendPermissions>>;
 
-pub struct JwtSession(JwtPayload, FlagSet<FrontendPermissions>);
+pub struct JwtSession {
+    payload: JwtPayload,
+    permissions: FlagSet<FrontendPermissions>,
+    pub token: String,
+}
 
 impl Deref for JwtSession {
     type Target = JwtPayload;
 
     fn deref(&self) -> &Self::Target {
-        &self.0
+        &self.payload
     }
 }
 
 impl AsRef<JwtPayload> for JwtSession {
     fn as_ref(&self) -> &JwtPayload {
-        &self.0
+        &self.payload
     }
 }
 
@@ -45,7 +50,7 @@ impl JwtSession {
             return true;
         }
 
-        self.1.contains(permissions)
+        self.permissions.contains(permissions)
     }
 }
 
@@ -165,7 +170,11 @@ impl FromRequest for JwtSession {
                 }
             };
 
-            Ok(Self(payload, permissions))
+            Ok(Self {
+                payload,
+                permissions,
+                token,
+            })
         }
         .boxed_local()
     }

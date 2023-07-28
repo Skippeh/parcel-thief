@@ -59,6 +59,16 @@ diesel::table! {
 }
 
 diesel::table! {
+    frontend_account_sessions (id) {
+        id -> Int8,
+        account_id -> Int8,
+        created_at -> Timestamp,
+        expires_at -> Timestamp,
+        token -> Varchar,
+    }
+}
+
+diesel::table! {
     frontend_accounts (id) {
         id -> Int8,
         game_account_id -> Nullable<Varchar>,
@@ -439,6 +449,7 @@ diesel::table! {
 diesel::joinable!(devoted_highway_resources -> accounts (account_id));
 diesel::joinable!(frontend_account_credentials -> frontend_accounts (account_id));
 diesel::joinable!(frontend_account_provider_connections -> frontend_accounts (account_id));
+diesel::joinable!(frontend_account_sessions -> frontend_accounts (account_id));
 diesel::joinable!(frontend_accounts -> accounts (game_account_id));
 diesel::joinable!(mission_baggage_ammo_infos -> mission_baggages (baggage_id));
 diesel::joinable!(mission_baggages -> missions (mission_id));
@@ -480,6 +491,7 @@ diesel::allow_tables_to_appear_in_same_query!(
     devoted_highway_resources,
     frontend_account_credentials,
     frontend_account_provider_connections,
+    frontend_account_sessions,
     frontend_accounts,
     likes,
     mission_baggage_ammo_infos,

@@ -9,6 +9,7 @@ pub fn configure_endpoints(cfg: &mut ServiceConfig) {
         .service(auth::check_auth)
         .service(auth::steam::steam_callback)
         .service(auth::local::auth_local)
+        .service(auth::logout)
         .service(baggages::list_shared_cargo)
         .service(baggages::list_lost_cargo)
         .service(baggages::list_wasted_cargo)

@@ -33,7 +33,10 @@ use diesel::{pg::Pg, Connection, PgConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use frontend::{
     api::endpoints::auth::FrontendAuthCache,
-    jwt_session::{SessionBlacklistCache, SessionBlacklistCacheExpiry, SessionPermissionsCache},
+    jwt_session::{
+        SessionBlacklistCache, SessionBlacklistCacheExpiry, SessionPermissionsCache,
+        BLACKLIST_CACHE_PATH,
+    },
 };
 use moka::future::CacheBuilder;
 use parcel_game_data::GameData;
@@ -165,10 +168,11 @@ async fn main() -> Result<()> {
                 .name("SessionBlacklistCache")
                 .expire_after(SessionBlacklistCacheExpiry),
         )
-        .load_from_file(Path::new("data/blacklist"))
+        .load_from_file(Path::new(BLACKLIST_CACHE_PATH))
         .await
         .context("Could not load session blacklist")?,
     );
+    let session_blacklist_cache_clone = session_blacklist_cache.clone();
     let session_permissions_cache = web::Data::new(SessionPermissionsCache::from_builder(
         CacheBuilder::default()
             .name("SessionPermissionsCache")
@@ -256,13 +260,13 @@ async fn main() -> Result<()> {
 
     if let Err(err) = &stop_pg_result {
         log::error!("Could not gracefully stop postgresql server: {}", err);
-    }
-
-    if stop_pg_result.is_err() {
         log::info!("Note: postgresql server has been stopped even if there are errors above");
     }
 
     session_store_clone.save_to_file().await?;
+    session_blacklist_cache_clone
+        .save_to_file(Path::new(BLACKLIST_CACHE_PATH))
+        .await?;
 
     result
 }
