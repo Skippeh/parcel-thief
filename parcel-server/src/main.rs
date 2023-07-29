@@ -1,3 +1,4 @@
+mod background_jobs;
 mod data;
 mod db;
 mod embedded;
@@ -208,6 +209,13 @@ async fn main() -> Result<()> {
         log::info!("Launching server with the public gateway url being inferred from the incoming connection");
     }
 
+    let mut background_job_scheduler =
+        background_jobs::create_scheduler(database.clone().into_inner()).await?;
+    background_job_scheduler
+        .start()
+        .await
+        .context("Could not start scheduler for background jobs")?;
+
     let mut builder = HttpServer::new(move || {
         App::new()
             .app_data(steam_data.clone())
@@ -263,10 +271,20 @@ async fn main() -> Result<()> {
         log::info!("Note: postgresql server has been stopped even if there are errors above");
     }
 
+    let mut scheduler_stop_failed = false;
+    if let Err(err) = background_job_scheduler.shutdown().await {
+        log::error!("Could not shutdown scheduler for background jobs: {}", err);
+        scheduler_stop_failed = true;
+    }
+
     session_store_clone.save_to_file().await?;
     session_blacklist_cache_clone
         .save_to_file(Path::new(BLACKLIST_CACHE_PATH))
         .await?;
+
+    if scheduler_stop_failed {
+        panic!("Could not shutdown background jobs");
+    }
 
     result
 }
