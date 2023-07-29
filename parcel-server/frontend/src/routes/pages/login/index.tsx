@@ -174,6 +174,11 @@ const Login = () => {
   React.useEffect(() => {
     // If we're in the initial state check if callback_token query parameter is present
     if (state == LoginState.WaitingForLoginOption) {
+      if (session.isLoggedIn) {
+        navigate("/", { replace: true });
+        return;
+      }
+
       let callbackToken = searchParams.get("callback_token");
 
       if (callbackToken == null) {
