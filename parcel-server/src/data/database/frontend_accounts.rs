@@ -601,7 +601,7 @@ impl<'db> FrontendAccounts<'db> {
         let conn = &mut *self.connection.get_pg_connection().await;
 
         diesel::delete(dsl::frontend_account_sessions)
-            .filter(dsl::expires_at.lt(diesel::dsl::now))
+            .filter(dsl::expires_at.le(diesel::dsl::now))
             .execute(conn)
             .await?;
 
