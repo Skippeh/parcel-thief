@@ -21,7 +21,8 @@ const useSession = () => {
   const logout = async (): Promise<boolean> => {
     const logoutResponse = await authServiceLogout();
 
-    if (logoutResponse.statusCode == 200) {
+    // 401 means token is expired or otherwise invalid
+    if (logoutResponse.statusCode == 200 || logoutResponse.statusCode == 401) {
       session.setUserAndToken(null);
       return true;
     }
