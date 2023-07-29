@@ -104,6 +104,7 @@ pub struct ResetPasswordRequest {
     pub current_password: Option<String>,
     #[validate(length(min = 1, max = 127), custom = "is_valid_password")]
     pub new_password: String,
+    pub logout_sessions: bool,
 }
 
 fn is_valid_password(str: &str) -> Result<(), ValidationError> {

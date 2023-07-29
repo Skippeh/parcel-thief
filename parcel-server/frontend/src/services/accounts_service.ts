@@ -73,11 +73,13 @@ export function createLocalAccountFor(
 export function resetAccountPassword(
   accountId: number,
   currentPassword: string | null,
-  newPassword: string
+  newPassword: string,
+  logoutSessions: boolean
 ): Promise<ApiResponse<void>> {
   const requestData: ResetPasswordRequest = {
     currentPassword,
     newPassword,
+    logoutSessions,
   };
 
   return callApi(`accounts/resetPassword/${accountId}`, "POST", requestData);

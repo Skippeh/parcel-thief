@@ -24,7 +24,7 @@ use crate::{
     endpoints::{EmptyResponse, ValidatedJson},
     frontend::{
         error::ApiError,
-        jwt_session::{JwtSession, SessionPermissionsCache},
+        jwt_session::{JwtSession, SessionBlacklistCache, SessionPermissionsCache},
         result::{ApiResponse, ApiResult},
     },
 };
@@ -265,6 +265,7 @@ pub async fn reset_password(
     request: ValidatedJson<ResetPasswordRequest>,
     database: Data<Database>,
     hash_secret: Data<HashSecret>,
+    session_blacklist: Data<SessionBlacklistCache>,
 ) -> ApiResult<EmptyResponse> {
     let account_id = params.into_inner();
 
@@ -295,9 +296,41 @@ pub async fn reset_password(
                 }
             }
 
-            accounts
-                .set_credentials_password(account_id, &request.new_password, hash_secret.as_ref())
+            let sessions = conn
+                .transaction(|conn| {
+                    async {
+                        let accounts = conn.frontend_accounts();
+
+                        accounts
+                            .set_credentials_password(
+                                account_id,
+                                &request.new_password,
+                                hash_secret.as_ref(),
+                            )
+                            .await?;
+
+                        if request.logout_sessions {
+                            let sessions = accounts.get_sessions_by_account_id(account_id).await?;
+                            let session_ids = sessions.iter().map(|s| s.id).collect::<Vec<_>>();
+
+                            accounts.delete_sessions_by_id(&session_ids).await?;
+
+                            Ok(Some(sessions))
+                        } else {
+                            Ok(None)
+                        }
+                    }
+                    .scope_boxed()
+                })
                 .await?;
+
+            if let Some(sessions) = sessions {
+                for session in sessions {
+                    session_blacklist
+                        .insert(session.token, session.expires_at.and_utc())
+                        .await;
+                }
+            }
 
             ApiResponse::ok(EmptyResponse)
         }

@@ -74,7 +74,7 @@ pub struct AccountSession {
     pub account_id: i64,
     pub created_at: NaiveDateTime,
     pub expires_at: NaiveDateTime,
-    token: String,
+    pub token: String,
 }
 
 #[derive(Debug, Insertable)]

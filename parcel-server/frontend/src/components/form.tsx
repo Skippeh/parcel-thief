@@ -15,6 +15,11 @@ export const Field = styled(Form.Field)`
 `;
 export const Control = styled(Form.Control)`
   width: 100%;
+
+  &[type="checkbox"],
+  &[type="radio"] {
+    width: fit-content;
+  }
 `;
 export const Label = styled(Form.Label)`
   font-weight: bold;

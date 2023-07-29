@@ -18,6 +18,7 @@ const ResetPasswordButton = ({ account, promptCurrentPassword }: Props) => {
   const [currentPassword, setCurrentPassword] = React.useState("");
   const [newPassword, setNewPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
+  const [logoutSessions, setLogoutSessions] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
   function checkPasswordConfirm(value: string, formData: FormData) {
@@ -28,7 +29,8 @@ const ResetPasswordButton = ({ account, promptCurrentPassword }: Props) => {
     const response = await resetAccountPassword(
       account.id,
       promptCurrentPassword ? currentPassword : null,
-      newPassword
+      newPassword,
+      logoutSessions
     );
 
     if (response.statusCode == 200) {
@@ -49,6 +51,7 @@ const ResetPasswordButton = ({ account, promptCurrentPassword }: Props) => {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
+      setLogoutSessions(true);
     }
   }
 
@@ -104,6 +107,14 @@ const ResetPasswordButton = ({ account, promptCurrentPassword }: Props) => {
               <Form.Message match={checkPasswordConfirm}>
                 Passwords do not match
               </Form.Message>
+            </Form.Field>
+            <Form.Field>
+              <Form.Label>Log out all current sessions</Form.Label>
+              <Form.Control
+                type="checkbox"
+                checked={logoutSessions}
+                onChange={(e) => setLogoutSessions(e.target.checked)}
+              />
             </Form.Field>
             <span className="error">{error}</span>
             <Dialog.Buttons>
