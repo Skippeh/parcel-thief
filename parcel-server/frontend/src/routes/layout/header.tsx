@@ -74,6 +74,11 @@ const Header = () => {
                   <NavLink to="/accounts">Accounts</NavLink>
                 </li>
               </ProtectedContent>
+              <ProtectedContent permissions={["manageServerSettings"]}>
+                <li>
+                  <NavLink to="/settings">Settings</NavLink>
+                </li>
+              </ProtectedContent>
             </ul>
           </nav>
           <User user={user} />

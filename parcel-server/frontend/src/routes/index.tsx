@@ -8,6 +8,7 @@ import ProtectedContent from "./protected_content";
 import Items from "./pages/items";
 import Accounts from "./pages/accounts";
 import FrontendAccount from "./pages/accounts/frontend/account";
+import Settings from "./pages/settings";
 
 export interface RouteHandle {
   crumb: string;
@@ -60,6 +61,19 @@ export default createBrowserRouter(
               handle: {
                 crumb: "Edit frontend account",
               },
+            },
+          ],
+        },
+        {
+          path: "/settings",
+          element: <ProtectedContent permissions={["manageServerSettings"]} />,
+          handle: {
+            crumb: "Settings",
+          },
+          children: [
+            {
+              path: "",
+              element: <Settings />,
             },
           ],
         },
