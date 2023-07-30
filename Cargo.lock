@@ -3127,6 +3127,7 @@ dependencies = [
  "log",
  "mime_guess",
  "moka",
+ "notify 6.0.0",
  "parcel-common",
  "parcel-game-data",
  "pbkdf2 0.12.2",

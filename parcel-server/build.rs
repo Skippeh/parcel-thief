@@ -7,6 +7,7 @@ use parcel_common::api_types::frontend::{
     },
     auth::*,
     baggages::*,
+    settings::SettingsValues,
 };
 use typescript_type_def::{write_definition_file, DefinitionFileOptions};
 
@@ -19,22 +20,25 @@ fn main() {
 }
 
 type Api = (
-    AuthRequest,
-    LocalAuthRequest,
-    InitAuthResponse,
-    CheckAuthRequest,
-    CheckAuthResponse,
-    JwtPayload,
-    ListSharedCargoResponse,
-    ListLostCargoResponse,
-    ListWastedCargoResponse,
-    ListAccountsType,
-    ListAccountsResponse,
-    FrontendAccount,
-    SetAccountPermissionsRequest,
-    CreateCredentialsRequest,
-    ResetPasswordRequest,
-    CreateFrontendAccountRequest,
+    (
+        AuthRequest,
+        LocalAuthRequest,
+        InitAuthResponse,
+        CheckAuthRequest,
+        CheckAuthResponse,
+        JwtPayload,
+        ListSharedCargoResponse,
+        ListLostCargoResponse,
+        ListWastedCargoResponse,
+        ListAccountsType,
+        ListAccountsResponse,
+        FrontendAccount,
+        SetAccountPermissionsRequest,
+        CreateCredentialsRequest,
+        ResetPasswordRequest,
+        CreateFrontendAccountRequest,
+    ),
+    SettingsValues,
 );
 
 fn generate_ts_types() {

@@ -7,6 +7,7 @@ mod frontend;
 mod middleware;
 mod response_error;
 mod session;
+mod settings;
 
 use std::{
     fs::File,
@@ -43,6 +44,7 @@ use moka::future::CacheBuilder;
 use parcel_game_data::GameData;
 use rustls::{Certificate, PrivateKey};
 use rustls_pemfile::{certs, pkcs8_private_keys};
+use settings::Settings;
 
 use crate::{data::session_store::SessionStore, middleware::wrap_errors};
 
@@ -192,6 +194,11 @@ async fn main() -> Result<()> {
     let game_data = web::Data::new(
         load_gamedata_from_file(&args.game_data_path).context("Could not load game data")?,
     );
+    let settings = web::Data::new(
+        Settings::load_from_path(Path::new("data/settings.json"))
+            .await
+            .context("Could not load settings")?,
+    );
 
     migrate_database(&database_url).context("Could not apply pending database migrations")?;
     create_admin_account_if_not_exists(&*database, &*hash_secret)
@@ -231,6 +238,7 @@ async fn main() -> Result<()> {
             .app_data(jwt_secret.clone())
             .app_data(hash_secret.clone())
             .app_data(game_data.clone())
+            .app_data(settings.clone())
             .service(
                 actix_web::web::scope("/ds/e")
                     .configure(endpoints::configure_endpoints)

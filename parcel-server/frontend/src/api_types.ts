@@ -32,3 +32,16 @@ export type SetAccountPermissionsRequest={"permissions":(FrontendPermissions)[];
 export type CreateCredentialsRequest={"username":string;"password":string;};
 export type ResetPasswordRequest={"currentPassword":(string|null);"newPassword":string;"logoutSessions":boolean;};
 export type CreateFrontendAccountRequest=(({"type":"withCredentials";}&CreateCredentialsRequest)|({"type":"withProvider";}&{"provider":Provider;"providerId":string;}));
+export type SettingsValues={
+/**
+ * If true, anyone who knows of the server address will be able to
+ * log in to the game server. Otherwise they must first be added to
+ * the whitelist.
+ */
+"publicServer":boolean;
+/**
+ * If true, any user with an existing game account can log in to the
+ * frontend. Otherwise an admin must first create a frontend account
+ * for the user.
+ */
+"allowFrontendLogin":boolean;};
