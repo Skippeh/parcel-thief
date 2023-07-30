@@ -175,7 +175,6 @@ const Login = () => {
     // If we're in the initial state check if callback_token query parameter is present
     if (state == LoginState.WaitingForLoginOption) {
       if (session.isLoggedIn()) {
-        console.log(session.getUser());
         navigate("/", { replace: true });
         return;
       }
