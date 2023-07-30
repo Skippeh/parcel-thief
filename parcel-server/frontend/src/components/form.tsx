@@ -28,6 +28,16 @@ export const Label = styled(Form.Label)`
 export const SubLabel = styled.span`
   display: block;
   font-size: 0.7rem;
+
+  & > * {
+    &:first-child {
+      margin-top: 0;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
 `;
 export const Message = styled(Form.Message)``;
 export const ValidityState = styled(Form.ValidityState)``;
