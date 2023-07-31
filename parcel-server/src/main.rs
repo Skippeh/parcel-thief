@@ -8,6 +8,7 @@ mod middleware;
 mod response_error;
 mod session;
 mod settings;
+mod whitelist;
 
 use std::{
     fs::File,
@@ -52,6 +53,7 @@ use crate::{data::session_store::SessionStore, middleware::wrap_errors};
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
 
 pub type ServerSettings = Settings<SettingsValues, settings::JsonPersist>;
+pub type WhitelistSettings = Settings<whitelist::Whitelist, whitelist::WhitelistPersist>;
 
 /// A custom server implementation for Death Stranding Directory's Cut.
 ///
@@ -197,10 +199,15 @@ async fn main() -> Result<()> {
     let game_data = web::Data::new(
         load_gamedata_from_file(&args.game_data_path).context("Could not load game data")?,
     );
-    let settings = web::Data::new(
+    let server_settings = web::Data::new(
         ServerSettings::load_from_path(Path::new("data/settings.json"))
             .await
             .context("Could not load settings")?,
+    );
+    let whitelist_settings = web::Data::new(
+        WhitelistSettings::load_from_path(Path::new("data/whitelist.txt"))
+            .await
+            .context("Could not load whitelist")?,
     );
 
     migrate_database(&database_url).context("Could not apply pending database migrations")?;
@@ -241,7 +248,8 @@ async fn main() -> Result<()> {
             .app_data(jwt_secret.clone())
             .app_data(hash_secret.clone())
             .app_data(game_data.clone())
-            .app_data(settings.clone())
+            .app_data(server_settings.clone())
+            .app_data(whitelist_settings.clone())
             .service(
                 actix_web::web::scope("/ds/e")
                     .configure(endpoints::configure_endpoints)
