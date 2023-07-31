@@ -37,7 +37,7 @@ where
     /// If the file is edited manually the settings will be reloaded automatically the next time `read()` is called.
     pub async fn load_from_path(file_path: &Path) -> Result<Self, anyhow::Error> {
         let settings = if file_path.try_exists()? {
-            log::debug!("Loading settings from file");
+            log::debug!("Loading settings from file: {}", file_path.display());
             TPersist::read_file(file_path).await?
         } else {
             log::warn!("Settings file not found, using default settings");
