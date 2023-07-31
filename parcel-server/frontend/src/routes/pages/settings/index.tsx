@@ -112,8 +112,9 @@ const Settings = () => {
                     be added to the whitelist.
                   </p>
                   <p>
-                    The whitelist can be edited by changing{" "}
-                    <Code>data/whitelist.txt</Code> in the server directory.
+                    The whitelist can be edited from the Whitelist tab above or
+                    by changing <Code>data/whitelist.txt</Code> in the server
+                    directory.
                   </p>
                 </Form.SubLabel>
                 <Form.Control
