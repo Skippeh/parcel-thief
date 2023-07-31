@@ -7,7 +7,7 @@ use parcel_common::api_types::frontend::{
     },
     auth::*,
     baggages::*,
-    settings::SettingsValues,
+    settings::{SettingsValues, WhitelistEntry},
 };
 use typescript_type_def::{write_definition_file, DefinitionFileOptions};
 
@@ -38,7 +38,7 @@ type Api = (
         ResetPasswordRequest,
         CreateFrontendAccountRequest,
     ),
-    SettingsValues,
+    (SettingsValues, WhitelistEntry),
 );
 
 fn generate_ts_types() {

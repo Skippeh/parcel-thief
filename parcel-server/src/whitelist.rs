@@ -1,16 +1,12 @@
 use std::path::Path;
 
-#[derive(Debug, Clone)]
-pub struct Entry {
-    pub provider_id: String,
-    pub name_reference: Option<String>,
-}
+use parcel_common::api_types::frontend::settings::WhitelistEntry;
 
 #[derive(Debug, Clone, Default)]
-pub struct Whitelist(Vec<Entry>);
+pub struct Whitelist(Vec<WhitelistEntry>);
 
 impl std::ops::Deref for Whitelist {
-    type Target = Vec<Entry>;
+    type Target = Vec<WhitelistEntry>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -45,12 +41,12 @@ impl super::settings::Persist<Whitelist> for WhitelistPersist {
             let parts = line.split_once(';');
 
             if let Some((provider_id, name_reference)) = parts {
-                entries.push(Entry {
+                entries.push(WhitelistEntry {
                     provider_id: provider_id.to_string(),
                     name_reference: Some(name_reference.to_string()),
                 })
             } else {
-                entries.push(Entry {
+                entries.push(WhitelistEntry {
                     provider_id: line.to_string(),
                     name_reference: None,
                 })

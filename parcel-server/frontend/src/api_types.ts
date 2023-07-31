@@ -45,3 +45,4 @@ export type SettingsValues={
  * for the user.
  */
 "allowFrontendLogin":boolean;};
+export type WhitelistEntry={"providerId":string;"nameReference":(string|null);};

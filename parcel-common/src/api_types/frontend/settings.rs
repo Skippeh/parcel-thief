@@ -27,3 +27,11 @@ impl Default for SettingsValues {
         }
     }
 }
+
+#[derive(Debug, Clone, Serialize)]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
+#[serde(rename_all = "camelCase")]
+pub struct WhitelistEntry {
+    pub provider_id: String,
+    pub name_reference: Option<String>,
+}
