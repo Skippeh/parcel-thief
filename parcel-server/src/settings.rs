@@ -1,21 +1,36 @@
 use std::{
+    marker::PhantomData,
     path::{Path, PathBuf},
     sync::Arc,
 };
 
 use notify::{EventHandler, ReadDirectoryChangesWatcher, Watcher};
-use parcel_common::api_types::frontend::settings::SettingsValues;
+use serde::{de::DeserializeOwned, Serialize};
 use tokio::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
-pub struct Settings {
-    lock: RwLock<SettingsValues>,
+#[async_trait::async_trait]
+pub trait Persist<TData>
+where
+    TData: Send + Sync,
+{
+    async fn write_file(file_path: &Path, data: &TData) -> Result<(), anyhow::Error>;
+    async fn read_file(file_path: &Path) -> Result<TData, anyhow::Error>;
+}
+
+pub struct Settings<TData, TDataPersist> {
+    lock: RwLock<TData>,
     file_path: PathBuf,
     /// If true, the settings will be reloaded the next time `read()` is called.
     is_dirty: Arc<RwLock<bool>>,
     _watcher: ReadDirectoryChangesWatcher,
+    _data_persist: PhantomData<TDataPersist>,
 }
 
-impl Settings {
+impl<TData, TPersist> Settings<TData, TPersist>
+where
+    TData: Default + Send + Sync,
+    TPersist: Persist<TData>,
+{
     /// Loads settings from the file at the specified path.
     /// If the file doesn't exist the default settings are saved to the path and then returned.
     ///
@@ -23,12 +38,12 @@ impl Settings {
     pub async fn load_from_path(file_path: &Path) -> Result<Self, anyhow::Error> {
         let settings = if file_path.try_exists()? {
             log::debug!("Loading settings from file");
-            read_file(file_path).await?
+            TPersist::read_file(file_path).await?
         } else {
             log::warn!("Settings file not found, using default settings");
-            let values = SettingsValues::default();
+            let values = TData::default();
 
-            write_file(&values, file_path).await?;
+            TPersist::write_file(file_path, &values).await?;
 
             values
         };
@@ -43,18 +58,19 @@ impl Settings {
             file_path: file_path.to_owned(),
             is_dirty,
             _watcher: watcher,
+            _data_persist: PhantomData,
         })
     }
 
     /// Returns a read guard over the settings.
     /// It does not load settings from the file again unless the file was changed since the last time `read()` or `write()` was called.
-    pub async fn read(&self) -> RwLockReadGuard<SettingsValues> {
+    pub async fn read(&self) -> RwLockReadGuard<TData> {
         if *self.is_dirty.read().await {
             log::debug!("Reloading settings");
 
             let mut write_guard = self.lock.write().await;
 
-            match read_file(&self.file_path).await {
+            match TPersist::read_file(&self.file_path).await {
                 Ok(settings) => {
                     *write_guard = settings;
                     *self.is_dirty.write().await = false;
@@ -72,28 +88,36 @@ impl Settings {
     /// After the callback finishes the changes will be written back to the file.
     pub async fn write<F>(&self, callback: F) -> Result<(), anyhow::Error>
     where
-        F: FnOnce(&mut RwLockWriteGuard<'_, SettingsValues>),
+        F: FnOnce(&mut RwLockWriteGuard<'_, TData>),
     {
         let mut settings = self.lock.write().await;
         callback(&mut settings);
 
-        write_file(&*settings, &self.file_path).await?;
+        TPersist::write_file(&self.file_path, &*settings).await?;
         *self.is_dirty.write().await = false;
 
         Ok(())
     }
 }
 
-async fn read_file(path: &Path) -> Result<SettingsValues, anyhow::Error> {
-    let bytes = std::fs::read(path)?;
-    Ok(serde_json::from_slice(&bytes)?)
-}
+pub struct JsonPersist;
 
-async fn write_file(settings: &SettingsValues, path: &Path) -> Result<(), anyhow::Error> {
-    let bytes = serde_json::to_vec_pretty(&settings)?;
-    std::fs::write(path, bytes)?;
+#[async_trait::async_trait]
+impl<TData> Persist<TData> for JsonPersist
+where
+    TData: Serialize + DeserializeOwned + Send + Sync,
+{
+    async fn write_file(file_path: &Path, data: &TData) -> Result<(), anyhow::Error> {
+        let bytes = serde_json::to_vec_pretty(data)?;
+        tokio::fs::write(file_path, bytes).await?;
 
-    Ok(())
+        Ok(())
+    }
+
+    async fn read_file(file_path: &Path) -> Result<TData, anyhow::Error> {
+        let bytes = tokio::fs::read(file_path).await?;
+        Ok(serde_json::from_slice(&bytes)?)
+    }
 }
 
 struct SetBoolTrueEventHandler(Arc<RwLock<bool>>);

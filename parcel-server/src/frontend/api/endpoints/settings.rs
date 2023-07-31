@@ -10,13 +10,13 @@ use crate::{
         jwt_session::JwtSession,
         result::{ApiResponse, ApiResult},
     },
-    settings::Settings,
+    ServerSettings,
 };
 
 #[get("settings")]
 pub async fn get_settings(
     session: JwtSession,
-    settings: Data<Settings>,
+    settings: Data<ServerSettings>,
 ) -> ApiResult<SettingsValues> {
     // check that the session has access
     if !session.has_permissions(FrontendPermissions::ManageServerSettings) {
@@ -30,7 +30,7 @@ pub async fn get_settings(
 pub async fn set_settings(
     session: JwtSession,
     request_settings: Json<SettingsValues>,
-    settings: Data<Settings>,
+    settings: Data<ServerSettings>,
 ) -> ApiResult<SettingsValues> {
     // check that the session has access
     if !session.has_permissions(FrontendPermissions::ManageServerSettings) {

@@ -41,6 +41,7 @@ use frontend::{
     },
 };
 use moka::future::CacheBuilder;
+use parcel_common::api_types::frontend::settings::SettingsValues;
 use parcel_game_data::GameData;
 use rustls::{Certificate, PrivateKey};
 use rustls_pemfile::{certs, pkcs8_private_keys};
@@ -49,6 +50,8 @@ use settings::Settings;
 use crate::{data::session_store::SessionStore, middleware::wrap_errors};
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
+
+pub type ServerSettings = Settings<SettingsValues, settings::JsonPersist>;
 
 /// A custom server implementation for Death Stranding Directory's Cut.
 ///
@@ -195,7 +198,7 @@ async fn main() -> Result<()> {
         load_gamedata_from_file(&args.game_data_path).context("Could not load game data")?,
     );
     let settings = web::Data::new(
-        Settings::load_from_path(Path::new("data/settings.json"))
+        ServerSettings::load_from_path(Path::new("data/settings.json"))
             .await
             .context("Could not load settings")?,
     );
