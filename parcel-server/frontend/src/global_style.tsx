@@ -131,5 +131,9 @@ export default createGlobalStyle`
     &.error {
       color: ${Colors.redDark.red9};
     }
+
+    &.warning {
+      color: ${Colors.orangeDark.orange10};
+    }
   }
 `;
