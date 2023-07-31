@@ -157,6 +157,9 @@ const Settings = () => {
               />
             </div>
             <SaveButton saveAction={saveWhitelist}>Save</SaveButton>
+            {whitelistError != null && (
+              <span className="error">{whitelistError}</span>
+            )}
           </Tabs.Content>
         </Tabs.Root>
       )}
