@@ -10,8 +10,6 @@ use crate::db::QueryError;
 pub enum ApiError {
     #[error("{0}")]
     Internal(anyhow::Error),
-    #[error("{0}")]
-    BadRequest(anyhow::Error),
     #[error("You lack the permissions to access to this resource")]
     Forbidden,
     #[error("{0}")]
@@ -79,7 +77,6 @@ impl ResponseError for ApiError {
     fn status_code(&self) -> StatusCode {
         match self {
             ApiError::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            ApiError::BadRequest(_) => StatusCode::BAD_REQUEST,
             ApiError::Forbidden => StatusCode::FORBIDDEN,
             ApiError::Unauthorized(_) => StatusCode::UNAUTHORIZED,
             ApiError::NotFound => StatusCode::NOT_FOUND,
