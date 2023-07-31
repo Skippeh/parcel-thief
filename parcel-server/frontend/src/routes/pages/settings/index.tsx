@@ -151,6 +151,24 @@ const Settings = () => {
                   server' setting being enabled.
                 </span>
               )}
+              <p>
+                The provider id can be found by using the following methods:
+              </p>
+              <ul>
+                <li>
+                  Steam: Use{" "}
+                  <a href="https://steamid.io" target="_blank">
+                    steamid.io
+                  </a>{" "}
+                  and use the steamID64 value
+                </li>
+                <li>
+                  Epic: Open the Epic Games Launcher and click your avatar, and
+                  then click on <Code>Account</Code>. Then look for{" "}
+                  <Code>ID</Code> under <Code>Account Information</Code> and use
+                  that value
+                </li>
+              </ul>
               <WhitelistTable
                 whitelist={whitelist}
                 setWhitelist={setWhitelist}
