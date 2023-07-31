@@ -44,10 +44,10 @@ impl super::settings::Persist<Whitelist> for WhitelistPersist {
         for line in contents.lines() {
             let parts = line.split_once(';');
 
-            if let Some(parts) = parts {
+            if let Some((provider_id, name_reference)) = parts {
                 entries.push(Entry {
-                    provider_id: parts.0.to_string(),
-                    name_reference: Some(parts.1.to_string()),
+                    provider_id: provider_id.to_string(),
+                    name_reference: Some(name_reference.to_string()),
                 })
             } else {
                 entries.push(Entry {
