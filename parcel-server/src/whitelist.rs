@@ -5,6 +5,12 @@ use parcel_common::api_types::frontend::settings::WhitelistEntry;
 #[derive(Debug, Clone, Default)]
 pub struct Whitelist(Vec<WhitelistEntry>);
 
+impl Whitelist {
+    pub fn into_inner(self) -> Vec<WhitelistEntry> {
+        self.0
+    }
+}
+
 impl std::ops::Deref for Whitelist {
     type Target = Vec<WhitelistEntry>;
 

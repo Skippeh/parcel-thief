@@ -2,7 +2,10 @@ use actix_web::{
     get, put,
     web::{Data, Json},
 };
-use parcel_common::api_types::frontend::{auth::FrontendPermissions, settings::SettingsValues};
+use parcel_common::api_types::frontend::{
+    auth::FrontendPermissions,
+    settings::{SettingsValues, WhitelistEntry},
+};
 
 use crate::{
     frontend::{
@@ -10,7 +13,7 @@ use crate::{
         jwt_session::JwtSession,
         result::{ApiResponse, ApiResult},
     },
-    ServerSettings,
+    ServerSettings, WhitelistSettings,
 };
 
 #[get("settings/server")]
@@ -44,4 +47,38 @@ pub async fn set_server_settings(
         .await?;
 
     ApiResponse::ok(request_settings.into_inner())
+}
+
+#[get("settings/whitelist")]
+pub async fn get_whitelist(
+    session: JwtSession,
+    whitelist: Data<WhitelistSettings>,
+) -> ApiResult<Vec<WhitelistEntry>> {
+    // check that the session has access
+    if !session.has_permissions(FrontendPermissions::ManageServerSettings) {
+        return Err(ApiError::Forbidden);
+    }
+
+    ApiResponse::ok(whitelist.read().await.clone().into_inner())
+}
+
+#[put("settings/whitelist")]
+pub async fn set_whitelist(
+    session: JwtSession,
+    request_whitelist: Json<Vec<WhitelistEntry>>,
+    whitelist: Data<WhitelistSettings>,
+) -> ApiResult<Vec<WhitelistEntry>> {
+    // check that the session has access
+    if !session.has_permissions(FrontendPermissions::ManageServerSettings) {
+        return Err(ApiError::Forbidden);
+    }
+
+    whitelist
+        .write(|whitelist| {
+            whitelist.clear();
+            whitelist.append(&mut request_whitelist.clone());
+        })
+        .await?;
+
+    ApiResponse::ok(request_whitelist.into_inner())
 }
