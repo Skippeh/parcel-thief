@@ -83,6 +83,12 @@ pub async fn set_whitelist(
                 "Provider id cannot be empty"
             )));
         }
+
+        if entry.provider_id.contains(';') {
+            return Err(ApiError::Unprocessable(anyhow::anyhow!(
+                "Provider id cannot contain semicolons"
+            )));
+        }
     }
 
     whitelist
