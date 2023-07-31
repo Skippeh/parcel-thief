@@ -65,12 +65,18 @@ pub async fn get_whitelist(
 #[put("settings/whitelist")]
 pub async fn set_whitelist(
     session: JwtSession,
-    request_whitelist: Json<Vec<WhitelistEntry>>,
+    mut request_whitelist: Json<Vec<WhitelistEntry>>,
     whitelist: Data<WhitelistSettings>,
 ) -> ApiResult<Vec<WhitelistEntry>> {
     // check that the session has access
     if !session.has_permissions(FrontendPermissions::ManageServerSettings) {
         return Err(ApiError::Forbidden);
+    }
+
+    // normalize formatting on request data
+    for entry in request_whitelist.iter_mut() {
+        entry.provider_id = entry.provider_id.trim().to_string();
+        entry.name_reference = entry.name_reference.as_ref().map(|s| s.trim().to_string());
     }
 
     whitelist
