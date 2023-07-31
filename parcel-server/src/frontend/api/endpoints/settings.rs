@@ -13,8 +13,8 @@ use crate::{
     ServerSettings,
 };
 
-#[get("settings")]
-pub async fn get_settings(
+#[get("settings/server")]
+pub async fn get_server_settings(
     session: JwtSession,
     settings: Data<ServerSettings>,
 ) -> ApiResult<SettingsValues> {
@@ -26,8 +26,8 @@ pub async fn get_settings(
     ApiResponse::ok((*settings.read().await).clone())
 }
 
-#[put("settings")]
-pub async fn set_settings(
+#[put("settings/server")]
+pub async fn set_server_settings(
     session: JwtSession,
     request_settings: Json<SettingsValues>,
     settings: Data<ServerSettings>,

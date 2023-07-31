@@ -5,8 +5,8 @@ import SaveButton from "../../../components/save_button";
 import { ApiResponse } from "../../../services";
 import { SettingsValues } from "../../../api_types";
 import {
-  getSettings,
-  setSettings as setSettingsService,
+  getServerSettings,
+  setServerSettings as setSettingsService,
 } from "../../../services/settings_service";
 
 const Settings = () => {
@@ -45,7 +45,7 @@ const Settings = () => {
   React.useEffect(() => {
     (async () => {
       if (settings === undefined) {
-        const response = await getSettings();
+        const response = await getServerSettings();
 
         if (response.data != null) {
           setSettings(response.data);
