@@ -73,10 +73,16 @@ pub async fn set_whitelist(
         return Err(ApiError::Forbidden);
     }
 
-    // normalize formatting on request data
+    // normalize formatting on request data and then validate it
     for entry in request_whitelist.iter_mut() {
         entry.provider_id = entry.provider_id.trim().to_string();
         entry.name_reference = entry.name_reference.as_ref().map(|s| s.trim().to_string());
+
+        if entry.provider_id.is_empty() {
+            return Err(ApiError::Unprocessable(anyhow::anyhow!(
+                "Provider id cannot be empty"
+            )));
+        }
     }
 
     whitelist
