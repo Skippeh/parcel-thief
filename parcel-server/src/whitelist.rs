@@ -9,6 +9,16 @@ impl Whitelist {
     pub fn into_inner(self) -> Vec<WhitelistEntry> {
         self.0
     }
+
+    pub fn is_whitelisted(&self, provider_id: &str) -> bool {
+        for entry in &self.0 {
+            if entry.provider_id == provider_id {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
 
 impl std::ops::Deref for Whitelist {
