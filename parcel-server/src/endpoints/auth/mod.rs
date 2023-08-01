@@ -140,6 +140,7 @@ pub async fn auth(
                     .await
                     .is_whitelisted(&user_id.steam_id.to_string())
             {
+                log::info!("Blocked non whitelisted provider id: {}", user_id.steam_id);
                 return Err(Error::NotWhitelisted);
             }
 
@@ -173,6 +174,10 @@ pub async fn auth(
                     .await
                     .is_whitelisted(&account_id.account_id)
             {
+                log::info!(
+                    "Blocked non whitelisted provider id: {}",
+                    account_id.account_id
+                );
                 return Err(Error::NotWhitelisted);
             }
 
