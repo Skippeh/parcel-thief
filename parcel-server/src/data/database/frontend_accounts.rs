@@ -2,20 +2,17 @@ use std::collections::HashMap;
 
 use chrono::NaiveDateTime;
 use diesel::{dsl::exists, prelude::*, select};
-use diesel_async::{scoped_futures::ScopedFutureExt, AsyncConnection, RunQueryDsl};
+use diesel_async::RunQueryDsl;
 use flagset::FlagSet;
 use parcel_common::api_types::{auth::Provider, frontend::auth::FrontendPermissions};
 
 use crate::{
     data::hash_secret::HashSecret,
     db::{
-        models::{
-            account::Account as GameAccount,
-            frontend_account::{
-                AccountCredentials, AccountProviderConnection, AccountSession,
-                ChangeFrontendAccount, FrontendAccount, NewAccountCredentials,
-                NewAccountProviderConnection, NewAccountSession, NewFrontendAccount,
-            },
+        models::frontend_account::{
+            AccountCredentials, AccountProviderConnection, AccountSession, ChangeFrontendAccount,
+            FrontendAccount, NewAccountCredentials, NewAccountProviderConnection,
+            NewAccountSession, NewFrontendAccount,
         },
         QueryError,
     },
@@ -25,26 +22,6 @@ use super::DatabaseConnection;
 
 pub struct FrontendAccounts<'db> {
     connection: &'db DatabaseConnection<'db>,
-}
-
-#[derive(Debug, thiserror::Error)]
-pub enum GetOrCreateError {
-    #[error("Account not found")]
-    GameAccountNotFound,
-    #[error("{0}")]
-    QueryError(QueryError),
-}
-
-impl From<QueryError> for GetOrCreateError {
-    fn from(value: QueryError) -> Self {
-        GetOrCreateError::QueryError(value)
-    }
-}
-
-impl From<diesel::result::Error> for GetOrCreateError {
-    fn from(value: diesel::result::Error) -> Self {
-        GetOrCreateError::QueryError(value.into())
-    }
 }
 
 impl<'db> FrontendAccounts<'db> {
@@ -100,85 +77,35 @@ impl<'db> FrontendAccounts<'db> {
         }
     }
 
-    /// Gets or creates a frontend account for the given provider account.
-    ///
-    /// Note that if there's no game account matching the provider account, an error is returned.
-    pub async fn get_or_create_from_provider(
+    pub async fn get_by_provider(
         &self,
         provider: Provider,
         provider_id: &str,
-    ) -> Result<FrontendAccount, GetOrCreateError> {
+    ) -> Result<Option<FrontendAccount>, QueryError> {
         use crate::db::schema::frontend_account_provider_connections::dsl;
         let conn = &mut *self.connection.get_pg_connection().await;
 
-        conn.transaction(|conn| {
-            async move {
-            let connection: Option<AccountProviderConnection> =
-                dsl::frontend_account_provider_connections
-                    .filter(dsl::provider.eq(&provider))
-                    .filter(dsl::provider_id.eq(provider_id))
+        let connection: Option<AccountProviderConnection> =
+            dsl::frontend_account_provider_connections
+                .filter(dsl::provider.eq(&provider))
+                .filter(dsl::provider_id.eq(provider_id))
+                .first(conn)
+                .await
+                .optional()?;
+
+        match connection {
+            None => Ok(None),
+            Some(connection) => {
+                use crate::db::schema::frontend_accounts::dsl;
+
+                let account = dsl::frontend_accounts
+                    .filter(dsl::id.eq(connection.account_id))
                     .first(conn)
-                    .await
-                    .optional()?;
+                    .await?;
 
-            match connection {
-                Some(connection) => {
-                    use crate::db::schema::frontend_accounts::dsl;
-
-                    let account = dsl::frontend_accounts
-                        .filter(dsl::id.eq(connection.account_id))
-                        .first(conn)
-                        .await?;
-
-                    Ok(account)
-                }
-                None => {
-                    // Check if there's a game account for this provider id. If there isn't we return an error.
-                    use crate::db::schema::accounts::dsl;
-
-                    let account: Option<GameAccount> = dsl::accounts
-                        .filter(dsl::provider.eq(&provider))
-                        .filter(dsl::provider_id.eq(provider_id))
-                        .first(conn)
-                        .await
-                        .optional()?;
-
-                    match account {
-                        None => Err(GetOrCreateError::GameAccountNotFound),
-                        Some(game_account) => {
-                            use crate::db::schema::frontend_accounts::dsl;
-
-                            // Create a new frontend account
-                            let frontend_account = diesel::insert_into(dsl::frontend_accounts)
-                                .values(&NewFrontendAccount {
-                                    game_account_id: Some(&game_account.id),
-                                    created_at: None,
-                                    permissions: 0,
-                                })
-                                .get_result::<FrontendAccount>(conn)
-                                .await?;
-
-                            // Create the provider connection
-                            {
-                                use crate::db::schema::frontend_account_provider_connections::dsl;
-                                diesel::insert_into(dsl::frontend_account_provider_connections)
-                                    .values(&NewAccountProviderConnection {
-                                        account_id: frontend_account.id,
-                                        provider,
-                                        provider_id: &provider_id,
-                                        created_at: None,
-                                    })
-                                    .execute(conn).await?;
-                            }
-
-                            Ok(frontend_account)
-                        }
-                    }
-                }
+                Ok(Some(account))
             }
-        }.scope_boxed()
-        })
-        .await
+        }
     }
 
     pub async fn get_by_id(&self, id: i64) -> Result<Option<FrontendAccount>, QueryError> {
