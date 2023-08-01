@@ -1,0 +1,9 @@
+{
+  "include": ["node_modules/@types", "src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules/**/*"],
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "lib": ["ES2019", "DOM"],
+    "jsx": "react-jsx"
+  }
+}

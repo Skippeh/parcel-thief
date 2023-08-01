@@ -1,6 +1,6 @@
 use chrono::NaiveDateTime;
 use diesel::{Insertable, Queryable};
-use parcel_common::api_types;
+use parcel_common::api_types::{self, IntoDsApiType};
 
 use crate::db::schema::{
     likes::{self},
@@ -24,9 +24,13 @@ impl Like {
     pub fn total_likes(&self) -> i32 {
         self.likes_manual + self.likes_auto
     }
+}
 
-    pub fn into_api_type(self) -> api_types::requests::get_like_history::LikeHistory {
-        api_types::requests::get_like_history::LikeHistory {
+impl IntoDsApiType for Like {
+    type ApiType = api_types::requests::get_like_history::LikeHistory;
+
+    fn into_ds_api_type(self) -> Self::ApiType {
+        Self::ApiType {
             likes_auto: self.likes_auto,
             likes_manual: self.likes_manual,
             like_type: self.ty,

@@ -2,7 +2,7 @@ use diesel::{
     backend::Backend, deserialize::FromSql, serialize::ToSql, sql_types::Int2, AsChangeset,
     AsExpression, FromSqlRow, Insertable, Queryable,
 };
-use parcel_common::api_types;
+use parcel_common::api_types::{self, IntoDsApiType};
 
 use crate::db::schema::mission_dynamic_location_infos;
 
@@ -58,9 +58,11 @@ pub struct DynamicLocationInfo {
     pub z: i32,
 }
 
-impl DynamicLocationInfo {
-    pub fn into_api_type(self) -> api_types::mission::DynamicLocationInfo {
-        api_types::mission::DynamicLocationInfo {
+impl IntoDsApiType for DynamicLocationInfo {
+    type ApiType = api_types::mission::DynamicLocationInfo;
+
+    fn into_ds_api_type(self) -> Self::ApiType {
+        Self::ApiType {
             location_object_id: self.location_id,
             x: self.x,
             y: self.y,

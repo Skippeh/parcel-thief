@@ -1,5 +1,5 @@
 use diesel::{AsChangeset, Insertable, Queryable};
-use parcel_common::api_types;
+use parcel_common::api_types::{self, IntoDsApiType};
 
 use crate::db::schema::qpid_object_customize_infos;
 
@@ -18,9 +18,11 @@ pub struct NewCustomizeInfo<'a> {
     pub customize_color: i32,
 }
 
-impl CustomizeInfo {
-    pub fn into_api_type(self) -> api_types::object::CustomizeInfo {
-        api_types::object::CustomizeInfo {
+impl IntoDsApiType for CustomizeInfo {
+    type ApiType = api_types::object::CustomizeInfo;
+
+    fn into_ds_api_type(self) -> Self::ApiType {
+        Self::ApiType {
             customize_param: self.customize_param as u32,
             customize_color: self.customize_color as u32,
         }

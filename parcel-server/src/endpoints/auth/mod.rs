@@ -27,7 +27,7 @@ use crate::{
     },
     response_error::{impl_response_error, CommonResponseError},
     session::Session,
-    GatewayUrl,
+    GatewayUrl, ServerSettings, WhitelistSettings,
 };
 
 use super::InternalError;
@@ -46,6 +46,7 @@ pub enum Error {
     ApiResponseError(anyhow::Error),
     InvalidCode,
     InternalError(InternalError),
+    NotWhitelisted,
 }
 
 impl From<crate::db::QueryError> for Error {
@@ -70,6 +71,9 @@ impl Display for Error {
             Error::InternalError(err) => {
                 write!(f, "{}", err)
             }
+            Error::NotWhitelisted => {
+                write!(f, "Account is not whitelisted")
+            }
         }
     }
 }
@@ -81,6 +85,7 @@ impl CommonResponseError for Error {
             Error::ApiResponseError(_) => "AU-AE".into(),
             Error::InvalidCode => "AU-IC".into(),
             Error::InternalError(err) => err.get_status_code(),
+            Error::NotWhitelisted => "AU-NW".into(),
         }
     }
 
@@ -88,7 +93,8 @@ impl CommonResponseError for Error {
         match self {
             Error::ApiResponseError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::InternalError(err) => err.get_http_status_code(),
-            Error::InvalidCode => StatusCode::UNAUTHORIZED,
+            Error::InvalidCode => StatusCode::FORBIDDEN,
+            Error::NotWhitelisted => StatusCode::FORBIDDEN,
         }
     }
 
@@ -97,6 +103,7 @@ impl CommonResponseError for Error {
             Error::ApiResponseError(_) => "provider error".into(),
             Error::InvalidCode => "invalid provider code".into(),
             Error::InternalError(err) => err.get_message(),
+            Error::NotWhitelisted => "not whitelisted".into(),
         }
     }
 }
@@ -110,6 +117,8 @@ pub async fn auth(
     db: Data<Database>,
     gateway_url: Data<Option<GatewayUrl>>,
     http_request: HttpRequest,
+    server_settings: Data<ServerSettings>,
+    whitelist: Data<WhitelistSettings>,
 ) -> Result<Json<AuthResponse>, Error> {
     let provider;
     let provider_id;
@@ -124,6 +133,16 @@ pub async fn auth(
                     steam::VerifyUserAuthTicketError::InvalidTicket => Error::InvalidCode,
                     other => Error::ApiResponseError(other.into()),
                 })?;
+
+            if !server_settings.read().await.public_server
+                && !whitelist
+                    .read()
+                    .await
+                    .is_whitelisted(&user_id.steam_id.to_string())
+            {
+                log::info!("Blocked non whitelisted provider id: {}", user_id.steam_id);
+                return Err(Error::NotWhitelisted);
+            }
 
             let user_info = steam
                 .get_player_summaries(&[&user_id.steam_id])
@@ -148,6 +167,19 @@ pub async fn auth(
                     epic::VerifyTokenError::InvalidToken => Error::InvalidCode,
                     other => Error::ApiResponseError(other.into()),
                 })?;
+
+            if !server_settings.read().await.public_server
+                && !whitelist
+                    .read()
+                    .await
+                    .is_whitelisted(&account_id.account_id)
+            {
+                log::info!(
+                    "Blocked non whitelisted provider id: {}",
+                    account_id.account_id
+                );
+                return Err(Error::NotWhitelisted);
+            }
 
             let account_info = epic
                 .get_account_infos(&request.code, &[&account_id.account_id])
@@ -175,6 +207,7 @@ pub async fn auth(
     // create account if one doesn't exist
     let db = &mut db
         .connect()
+        .await
         .map_err(|err| Error::InternalError(err.into()))?;
     let accounts = db.accounts();
 

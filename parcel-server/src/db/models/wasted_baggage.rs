@@ -1,25 +1,27 @@
 use chrono::NaiveDateTime;
 use diesel::{Insertable, Queryable};
-use parcel_common::api_types;
+use parcel_common::api_types::{self, IntoDsApiType};
 
 use crate::db::schema::wasted_baggages;
 
 #[derive(Debug, Queryable)]
 pub struct WastedBaggage {
-    id: String,
-    qpid_id: i32,
-    creator_id: String,
-    created_at: NaiveDateTime,
-    item_hash: i32,
-    broken: bool,
-    x: i32,
-    y: i32,
-    z: i32,
+    pub id: String,
+    pub qpid_id: i32,
+    pub creator_id: String,
+    pub created_at: NaiveDateTime,
+    pub item_hash: i32,
+    pub broken: bool,
+    pub x: i32,
+    pub y: i32,
+    pub z: i32,
 }
 
-impl WastedBaggage {
-    pub fn into_api_type(self) -> api_types::requests::get_wasted_baggages::WastedBaggage {
-        api_types::requests::get_wasted_baggages::WastedBaggage {
+impl IntoDsApiType for WastedBaggage {
+    type ApiType = api_types::requests::get_wasted_baggages::WastedBaggage;
+
+    fn into_ds_api_type(self) -> Self::ApiType {
+        Self::ApiType {
             baggage_id: self.id,
             account_id: self.creator_id,
             qpid_id: self.qpid_id,

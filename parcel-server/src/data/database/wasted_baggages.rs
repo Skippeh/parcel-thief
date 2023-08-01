@@ -1,6 +1,6 @@
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
-use diesel::Connection;
+use diesel_async::{scoped_futures::ScopedFutureExt, AsyncConnection, RunQueryDsl};
 use parcel_common::api_types::requests::delete_wasted_baggages::DeleteRequest;
 use parcel_common::api_types::requests::get_wasted_baggages::WastedItem;
 
@@ -30,27 +30,32 @@ impl<'db> WastedBaggages<'db> {
         let created_at = chrono::Utc::now().naive_utc();
 
         conn.transaction(|conn| {
-            diesel::insert_into(dsl::wasted_baggages)
-                .values(
-                    &items
-                        .iter()
-                        .map(|item| NewWastedBaggage {
-                            id: generate_wasted_baggage_id(),
-                            qpid_id,
-                            creator_id: owner_id,
-                            created_at: &created_at,
-                            item_hash: item.item_hash,
-                            broken: item.broken,
-                            x: item.x,
-                            y: item.y,
-                            z: item.z,
-                        })
-                        .collect::<Vec<_>>(),
-                )
-                .execute(conn)?;
+            async move {
+                diesel::insert_into(dsl::wasted_baggages)
+                    .values(
+                        &items
+                            .iter()
+                            .map(|item| NewWastedBaggage {
+                                id: generate_wasted_baggage_id(),
+                                qpid_id,
+                                creator_id: owner_id,
+                                created_at: &created_at,
+                                item_hash: item.item_hash,
+                                broken: item.broken,
+                                x: item.x,
+                                y: item.y,
+                                z: item.z,
+                            })
+                            .collect::<Vec<_>>(),
+                    )
+                    .execute(conn)
+                    .await?;
 
-            Ok(())
+                Ok(())
+            }
+            .scope_boxed()
         })
+        .await
     }
 
     pub async fn get_wasted_baggages(
@@ -65,12 +70,23 @@ impl<'db> WastedBaggages<'db> {
             dsl::wasted_baggages
                 .filter(dsl::qpid_id.eq(qpid_id))
                 .filter(dsl::created_at.gt(earliest_date))
-                .get_results(conn)?
+                .get_results(conn)
+                .await?
         } else {
             dsl::wasted_baggages
                 .filter(dsl::qpid_id.eq(qpid_id))
-                .get_results(conn)?
+                .get_results(conn)
+                .await?
         };
+
+        Ok(baggages)
+    }
+
+    pub async fn get_all_baggages(&self) -> Result<Vec<WastedBaggage>, QueryError> {
+        use crate::db::schema::wasted_baggages::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        let baggages = dsl::wasted_baggages.get_results(conn).await?;
 
         Ok(baggages)
     }
@@ -81,17 +97,23 @@ impl<'db> WastedBaggages<'db> {
     ) -> Result<(), QueryError> {
         use crate::db::schema::wasted_baggages::dsl;
         let conn = &mut *self.connection.get_pg_connection().await;
+        let delete_requests = delete_requests.collect::<Vec<_>>();
 
         conn.transaction(|conn| {
-            for request in delete_requests {
-                diesel::delete(dsl::wasted_baggages)
-                    .filter(dsl::id.eq(&request.baggage_id))
-                    .filter(dsl::creator_id.eq(&request.account_id))
-                    .execute(conn)?;
-            }
+            async move {
+                for request in delete_requests {
+                    diesel::delete(dsl::wasted_baggages)
+                        .filter(dsl::id.eq(&request.baggage_id))
+                        .filter(dsl::creator_id.eq(&request.account_id))
+                        .execute(conn)
+                        .await?;
+                }
 
-            Ok(())
+                Ok(())
+            }
+            .scope_boxed()
         })
+        .await
     }
 }
 

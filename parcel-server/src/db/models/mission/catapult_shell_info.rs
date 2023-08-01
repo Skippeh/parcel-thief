@@ -1,5 +1,5 @@
 use diesel::{AsChangeset, Insertable, Queryable};
-use parcel_common::api_types;
+use parcel_common::api_types::{self, IntoDsApiType};
 
 use crate::db::schema::mission_catapult_shell_infos;
 
@@ -12,9 +12,11 @@ pub struct CatapultShellInfo {
     pub z: i32,
 }
 
-impl CatapultShellInfo {
-    pub fn into_api_type(self) -> api_types::mission::CatapultShellInfo {
-        api_types::mission::CatapultShellInfo {
+impl IntoDsApiType for CatapultShellInfo {
+    type ApiType = api_types::mission::CatapultShellInfo;
+
+    fn into_ds_api_type(self) -> Self::ApiType {
+        Self::ApiType {
             mission_id: self.mission_id,
             local_id: self.local_id,
             x: self.x,

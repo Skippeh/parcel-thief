@@ -1,5 +1,5 @@
 use diesel::{Insertable, Queryable};
-use parcel_common::api_types;
+use parcel_common::api_types::{self, IntoDsApiType};
 
 use crate::db::schema::mission_dynamic_mission_infos;
 
@@ -10,9 +10,11 @@ pub struct DynamicMissionInfo {
     pub reward_name_hash: i32,
 }
 
-impl DynamicMissionInfo {
-    pub fn into_api_type(self) -> api_types::mission::DynamicMissionInfo {
-        api_types::mission::DynamicMissionInfo {
+impl IntoDsApiType for DynamicMissionInfo {
+    type ApiType = api_types::mission::DynamicMissionInfo;
+
+    fn into_ds_api_type(self) -> Self::ApiType {
+        Self::ApiType {
             client_name_hash: self.client_name_hash,
             reward_name_hash: self.reward_name_hash,
         }

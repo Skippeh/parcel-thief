@@ -1,4 +1,5 @@
 use diesel::prelude::*;
+use diesel_async::RunQueryDsl;
 
 use crate::db::schema::player_profiles::dsl;
 use crate::db::{models::player_profile::PlayerProfile, QueryError};
@@ -22,7 +23,8 @@ impl<'db> PlayerProfiles<'db> {
         let conn = &mut *self.connection.get_pg_connection().await;
         let results = dsl::player_profiles
             .filter(dsl::account_id.eq_any(&account_ids))
-            .get_results(conn)?;
+            .get_results(conn)
+            .await?;
 
         Ok(results)
     }
@@ -34,7 +36,8 @@ impl<'db> PlayerProfiles<'db> {
             .on_conflict(dsl::account_id)
             .do_update()
             .set(profile)
-            .execute(conn)?;
+            .execute(conn)
+            .await?;
 
         Ok(())
     }

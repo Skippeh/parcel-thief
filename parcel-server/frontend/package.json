@@ -1,0 +1,48 @@
+{
+  "name": "parcel-server-frontend",
+  "private": true,
+  "license": "UNLICENSED",
+  "source": "src/index.html",
+  "scripts": {
+    "watch": "concurrently --kill-others \"yarn watch:dist\" \"yarn watch:tsc\"",
+    "watch:dist": "parcel watch --public-url /frontend",
+    "watch:tsc": "tsc -p . --watch --noEmit",
+    "build": "parcel build --public-url /frontend",
+    "checkTypings": "tsc --noEmit",
+    "checkTypingsAndBuild": "yarn checkTypings && yarn build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Skippeh/parcel-thief.git"
+  },
+  "alias": {
+    "process": "process/browser.js",
+    "buffer": "buffer"
+  },
+  "devDependencies": {
+    "@parcel/transformer-sass": "2.9.3",
+    "@types/react": "^18.2.14",
+    "@types/react-dom": "^18.2.6",
+    "@types/react-router-dom": "^5.3.3",
+    "concurrently": "^8.2.0",
+    "parcel": "^2.9.3",
+    "process": "^0.11.10",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "@emotion/is-prop-valid": "^1.2.1",
+    "@phosphor-icons/react": "^2.0.10",
+    "@radix-ui/colors": "^1.0.0",
+    "@radix-ui/react-dialog": "^1.0.4",
+    "@radix-ui/react-dropdown-menu": "^2.0.5",
+    "@radix-ui/react-form": "^0.0.3",
+    "@radix-ui/react-tabs": "^1.0.4",
+    "ag-grid-community": "30.0.3",
+    "ag-grid-react": "30.0.3",
+    "normalize.css": "^8.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.14.1",
+    "styled-components": "^6.0.2"
+  }
+}

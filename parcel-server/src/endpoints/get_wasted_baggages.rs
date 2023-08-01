@@ -3,8 +3,9 @@ use actix_web::{
     web::{Data, Json},
 };
 use anyhow::Context;
-use parcel_common::api_types::requests::get_wasted_baggages::{
-    GetWastedBaggagesRequest, GetWastedBaggagesResponse,
+use parcel_common::api_types::{
+    requests::get_wasted_baggages::{GetWastedBaggagesRequest, GetWastedBaggagesResponse},
+    IntoDsApiType,
 };
 
 use crate::{data::database::Database, endpoints::InternalError, session::Session};
@@ -15,7 +16,7 @@ pub async fn get_wasted_baggages(
     _session: Session,
     database: Data<Database>,
 ) -> Result<Json<GetWastedBaggagesResponse>, InternalError> {
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let wasted_baggages = conn.wasted_baggages();
     let mut baggages = Vec::new();
 
@@ -34,7 +35,7 @@ pub async fn get_wasted_baggages(
             .get_wasted_baggages(qpid_id, last_date.as_ref())
             .await?
             .into_iter()
-            .map(|wb| wb.into_api_type());
+            .map(|wb| wb.into_ds_api_type());
 
         baggages.extend(qpid_baggages);
     }

@@ -8,4 +8,5 @@ members = [
     "re-testing/deobfuscate_json",
     "parcel-save-tool",
     "parcel-data-export",
+    "parcel-game-data",
 ]

@@ -1,19 +1,25 @@
+mod background_jobs;
 mod data;
 mod db;
 mod embedded;
 mod endpoints;
+mod frontend;
 mod middleware;
 mod response_error;
 mod session;
+mod settings;
+mod whitelist;
 
 use std::{
     fs::File,
     io::BufReader,
     net::IpAddr,
     path::{Path, PathBuf},
+    time::Duration,
 };
 
 use actix_web::{
+    middleware::NormalizePath,
     web::{self},
     App, HttpServer,
 };
@@ -21,17 +27,33 @@ use anyhow::{Context, Result};
 use clap::Parser;
 use data::{
     database::Database,
+    hash_secret::HashSecret,
+    jwt_secret::JwtSecret,
+    memory_cache::PersistentCache,
     platforms::{epic::Epic, steam::Steam},
 };
 use diesel::{pg::Pg, Connection, PgConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
-use endpoints::configure_endpoints;
+use frontend::{
+    api::endpoints::auth::FrontendAuthCache,
+    jwt_session::{
+        SessionBlacklistCache, SessionBlacklistCacheExpiry, SessionPermissionsCache,
+        BLACKLIST_CACHE_PATH,
+    },
+};
+use moka::future::CacheBuilder;
+use parcel_common::api_types::frontend::settings::SettingsValues;
+use parcel_game_data::GameData;
 use rustls::{Certificate, PrivateKey};
 use rustls_pemfile::{certs, pkcs8_private_keys};
+use settings::Settings;
 
 use crate::{data::session_store::SessionStore, middleware::wrap_errors};
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
+
+pub type ServerSettings = Settings<SettingsValues, settings::JsonPersist>;
+pub type WhitelistSettings = Settings<whitelist::Whitelist, whitelist::WhitelistPersist>;
 
 /// A custom server implementation for Death Stranding Directory's Cut.
 ///
@@ -96,6 +118,9 @@ pub struct Options {
     /// This is a lot slower than normal logging so don't use this in production
     #[arg(long, default_value_t = false, env = "DEEP_LOGGING")]
     deep_logging: bool,
+
+    #[arg(long, default_value = "data/game_data.json", env = "GAME_DATA_PATH")]
+    game_data_path: PathBuf,
 }
 
 #[derive(Debug, Clone)]
@@ -125,6 +150,9 @@ async fn main() -> Result<()> {
         anyhow::bail!("Both or none of the public and private keys needs to be specified");
     }
 
+    // make sure data directory exists
+    std::fs::create_dir_all("data").context("Could not create data directory")?;
+
     let database_url = embedded::postgresql::setup_postgresql(&args)
         .await
         .context("Failed to setup and launch postgresql server")?;
@@ -138,10 +166,54 @@ async fn main() -> Result<()> {
         web::Data::new(SessionStore::load_or_create(Path::new("data/sessions")).await);
     let session_store_clone = session_store.clone();
     let database = web::Data::new(Database::new(&database_url));
-
-    migrate_database(&database_url)
+    let frontend_auth_cache = web::Data::new(FrontendAuthCache::with_time_to_live_secs(
+        "FrontendAuthCache",
+        60 * 2,
+    ));
+    let session_blacklist_cache = web::Data::new(
+        SessionBlacklistCache::from_builder(
+            CacheBuilder::default()
+                .name("SessionBlacklistCache")
+                .expire_after(SessionBlacklistCacheExpiry),
+        )
+        .load_from_file(Path::new(BLACKLIST_CACHE_PATH))
         .await
-        .context("Could not apply pending database migrations")?;
+        .context("Could not load session blacklist")?,
+    );
+    let session_blacklist_cache_clone = session_blacklist_cache.clone();
+    let session_permissions_cache = web::Data::new(SessionPermissionsCache::from_builder(
+        CacheBuilder::default()
+            .name("SessionPermissionsCache")
+            .time_to_idle(Duration::from_secs(60 * 5)),
+    ));
+    let jwt_secret = web::Data::new(
+        JwtSecret::load_or_generate_secret()
+            .await
+            .context("Failed to load jwt secret")?,
+    );
+    let hash_secret = web::Data::new(
+        HashSecret::load_or_generate_secret()
+            .await
+            .context("Failed to load hash secret")?,
+    );
+    let game_data = web::Data::new(
+        load_gamedata_from_file(&args.game_data_path).context("Could not load game data")?,
+    );
+    let server_settings = web::Data::new(
+        ServerSettings::load_from_path(Path::new("data/settings.json"))
+            .await
+            .context("Could not load settings")?,
+    );
+    let whitelist_settings = web::Data::new(
+        WhitelistSettings::load_from_path(Path::new("data/whitelist.txt"))
+            .await
+            .context("Could not load whitelist")?,
+    );
+
+    migrate_database(&database_url).context("Could not apply pending database migrations")?;
+    create_admin_account_if_not_exists(&*database, &*hash_secret)
+        .await
+        .context("Could not check for or create admin account")?;
 
     let gateway_url = args.gateway_url.as_ref().map(|url| format!("{}/ds", url));
 
@@ -154,6 +226,13 @@ async fn main() -> Result<()> {
         log::info!("Launching server with the public gateway url being inferred from the incoming connection");
     }
 
+    let mut background_job_scheduler =
+        background_jobs::create_scheduler(database.clone().into_inner()).await?;
+    background_job_scheduler
+        .start()
+        .await
+        .context("Could not start scheduler for background jobs")?;
+
     let mut builder = HttpServer::new(move || {
         App::new()
             .app_data(steam_data.clone())
@@ -163,20 +242,30 @@ async fn main() -> Result<()> {
             .app_data(web::Data::new(
                 gateway_url.as_ref().map(|url| GatewayUrl(url.clone())),
             ))
+            .app_data(frontend_auth_cache.clone())
+            .app_data(session_blacklist_cache.clone())
+            .app_data(session_permissions_cache.clone())
+            .app_data(jwt_secret.clone())
+            .app_data(hash_secret.clone())
+            .app_data(game_data.clone())
+            .app_data(server_settings.clone())
+            .app_data(whitelist_settings.clone())
             .service(
                 actix_web::web::scope("/ds/e")
-                    .configure(configure_endpoints)
+                    .configure(endpoints::configure_endpoints)
                     .wrap(middleware::deep_logger::DeepLogger {
                         enabled: args.deep_logging,
                     })
                     // Make sure this is last middleware so that the data is decrypted before doing anything else that interacts with the encrypted data
                     .wrap(middleware::encryption::DataEncryption {
                         optional_encryption: args.optional_encryption,
-                    }),
+                    })
+                    .wrap(wrap_errors::WrapErrors),
             )
             .service(endpoints::auth::auth)
             .service(endpoints::auth::me::me)
-            .wrap(wrap_errors::WrapErrors)
+            .service(actix_web::web::scope("/frontend").configure(frontend::configure_endpoints))
+            .wrap(NormalizePath::trim())
             .wrap(actix_web::middleware::Logger::default())
     });
 
@@ -198,13 +287,23 @@ async fn main() -> Result<()> {
 
     if let Err(err) = &stop_pg_result {
         log::error!("Could not gracefully stop postgresql server: {}", err);
-    }
-
-    if stop_pg_result.is_err() {
         log::info!("Note: postgresql server has been stopped even if there are errors above");
     }
 
+    let mut scheduler_stop_failed = false;
+    if let Err(err) = background_job_scheduler.shutdown().await {
+        log::error!("Could not shutdown scheduler for background jobs: {}", err);
+        scheduler_stop_failed = true;
+    }
+
     session_store_clone.save_to_file().await?;
+    session_blacklist_cache_clone
+        .save_to_file(Path::new(BLACKLIST_CACHE_PATH))
+        .await?;
+
+    if scheduler_stop_failed {
+        panic!("Could not shutdown background jobs");
+    }
 
     result
 }
@@ -235,7 +334,7 @@ fn load_rustls_config(
     Ok(config.with_single_cert(cert_chain, keys.remove(0))?)
 }
 
-async fn migrate_database(database_url: &str) -> Result<(), anyhow::Error> {
+fn migrate_database(database_url: &str) -> Result<(), anyhow::Error> {
     let mut pg_conn =
         PgConnection::establish(database_url).context("Could not connect to database")?;
 
@@ -250,6 +349,34 @@ async fn migrate_database(database_url: &str) -> Result<(), anyhow::Error> {
 
     if !pending_migrations.is_empty() {
         log::info!("Applied pending database migrations successfully");
+    }
+
+    Ok(())
+}
+
+fn load_gamedata_from_file(game_data_path: &Path) -> Result<GameData, anyhow::Error> {
+    log::info!("Loading game data");
+
+    let bytes = std::fs::read(game_data_path)?;
+    let game_data = serde_json::from_slice(&bytes)?;
+
+    Ok(game_data)
+}
+
+async fn create_admin_account_if_not_exists(
+    database: &Database,
+    hash_secret: &HashSecret,
+) -> Result<(), anyhow::Error> {
+    let conn = database.connect().await?;
+    if let Some((username, password)) = conn
+        .frontend_accounts()
+        .create_admin_account_if_not_exists(hash_secret)
+        .await?
+    {
+        log::warn!("Could not find an existing admin account");
+        log::info!(
+            "Created admin account with username \"{username}\" and password \"{password}\""
+        );
     }
 
     Ok(())

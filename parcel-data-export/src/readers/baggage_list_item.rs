@@ -1,19 +1,10 @@
 use std::ops::{Deref, DerefMut};
 
-use serde::Serialize;
+use parcel_game_data::{
+    BaggageAttribute, BaggageCaseType, ContentsDamageType, ContentsType, VolumeType,
+};
 
 use super::{game_list_item_base::GameListItemBase, reference::UnresolvedRef};
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[repr(u8)]
-pub enum BaggageAttribute {
-    Locked,
-    Personal,
-    Dummy,
-    Discarded,
-    DummyBaggage,
-    NonBaggage,
-}
 
 impl super::Read for BaggageAttribute {
     fn read(
@@ -30,31 +21,6 @@ impl super::Read for BaggageAttribute {
             other => anyhow::bail!("Unknown BaggageAttribute variant: {other}"),
         })
     }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
-#[serde(rename_all = "camelCase")]
-#[repr(u8)]
-pub enum BaggageCaseType {
-    Normal,
-    LiquidOnly,
-    Weapon,
-    Item,
-    Equipment,
-    BBPod,
-    BodyBag,
-    Dummy,
-    Handcuffs,
-    Material,
-    Cart,
-    ConstructionMachine,
-    Ladder,
-    Delicate,
-    Rope,
-    Vehicle,
-    LivingThing,
-    SmallDelicate,
-    ToxicGas,
 }
 
 impl super::Read for BaggageCaseType {
@@ -87,21 +53,6 @@ impl super::Read for BaggageCaseType {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
-#[serde(rename_all = "camelCase")]
-#[repr(u8)]
-pub enum ContentsDamageType {
-    Normal,
-    Fragile,
-    Delicate,
-    Danger,
-    SensitiveToTimefall,
-    Equipment,
-    LivingThing,
-    MustKeepHorizontally,
-    Cool,
-}
-
 impl super::Read for ContentsDamageType {
     fn read(
         reader: &mut binary_reader::BinaryReader,
@@ -122,17 +73,6 @@ impl super::Read for ContentsDamageType {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
-#[serde(rename_all = "camelCase")]
-#[repr(u8)]
-pub enum ContentsType {
-    Commodity,
-    Weapon,
-    Equipment,
-    Special,
-    RawMaterial,
-}
-
 impl super::Read for ContentsType {
     fn read(
         reader: &mut binary_reader::BinaryReader,
@@ -147,17 +87,6 @@ impl super::Read for ContentsType {
             other => anyhow::bail!("Unknown ContentsType variant: {other}"),
         })
     }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
-#[serde(rename_all = "camelCase")]
-#[repr(u8)]
-pub enum VolumeType {
-    Small,
-    Medium,
-    Large,
-    ExtraLarge,
-    Human,
 }
 
 impl super::Read for VolumeType {

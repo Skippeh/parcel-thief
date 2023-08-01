@@ -1,5 +1,5 @@
 use diesel::{AsChangeset, Insertable, Queryable};
-use parcel_common::api_types;
+use parcel_common::api_types::{self, IntoDsApiType};
 
 use crate::db::schema::qpid_object_extra_infos;
 
@@ -16,9 +16,11 @@ pub struct NewExtraInfo<'a> {
     pub alternative_qpid_id: i32,
 }
 
-impl ExtraInfo {
-    pub fn into_api_type(self) -> api_types::object::ExtraInfo {
-        api_types::object::ExtraInfo {
+impl IntoDsApiType for ExtraInfo {
+    type ApiType = api_types::object::ExtraInfo;
+
+    fn into_ds_api_type(self) -> Self::ApiType {
+        Self::ApiType {
             alternative_qpid_id: self.alternative_qpid_id,
         }
     }

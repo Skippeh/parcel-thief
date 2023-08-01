@@ -1,5 +1,6 @@
 use chrono::NaiveDateTime;
 use diesel::{AsChangeset, Insertable, Queryable};
+use parcel_common::api_types::IntoDsApiType;
 
 use crate::db::schema::qpid_object_recycle_materials;
 
@@ -17,9 +18,11 @@ pub struct RecycleMaterials {
     pub recycle_time: NaiveDateTime,
 }
 
-impl RecycleMaterials {
-    pub fn into_api_type(self) -> parcel_common::api_types::object::RecycleMaterials {
-        parcel_common::api_types::object::RecycleMaterials {
+impl IntoDsApiType for RecycleMaterials {
+    type ApiType = parcel_common::api_types::object::RecycleMaterials;
+
+    fn into_ds_api_type(self) -> Self::ApiType {
+        Self::ApiType {
             // None means the owner of the object is the contributor, and the api should return an empty string if this is the case
             contributor_account_id: self.contributor_id.unwrap_or_default(),
             materials: [

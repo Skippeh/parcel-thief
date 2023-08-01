@@ -7,6 +7,7 @@ use actix_web::{
 use parcel_common::api_types::{
     mission::{MissionType, OnlineMissionType, ProgressState},
     requests::find_missions::{FindMissionsRequest, FindMissionsResponse},
+    IntoDsApiType,
 };
 
 use crate::{data::database::Database, endpoints::InternalError, session::Session};
@@ -18,7 +19,7 @@ pub async fn find_missions(
     database: Data<Database>,
 ) -> Result<Json<FindMissionsResponse>, InternalError> {
     let request = request.into_inner();
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let db_missions = conn.missions();
 
     const MISSION_TYPES: &[MissionType] = &[
@@ -43,7 +44,7 @@ pub async fn find_missions(
             MISSION_TYPES,
             &[&session.account_id],
             PROGRESS_STATES,
-            &request.qpid_ids,
+            Some(&request.qpid_ids),
         )
         .await?;
 
@@ -73,7 +74,7 @@ pub async fn find_missions(
     let res_missions = missions
         .into_iter()
         .take(request.limit as usize)
-        .map(|m| m.into_api_type())
+        .map(|m| m.into_ds_api_type())
         .collect();
 
     Ok(Json(FindMissionsResponse {

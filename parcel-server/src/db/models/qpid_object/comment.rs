@@ -1,7 +1,7 @@
 use std::num::TryFromIntError;
 
 use diesel::{Identifiable, Insertable, Queryable};
-use parcel_common::api_types;
+use parcel_common::api_types::{self, IntoDsApiType, TryIntoDsApiType};
 
 use crate::db::schema::{qpid_object_comment_phrases, qpid_object_comments};
 
@@ -17,14 +17,17 @@ pub struct Comment {
     pub reference_object: String,
 }
 
-impl Comment {
+impl TryIntoDsApiType for Comment {
+    type ApiType = api_types::object::Comment;
+    type Error = TryFromIntError;
+
     /// Try to convert self into the equivalent api type. Phrases will be set to empty vec.
     ///
     /// Since `likes` is i32 in the api but stored as i64 in the database,
     /// this will return an error if db value is out of range of i32.
     ///
     /// Similarly, `parent_index` is stored as i16 but api type is i8.
-    pub fn try_into_api_type(self) -> Result<api_types::object::Comment, TryFromIntError> {
+    fn try_into_ds_api_type(self) -> Result<Self::ApiType, Self::Error> {
         Ok(api_types::object::Comment {
             phrases: Vec::new(),
             writer: self.writer,
@@ -56,8 +59,10 @@ pub struct Phrase {
     pub sort_order: i16,
 }
 
-impl Phrase {
-    pub fn into_api_type(self) -> i32 {
+impl IntoDsApiType for Phrase {
+    type ApiType = i32;
+
+    fn into_ds_api_type(self) -> Self::ApiType {
         self.phrase
     }
 }

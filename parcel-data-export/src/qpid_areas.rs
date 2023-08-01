@@ -1,33 +1,14 @@
 use std::{collections::BTreeMap, ffi::OsStr, path::Path};
 
-use serde::Serialize;
+use parcel_game_data::{ConstructionPointType, Language, QpidArea, QpidAreaMetaData};
 
 use crate::readers::{
-    delivery_point_info_resource::{Area, ConstructionPointType, DeliveryPointInfoResource},
-    localized_text_resource::Language,
-    LoadContext, RTTITypeHash,
+    delivery_point_info_resource::DeliveryPointInfoResource, LoadContext, RTTITypeHash,
 };
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct QpidArea {
-    pub qpid_id: i32,
-    pub names: BTreeMap<Language, String>,
-    pub metadata: QpidAreaMetaData,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct QpidAreaMetaData {
-    pub order_in_list: u32,
-    pub construction_type: ConstructionPointType,
-    pub area: Area,
-    pub location: (f64, f64, f64),
-}
 
 pub fn read_qpid_areas(
     load_context: &mut LoadContext,
-    qpid_areas: &mut Vec<QpidArea>,
+    qpid_areas: &mut BTreeMap<i32, QpidArea>,
 ) -> Result<(), anyhow::Error> {
     let location_dir = load_context.get_absolute_path(&Path::new("ds").join("location"));
 
@@ -102,11 +83,14 @@ pub fn read_qpid_areas(
                         location: delivery_point.world_transform.position,
                     };
 
-                    qpid_areas.push(QpidArea {
-                        qpid_id: delivery_point.delivery_point_locator_id,
-                        names,
-                        metadata,
-                    });
+                    qpid_areas.insert(
+                        delivery_point.delivery_point_locator_id,
+                        QpidArea {
+                            qpid_id: delivery_point.delivery_point_locator_id,
+                            names,
+                            metadata,
+                        },
+                    );
                 }
             }
         }

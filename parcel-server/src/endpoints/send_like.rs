@@ -80,7 +80,7 @@ pub async fn send_like(
     session: Session,
     database: Data<Database>,
 ) -> Result<EmptyResponse, Error> {
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let likes = conn.likes();
     let accounts = conn.accounts();
 

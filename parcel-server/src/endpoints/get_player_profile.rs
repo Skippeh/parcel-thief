@@ -24,7 +24,7 @@ pub async fn get_player_profile(
         return Ok(Json(GetPlayerProfileResponse { profiles: vec![] }));
     }
 
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let accounts = conn.accounts();
     let profiles = conn.player_profiles();
 

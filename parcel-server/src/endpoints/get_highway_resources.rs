@@ -16,7 +16,7 @@ pub async fn get_highway_resources(
     session: Session,
     database: Data<Database>,
 ) -> Result<Json<GetHighwayResourcesResponse>, InternalError> {
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let highway_resources = conn.highway_resources();
     let likes = conn.likes();
 

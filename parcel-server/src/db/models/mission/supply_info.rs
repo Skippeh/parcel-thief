@@ -1,5 +1,5 @@
 use diesel::{Insertable, Queryable};
-use parcel_common::api_types;
+use parcel_common::api_types::{self, IntoDsApiType};
 
 use crate::db::schema::mission_supply_infos;
 
@@ -10,9 +10,11 @@ pub struct SupplyInfo {
     pub amount: i32,
 }
 
-impl SupplyInfo {
-    pub fn into_api_type(self) -> api_types::mission::SupplyInfo {
-        api_types::mission::SupplyInfo {
+impl IntoDsApiType for SupplyInfo {
+    type ApiType = api_types::mission::SupplyInfo;
+
+    fn into_ds_api_type(self) -> Self::ApiType {
+        Self::ApiType {
             item_hash: self.item_hash,
             amount: self.amount,
         }

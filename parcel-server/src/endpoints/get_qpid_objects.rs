@@ -5,6 +5,7 @@ use actix_web::{
 use parcel_common::api_types::{
     object::QpidObjectsResponse,
     requests::get_qpid_objects::{GetQpidObjectsRequest, GetQpidObjectsResponse},
+    TryIntoDsApiType,
 };
 
 use crate::{data::database::Database, endpoints::InternalError, session::Session};
@@ -15,7 +16,7 @@ pub async fn get_qpid_objects(
     _session: Session,
     database: Data<Database>,
 ) -> Result<Json<GetQpidObjectsResponse>, InternalError> {
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let objects = conn.qpid_objects();
 
     let db_objects = objects.find_objects_by_id(&request.object_ids).await?;
@@ -23,7 +24,7 @@ pub async fn get_qpid_objects(
         .query_object_data(db_objects)
         .await?
         .into_iter()
-        .map(|obj| obj.try_into_api_type())
+        .map(|obj| obj.try_into_ds_api_type())
         .collect::<Result<_, _>>()?;
 
     Ok(Json(GetQpidObjectsResponse {

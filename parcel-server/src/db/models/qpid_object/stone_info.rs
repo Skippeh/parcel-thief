@@ -1,5 +1,5 @@
 use diesel::{AsChangeset, Insertable, Queryable};
-use parcel_common::api_types;
+use parcel_common::api_types::{self, IntoDsApiType};
 
 use crate::db::schema::qpid_object_stone_infos;
 
@@ -16,9 +16,11 @@ pub struct NewStoneInfo<'a> {
     pub resting_count: i32,
 }
 
-impl StoneInfo {
-    pub fn into_api_type(self) -> api_types::object::StoneInfo {
-        api_types::object::StoneInfo {
+impl IntoDsApiType for StoneInfo {
+    type ApiType = api_types::object::StoneInfo;
+
+    fn into_ds_api_type(self) -> Self::ApiType {
+        Self::ApiType {
             resting_count: self.resting_count,
         }
     }

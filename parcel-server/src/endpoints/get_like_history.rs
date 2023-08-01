@@ -8,8 +8,9 @@ use actix_web::{
     web::{Data, Json},
 };
 use chrono::NaiveDateTime;
-use parcel_common::api_types::requests::get_like_history::{
-    GetLikeHistoryRequest, GetLikeHistoryResponse, LikeHistory,
+use parcel_common::api_types::{
+    requests::get_like_history::{GetLikeHistoryRequest, GetLikeHistoryResponse, LikeHistory},
+    IntoDsApiType,
 };
 
 use crate::{
@@ -22,7 +23,7 @@ pub async fn get_like_history(
     session: Session,
     database: Data<Database>,
 ) -> Result<Json<GetLikeHistoryResponse>, InternalError> {
-    let conn = database.connect()?;
+    let conn = database.connect().await?;
     let likes = conn.likes();
 
     let given_likes = if request.since <= 0 {
@@ -80,7 +81,7 @@ pub async fn get_like_history(
 
     let result = given_likes
         .drain(..min(given_likes.len(), 5))
-        .map(|like| like.into_api_type())
+        .map(|like| like.into_ds_api_type())
         .collect::<Vec<_>>();
 
     let mut summarized_like = LikeHistory {

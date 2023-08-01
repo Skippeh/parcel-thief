@@ -1,5 +1,5 @@
 use diesel::{Insertable, Queryable};
-use parcel_common::api_types;
+use parcel_common::api_types::{self, IntoDsApiType};
 
 use crate::db::schema::qpid_object_rope_infos;
 
@@ -20,9 +20,11 @@ pub struct NewRopeInfo<'a> {
     pub len: i32,
 }
 
-impl RopeInfo {
-    pub fn into_api_type(self) -> api_types::object::RopeInfo {
-        api_types::object::RopeInfo {
+impl IntoDsApiType for RopeInfo {
+    type ApiType = api_types::object::RopeInfo;
+
+    fn into_ds_api_type(self) -> Self::ApiType {
+        Self::ApiType {
             pitch: self.pitch,
             heading: self.heading,
             length: self.len,
