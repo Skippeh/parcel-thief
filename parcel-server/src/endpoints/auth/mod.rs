@@ -93,7 +93,7 @@ impl CommonResponseError for Error {
         match self {
             Error::ApiResponseError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::InternalError(err) => err.get_http_status_code(),
-            Error::InvalidCode => StatusCode::UNAUTHORIZED,
+            Error::InvalidCode => StatusCode::FORBIDDEN,
             Error::NotWhitelisted => StatusCode::FORBIDDEN,
         }
     }
