@@ -71,6 +71,8 @@ impl super::settings::Persist<Whitelist> for WhitelistPersist {
             if let Some(name_reference) = &entry.name_reference {
                 contents.push_str(&format!(";{}", name_reference.replace('\n', " ")));
             }
+
+            contents.push('\n');
         }
 
         tokio::fs::write(file_path, contents.as_bytes()).await?;
