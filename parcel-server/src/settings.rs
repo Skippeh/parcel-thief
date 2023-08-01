@@ -4,7 +4,7 @@ use std::{
     sync::Arc,
 };
 
-use notify::{EventHandler, PollWatcher, RecommendedWatcher, Watcher};
+use notify::{EventHandler, RecommendedWatcher, Watcher};
 use serde::{de::DeserializeOwned, Serialize};
 use tokio::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
