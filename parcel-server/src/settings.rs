@@ -4,7 +4,7 @@ use std::{
     sync::Arc,
 };
 
-use notify::{EventHandler, ReadDirectoryChangesWatcher, Watcher};
+use notify::{EventHandler, PollWatcher, RecommendedWatcher, Watcher};
 use serde::{de::DeserializeOwned, Serialize};
 use tokio::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
@@ -22,7 +22,7 @@ pub struct Settings<TData, TDataPersist> {
     file_path: PathBuf,
     /// If true, the settings will be reloaded the next time `read()` is called.
     is_dirty: Arc<RwLock<bool>>,
-    _watcher: ReadDirectoryChangesWatcher,
+    _watcher: RecommendedWatcher,
     _data_persist: PhantomData<TDataPersist>,
 }
 
