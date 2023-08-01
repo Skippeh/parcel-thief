@@ -38,7 +38,7 @@ diesel-async = { version = "0.3.1", features = ["postgres"] }
 diesel_migrations = "2.0.0"
 dotenv = "0.15.0"
 itertools = "0.10.5"
-pg-embed = { git = "https://github.com/faokunega/pg-embed.git" }
+pg-embed = { git = "https://github.com/Skippeh/pg-embed.git" }
 lazy_static = "1.4.0"
 portpicker = "0.1.1"
 tokio = { version = "1.25.0", features = ["full"] }
