@@ -1,5 +1,5 @@
 use actix_web::{
-    post,
+    put,
     web::{Data, Json},
 };
 use parcel_common::api_types::requests::delete_missions::DeleteMissionsRequest;
@@ -10,7 +10,7 @@ use crate::{
     session::Session,
 };
 
-#[post("deleteMissions")]
+#[put("deleteMissions")]
 pub async fn delete_missions(
     request: Json<DeleteMissionsRequest>,
     session: Session,
