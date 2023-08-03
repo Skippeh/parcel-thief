@@ -29,13 +29,16 @@ pub async fn list_shared_cargo(
 
     let data_missions = missions
         .find_missions(
-            &[OnlineMissionType::Private], // private = shared cargo, dynamic = lost cargo. we only want shared cargo here
+            &[OnlineMissionType::Private, OnlineMissionType::Dynamic],
             &[MissionType::LostObject],
             &[], // no excluded accounts
             &[ProgressState::Available, ProgressState::Ready],
             None,
         )
-        .await?;
+        .await?
+        .into_iter()
+        .filter(|m| m.qpid_end_location == -1)
+        .collect::<Vec<_>>();
 
     let mut account_ids = data_missions
         .iter()
@@ -108,13 +111,16 @@ pub async fn list_lost_cargo(
 
     let data_missions = missions
         .find_missions(
-            &[OnlineMissionType::Dynamic], // private = shared cargo, dynamic = lost cargo. we only want lost cargo here
+            &[OnlineMissionType::Private, OnlineMissionType::Dynamic],
             &[MissionType::LostObject],
             &[], // no excluded accounts
             &[ProgressState::Available, ProgressState::Ready],
             None,
         )
-        .await?;
+        .await?
+        .into_iter()
+        .filter(|m| m.qpid_end_location != -1)
+        .collect::<Vec<_>>();
 
     let mut account_ids = data_missions
         .iter()
