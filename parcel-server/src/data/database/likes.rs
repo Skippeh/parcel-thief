@@ -21,6 +21,9 @@ pub enum LikeTarget<'a> {
     Shared,
     Highway(u32),
     Object(&'a str),
+    Supply,
+    Recycle,
+    Shell,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -48,6 +51,12 @@ impl<'a> TryFrom<&'a str> for LikeTarget<'a> {
             Ok(Self::Dummy)
         } else if value.eq_ignore_ascii_case("ishared") {
             Ok(Self::Shared)
+        } else if value.eq_ignore_ascii_case("isupply") {
+            Ok(Self::Supply)
+        } else if value.eq_ignore_ascii_case("irecycle") {
+            Ok(Self::Recycle)
+        } else if value.eq_ignore_ascii_case("ishell") {
+            Ok(Self::Shell)
         } else {
             Ok(Self::Object(value))
         }
@@ -128,6 +137,9 @@ impl<'db> Likes<'db> {
                     LikeTarget::Shared => "ishared".into(),
                     LikeTarget::Highway(id) => format!("h{id}"),
                     LikeTarget::Object(id) => id.into(),
+                    LikeTarget::Supply => "isupply".into(),
+                    LikeTarget::Recycle => "irecycle".into(),
+                    LikeTarget::Shell => "ishell".into(),
                 };
 
                 diesel::insert_into(dsl::likes)

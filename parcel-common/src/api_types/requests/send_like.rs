@@ -23,7 +23,7 @@ pub struct SendLikeRequest {
     ///
     /// Incomplete list of possible values:
     /// - h = highway, online_id format = "h{construction_id}", where the number is the id of the highway segment
-    /// - i = dummy/shared, value is either idummy or ishared, maybe its purpose is to send likes to a player "directly" instead of liking an object
+    /// - i = dummy/shared/shell/recycle/supply, maybe its purpose is to send likes to a player "directly" instead of liking an object
     /// - any other = object, where the first letter is the object type (and also the first letter of the object id)
     #[serde(rename = "ot")]
     pub online_type: String,
