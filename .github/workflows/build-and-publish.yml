@@ -42,9 +42,8 @@ jobs:
           filename: pg.zip
       - name: Extract PostgreSQL binaries
         if: steps.cache-pgsql.outputs.cache-hit != 'true'
-        uses: edgarrc/action-7z@v1
-        with:
-          args: 7z x -o"${{ github.workspace}}/temp/" /temp/pg-dl/pg.zip pgsql/lib/* pgsql/bin/*
+        shell: pwsh
+        run: 7z x -o"${{ github.workspace}}/temp/" /temp/pg-dl/pg.zip pgsql/lib/* pgsql/bin/*
       - name: Build parcel-server
         uses: actions-rs/cargo@v1
         env:
