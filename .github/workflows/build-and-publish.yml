@@ -32,19 +32,19 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ github.workspace }}/temp/pgsql
-          key: pgsql-win-x64-15.3.1
+          key: pgsql-win-x64-15.3.4
       - name: Download PostgreSQL binaries
         if: steps.cache-pgsql.outputs.cache-hit != 'true'
         uses: suisei-cn/actions-download-file@v1.4.0
         with:
-          url: https://get.enterprisedb.com/postgresql/postgresql-15.3-1-windows-x64-binaries.zip
+          url: https://get.enterprisedb.com/postgresql/postgresql-15.3-4-windows-x64-binaries.zip
           target: /temp/pg-dl/
           filename: pg.zip
       - name: Extract PostgreSQL binaries
         if: steps.cache-pgsql.outputs.cache-hit != 'true'
-        shell: powershell
-        run: |
-          Expand-Archive -Path /temp/pg-dl/pg.zip -DestinationPath ${{ github.workspace }}/temp/
+        uses: edgarrc/action-7z@v1
+        with:
+          args: 7z x -o"${{ github.workspace}}/temp/" /temp/pg-dl/pg.zip pgsql/lib/* pgsql/bin/*
       - name: Build parcel-server
         uses: actions-rs/cargo@v1
         env:
@@ -71,6 +71,12 @@ jobs:
           mkdir ${{ github.workspace }}/dist-client/
           cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel-server.exe ${{ github.workspace }}/dist-server/
           cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel_server.pdb ${{ github.workspace }}/dist-server/
+          cp ${{ github.workspace }}/temp/pgsql/bin/libcrypto-3-x64.dll ${{ github.workspace }}/dist-server/
+          cp ${{ github.workspace }}/temp/pgsql/bin/libiconv-2.dll ${{ github.workspace }}/dist-server/
+          cp ${{ github.workspace }}/temp/pgsql/bin/libintl-9.dll ${{ github.workspace }}/dist-server/
+          cp ${{ github.workspace }}/temp/pgsql/bin/libpq.dll ${{ github.workspace }}/dist-server/
+          cp ${{ github.workspace }}/temp/pgsql/bin/libssl-3-x64.dll ${{ github.workspace }}/dist-server/
+          cp ${{ github.workspace }}/temp/pgsql/bin/libwinpthread-1.dll ${{ github.workspace }}/dist-server/
           cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel_client.dll ${{ github.workspace }}/dist-client/
           cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/parcel_client.pdb ${{ github.workspace }}/dist-client/
           cp ${{ github.workspace }}/target/x86_64-pc-windows-msvc/release/client-injector.exe ${{ github.workspace }}/dist-client/
