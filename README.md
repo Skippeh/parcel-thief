@@ -110,7 +110,7 @@ Note that this list might be inconclusive and maybe even slightly incorrect.
 - Various missing object types, usually noticed when the game calls the `findQpidObjects` or `createObject` endpoints with unknown object types in the request. It will still work but a warning will be logged.
 - Game does not query player profiles which leads to not being able to see stats for other players (total likes for example), most likely due to account id not being a valid hash of some sort.
 - Game does not show avatars of other players, most likely due to account id not being a valid hash of some sort.
-- Embedded PostgreSQL database doesn't gracefully shutdown on some Windows installs. Not sure why. I suspect it might have something to do with the `pg-embed` crate or a permissions issue as replicating the shutdown command with pg_ctl seems to work fine.
+- Embedded PostgreSQL database doesn't gracefully shutdown on some Windows installs. Not sure why. I suspect it might have something to do with the `pg-embed` crate or a permission issue as replicating the shutdown command with pg_ctl seems to work fine.
 
 ## Building
 
