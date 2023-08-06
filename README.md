@@ -58,6 +58,10 @@ If you don't have an existing server to use one will be automatically downloaded
 
 **There is an issue with this on some Windows configurations where graceful shutdown doesn't work and corrupts the database. I recommend testing to see if ctrl+c shuts down the server correctly before using it.**
 
+### Windows dependencies
+
+The windows server requires [Microsoft Visual C++ Redistributable](https://aka.ms/vs/17/release/vc_redist.x64.exe). You probably already have this installed but if you get an error about VCRUNTIME140.dll missing then install it.
+
 ### Linux dependencies
 
 The linux server requires `libpq5` and `glibc-2.31` or higher.
