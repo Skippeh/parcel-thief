@@ -89,7 +89,7 @@ Note that this list might be inconclusive and maybe even slightly incorrect.
 
 ### Server
 
-- [ ] Add all remaining object types and name them if possible. There are probably a lot more of them that I haven't encountered yet. [Known object types can be found here](https://github.com/Skippeh/parcel-thief/blob/main/parcel-common/src/api_types/object.rs#L159).
+- [ ] Add all remaining object types and name them if possible. There are probably a lot more of them that I haven't encountered yet. [Known object types can be found here](https://github.com/Skippeh/parcel-thief/blob/main/parcel-common/src/api_types/object.rs#L155).
 - [x] Figure out hashes for cargo items.
 - [x] Figure out the qpid id for each area in the game.
 - [ ] Figure out hashes for dynamic locations such as pre-placed post boxes.
