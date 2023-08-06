@@ -8,6 +8,8 @@
 
 You can find the latest client and server version in [Releases](https://github.com/Skippeh/parcel-thief/releases).
 
+Note that the project is still in development by a single developer so there will be bugs and unexpected behaviour.
+
 ## Game Installation
 
 **NOTE: Only Director's Cut is supported. Original Death Stranding is untested and is very unlikely to work.**
