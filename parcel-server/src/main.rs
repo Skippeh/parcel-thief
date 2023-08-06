@@ -34,6 +34,10 @@ use data::{
 };
 use diesel::{pg::Pg, Connection, PgConnection};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+use fern::{
+    colors::{Color, ColoredLevelConfig},
+    DateBased,
+};
 use frontend::{
     api::endpoints::auth::FrontendAuthCache,
     jwt_session::{
@@ -142,9 +146,51 @@ impl From<GatewayUrl> for String {
 async fn main() -> Result<()> {
     dotenv::dotenv().ok();
     let args = Options::parse();
-    env_logger::init_from_env(
-        env_logger::Env::new().default_filter_or("parcel_server=info,warn,error"),
-    );
+
+    let colors = ColoredLevelConfig::new()
+        .trace(Color::White)
+        .info(Color::BrightGreen)
+        .debug(Color::Blue)
+        .warn(Color::Yellow)
+        .error(Color::BrightRed);
+    let log_file = DateBased::new("logs/", "%Y-%m-%d.log");
+    const LOG_TIME_FORMAT: &str = "%Y-%m-%dT%H:%M:%S";
+    fern::Dispatch::new()
+        .chain(
+            fern::Dispatch::new()
+                .format(move |out, message, record| {
+                    let now = chrono::Local::now().format(LOG_TIME_FORMAT).to_string();
+                    out.finish(format_args!(
+                        "[{} {} {}] {}",
+                        now,
+                        colors.color(record.level()),
+                        record.target(),
+                        message
+                    ))
+                })
+                .chain(std::io::stdout()),
+        )
+        .chain(
+            fern::Dispatch::new()
+                .format(move |out, message, record| {
+                    let now = chrono::Local::now().format(LOG_TIME_FORMAT).to_string();
+                    out.finish(format_args!(
+                        "[{} {} {}] {}",
+                        now,
+                        record.level(),
+                        record.target(),
+                        message
+                    ))
+                })
+                .chain(log_file),
+        )
+        .level(log::LevelFilter::Info)
+        .level_for("parcel_common", log::LevelFilter::Debug)
+        .level_for("parcel_server", log::LevelFilter::Debug)
+        .level_for("parcel-game-data", log::LevelFilter::Debug)
+        .apply()?;
+
+    log::info!("Server starting...");
 
     if args.cert_private_key.is_some() != args.cert_public_key.is_some() {
         anyhow::bail!("Both or none of the public and private keys needs to be specified");
@@ -300,6 +346,8 @@ async fn main() -> Result<()> {
     session_blacklist_cache_clone
         .save_to_file(Path::new(BLACKLIST_CACHE_PATH))
         .await?;
+
+    log::info!("Server stopped\n");
 
     if scheduler_stop_failed {
         panic!("Could not shutdown background jobs");
