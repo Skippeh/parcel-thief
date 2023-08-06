@@ -223,7 +223,7 @@ async fn main() -> Result<()> {
             gateway_url
         );
     } else {
-        log::info!("Launching server with the public gateway url being inferred from the incoming connection");
+        log::info!("Launching server on port {} with the public gateway url being inferred from the incoming connection", args.listen_port);
     }
 
     let mut background_job_scheduler =
