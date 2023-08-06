@@ -39,16 +39,22 @@ Logs are also saved in the game directory to a file called `parcel-client.log`.
 1. Download parcel-server from [Releases](https://github.com/Skippeh/parcel-thief/releases) and
    extract the files anywhere. Preferrably not the game directory for tidyness because of some directories being created but it's up to you.
 2. By default only a steam web api key is required to launch the server, but you might want to run the server with `--help` launch parameter to see what else you can configure. Note that the server is a commandline application so if you don't run it from an existing terminal the window will close after the process exits.
-3. Optionally: configure the server by doing either of these:
-   - Specify launch parameters directly when launching the server.
-   - Create a .env file in the server directory to specify environment variables for the process.
-4. Launch parcel-server.
+   - Optionally: configure the server by doing either of these:
+     - Specify launch parameters directly when launching the server.
+     - Create a .env file in the server directory to specify environment variables for the process.
+3. Launch parcel-server.
+4. Optionally, configure the whitelist and other runtime configurable parameters from the frontend.
+   You can access it from the web browser at `/frontend`.
+   A default admin account is created and logged on startup if an account without the `Manage accounts` permission exists.
+   You can also edit the whitelist and server config file directly in the server's `data` directory. Restarting the server after editing is not required.
 
 ### PostgreSQL
 
 The server uses PostgreSQL to store data.
 
 If you don't have an existing server to use one will be automatically downloaded and configured, and start/stop with the server.
+
+**There is an issue with this on some Windows configurations where graceful shutdown doesn't work and corrupts the database. I recommend testing to see if ctrl+c shuts down the server correctly before using it.**
 
 ### Linux dependencies
 
@@ -84,8 +90,9 @@ Note that this list might be inconclusive and maybe even slightly incorrect.
 ### Server
 
 - [ ] Add all remaining object types and name them if possible. There are probably a lot more of them that I haven't encountered yet. [Known object types can be found here](https://github.com/Skippeh/parcel-thief/blob/main/parcel-common/src/api_types/object.rs#L159).
-- [ ] Figure out hashes for cargo types and dynamic locations such as pre-placed post boxes.
-- [ ] Figure out the qpid id for each area in the game.
+- [x] Figure out hashes for cargo items.
+- [x] Figure out the qpid id for each area in the game.
+- [ ] Figure out hashes for dynamic locations such as pre-placed post boxes.
 - [ ] If there's a want for it, implement ranked missions and rewards. The missions seem to be hard coded in the game and the server simply refers to a group of them by season id or something, but it could still be fun.
 - [ ] Implement the following endpoints if necessary (not sure if they're used):
   - [ ] deleteHighwayResources (there's no way to delete highway segments/resources in game)
@@ -94,14 +101,14 @@ Note that this list might be inconclusive and maybe even slightly incorrect.
 
 ## Ideas
 
-- Add a web frontend for the server to be able to see various data such as ongoing missions, cargo, etc.
-- Potentially then also the ability to add missions (cargo in shared lockers at waystations) from A to B so that players can make their own challenge deliveries for example.
+- Add some sort of mission creator to the frontend which puts lost cargo in the world, or shared lockers etc.
 
 ## Known issues
 
 - Various missing object types, usually noticed when the game calls the `findQpidObjects` or `createObject` endpoints with unknown object types in the request. It will still work but a warning will be logged.
 - Game does not query player profiles which leads to not being able to see stats for other players (total likes for example), most likely due to account id not being a valid hash of some sort.
 - Game does not show avatars of other players, most likely due to account id not being a valid hash of some sort.
+- Embedded PostgreSQL database doesn't gracefully shutdown on some Windows installs. Not sure why. I suspect it might have something to do with the `pg-embed` crate or a permissions issue as replicating the shutdown command with pg_ctl seems to work fine.
 
 ## Building
 
@@ -110,3 +117,9 @@ To build `parcel-server` you need to set `PQ_LIB_DIR` to the directory of the Po
 To build `parcel-client` and `client-injector` you need to use Rust nightly.
 
 After the above is done, all you need to do is run `cargo build`.
+
+## Acknowledgements
+
+Thanks to:
+
+- [Decima Workshop](https://github.com/ShadelessFox/decima) by ShadelessFox for figuring out game data layout and making it very easy to browse through the game's data.
