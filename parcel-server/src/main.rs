@@ -187,7 +187,7 @@ async fn main() -> Result<()> {
         .level(log::LevelFilter::Info)
         .level_for("parcel_common", log::LevelFilter::Debug)
         .level_for("parcel_server", log::LevelFilter::Debug)
-        .level_for("parcel-game-data", log::LevelFilter::Debug)
+        .level_for("parcel_game_data", log::LevelFilter::Debug)
         .apply()?;
 
     log::info!("Server starting...");
