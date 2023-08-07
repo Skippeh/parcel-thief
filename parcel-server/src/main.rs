@@ -130,9 +130,11 @@ pub struct Options {
 #[derive(Debug, Clone)]
 pub struct GatewayUrl(String);
 
-impl<'a> From<&'a GatewayUrl> for &'a str {
-    fn from(value: &'a GatewayUrl) -> Self {
-        &value.0
+impl std::ops::Deref for GatewayUrl {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
