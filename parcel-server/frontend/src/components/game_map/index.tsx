@@ -78,20 +78,19 @@ const MapRender = ({ area }: Props) => {
     <>
       <color attach="background" args={["black"]} />
       <ambientLight args={["white", 3]} />
-      <PerspectiveCamera makeDefault position={[0, 0, 1000]} />
-      <MapControls
-        screenSpacePanning
+      <PerspectiveCamera
         makeDefault
-        maxPolarAngle={Math.PI / 1.1}
-        minPolarAngle={Math.PI / 2}
-        maxAzimuthAngle={Math.PI * 2}
-        minAzimuthAngle={-Math.PI * 2}
+        position={[0, 0, 1000]}
+        up={[0, 0, 1]}
+        // rotate facing down
+        rotation={[-Math.PI / 2, 0, 0]}
+      />
+      <MapControls
+        makeDefault
+        maxPolarAngle={Math.PI / 2}
+        minPolarAngle={-Math.PI / 2}
         enableRotate
         enableDamping
-        mouseButtons={{
-          LEFT: THREE.MOUSE.PAN,
-          MIDDLE: THREE.MOUSE.DOLLY,
-        }}
         minDistance={128}
         maxDistance={1024}
         zoomSpeed={2}
