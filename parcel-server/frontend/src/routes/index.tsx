@@ -13,6 +13,8 @@ import Manage from "./pages/manage";
 export interface RouteHandle {
   crumb: string;
   title?: string;
+  noContentWrapper?: boolean;
+  noFooter?: boolean;
 }
 
 export default createBrowserRouter(
