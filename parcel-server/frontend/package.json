@@ -7,7 +7,7 @@
     "watch": "concurrently --kill-others \"yarn watch:dist\" \"yarn watch:tsc\"",
     "watch:dist": "parcel watch --public-url /frontend",
     "watch:tsc": "tsc -p . --watch --noEmit",
-    "build": "parcel build --public-url /frontend",
+    "build": "parcel build --public-url /frontend --no-source-maps",
     "checkTypings": "tsc --noEmit",
     "checkTypingsAndBuild": "yarn checkTypings && yarn build"
   },
