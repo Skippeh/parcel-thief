@@ -9,6 +9,7 @@ import Items from "./pages/items";
 import Accounts from "./pages/accounts";
 import FrontendAccount from "./pages/accounts/frontend/account";
 import Manage from "./pages/manage";
+import Map from "./pages/map";
 
 export interface RouteHandle {
   crumb: string;
@@ -42,6 +43,15 @@ export default createBrowserRouter(
               element: <Items />,
               handle: {
                 crumb: "Items",
+              },
+            },
+            {
+              path: "/map/:area",
+              element: <Map />,
+              handle: {
+                crumb: "Map",
+                noContentWrapper: true,
+                noFooter: true,
               },
             },
           ],

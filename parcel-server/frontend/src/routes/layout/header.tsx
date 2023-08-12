@@ -69,6 +69,16 @@ const Header = () => {
               <li>
                 <NavLink to="/items">Items</NavLink>
               </li>
+              {/* todo: put maps in a dropdown menu */}
+              <li>
+                <NavLink to="/map/west">Map (west)</NavLink>
+              </li>
+              <li>
+                <NavLink to="/map/central">Map (central)</NavLink>
+              </li>
+              <li>
+                <NavLink to="/map/east">Map (east)</NavLink>
+              </li>
               <ProtectedContent permissions={["manageAccounts"]}>
                 <li>
                   <NavLink to="/accounts">Accounts</NavLink>
