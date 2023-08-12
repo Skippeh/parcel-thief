@@ -1,6 +1,5 @@
 import { MapControls, PerspectiveCamera } from "@react-three/drei";
 import { Canvas, useLoader, useThree } from "@react-three/fiber";
-import { useRef } from "react";
 import { styled } from "styled-components";
 import area01Texture from "../../../../../assets/ds/levels/area01/area01.jpg";
 import area02Texture from "../../../../../assets/ds/levels/area02/area02.jpg";
@@ -51,7 +50,6 @@ const GameMap = (props: Props) => {
 
 const MapRender = ({ area }: Props) => {
   const three = useThree();
-  const planeRef = useRef<THREE.PlaneGeometry>(null);
   const planeTexture = useLoader(TextureLoader, Textures.get(area));
   planeTexture.anisotropy = Math.min(
     8,
@@ -83,7 +81,7 @@ const MapRender = ({ area }: Props) => {
         zoomSpeed={2}
       />
       <mesh position={[0, 0, 0]}>
-        <planeGeometry args={[1024, 1024, 128, 128]} ref={planeRef} />
+        <planeGeometry args={[1024, 1024, 128, 128]} />
         <meshStandardMaterial
           map={planeTexture}
           displacementMap={heightTexture}
