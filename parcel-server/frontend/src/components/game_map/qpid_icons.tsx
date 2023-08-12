@@ -47,11 +47,17 @@ function convertCoordinates(
   [x, y, z]: [number, number, number],
   area: Area
 ): [number, number, number] {
-  const xyScale = 7168;
+  let xyScale = 7168;
   let zScale = xyScale;
 
+  // area02 / central has different Z scaling than the other levels, not quite sure what it is yet
   if (area === "area02") {
     zScale /= 3;
+  }
+
+  // area04 / west is half the size of the other levels
+  if (area === "area04") {
+    xyScale /= 2;
   }
 
   return [(x / xyScale) * 1024, (y / xyScale) * 1024, (z / zScale) * 128];
