@@ -52,7 +52,7 @@ function convertCoordinates(
 
   // area02 / central has different Z scaling than the other levels, not quite sure what it is yet
   if (area === "area02") {
-    zScale /= 3;
+    zScale /= 4.5;
   }
 
   // area04 / west is half the size of the other levels
