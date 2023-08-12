@@ -9,6 +9,7 @@ use parcel_common::api_types::frontend::{
     baggages::*,
     settings::{SettingsValues, WhitelistEntry},
 };
+use parcel_game_data::QpidArea;
 use typescript_type_def::{write_definition_file, DefinitionFileOptions};
 
 fn main() {
@@ -38,7 +39,7 @@ type Api = (
         ResetPasswordRequest,
         CreateFrontendAccountRequest,
     ),
-    (SettingsValues, WhitelistEntry),
+    (SettingsValues, WhitelistEntry, QpidArea),
 );
 
 fn generate_ts_types() {

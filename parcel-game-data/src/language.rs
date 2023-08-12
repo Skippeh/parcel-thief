@@ -1,5 +1,8 @@
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "ts")]
+use typescript_type_def::TypeDef;
+
 #[derive(
     Debug,
     Serialize,
@@ -13,6 +16,7 @@ use serde::{Deserialize, Serialize};
     Ord,
     Hash,
 )]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
 #[repr(i32)]
 pub enum Language {
     #[serde(rename = "unknown")]

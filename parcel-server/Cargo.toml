@@ -63,4 +63,5 @@ typescript-type-def = "0.5.7"
 parcel-common = { path = "../parcel-common", default-features = false, features = [
     "ts",
 ] }
+parcel-game-data = { path = "../parcel-game-data", features = ["ts"] }
 which = "4.4"

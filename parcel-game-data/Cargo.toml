@@ -10,3 +10,7 @@ serde = { version = "1.0", features = ["derive"] }
 int-enum = "0.5.0"
 enum-as-inner = "0.6.0"
 enum-iterator = "1.4"
+typescript-type-def = { version = "0.5.7", optional = true }
+
+[features]
+ts = ["dep:typescript-type-def"]

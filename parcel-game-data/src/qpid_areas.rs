@@ -1,11 +1,15 @@
 use std::collections::BTreeMap;
 
+#[cfg(feature = "ts")]
+use typescript_type_def::TypeDef;
+
 use int_enum::IntEnum;
 use serde::{Deserialize, Serialize};
 
 use crate::Language;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
 #[serde(rename_all = "camelCase")]
 pub struct QpidArea {
     pub qpid_id: i32,
@@ -14,6 +18,7 @@ pub struct QpidArea {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
 #[serde(rename_all = "camelCase")]
 pub struct QpidAreaMetaData {
     pub order_in_list: u32,
@@ -25,6 +30,7 @@ pub struct QpidAreaMetaData {
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, IntEnum, Serialize, Deserialize,
 )]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
 #[serde(rename_all = "camelCase")]
 #[repr(u16)]
 pub enum Area {
@@ -62,6 +68,7 @@ pub enum Area {
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, IntEnum, Serialize, Deserialize,
 )]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
 #[serde(rename_all = "camelCase")]
 #[repr(u8)]
 pub enum ConstructionPointType {

@@ -46,3 +46,10 @@ export type SettingsValues={
  */
 "allowFrontendLogin":boolean;};
 export type WhitelistEntry={"providerId":string;"nameReference":(string|null);};
+export type Language=("unknown"|"en-us"|"fr"|"es"|"de"|"it"|"nl"|"pt"|"zh-CHT"|"ko"|"ru"|"pl"|"da"|"fi"|"no"|"sv"|"ja"|"es-419"|"latampor"|"tr"|"ar"|"zh-CN"|"en-uk"|"el"|"cs"|"hu");
+export type U32=number;
+export type ConstructionPointType=("deliveryBase"|"preppersShelter"|"stageSafetyHouse"|"playerSafetyHouse"|"netSafetyHouse"|"stagePost"|"playerPost"|"netPost"|"stageWatchTower"|"playerWatchTower"|"netWatchTower"|"_Reserved0"|"_Reserved1"|"_Reserved2"|"stageCharger"|"playerCharger"|"netCharger"|"stageRainShelter"|"playerRainShelter"|"netRainShelter"|"mulePost"|"stageZipline"|"playerZipline"|"netZipline"|"stageLadder"|"playerLadder"|"netLadder"|"stageFieldRope"|"playerFieldRope"|"netFieldRope"|"stageBridge30m"|"playerBridge30m"|"netBridge30m"|"stageBridge45m"|"playerBridge45m"|"netBridge45m"|"roadRebuilder"|"_Reserved3"|"_Reserved4"|"_Reserved5"|"_Reserved6"|"_Reserved7"|"_Reserved8"|"_Reserved9"|"_Reserved10"|"_Reserved11");
+export type Area=("area00"|"area01"|"area02"|"area03"|"area04"|"warrior01"|"warrior02"|"warrior03"|"beach01"|"empty"|"frange01"|"nm01"|"nm02"|"nm04"|"_Reserved0"|"_Reserved1"|"_Reserved2"|"_Reserved3"|"_Reserved4"|"_Reserved5"|"_Reserved6"|"_Reserved7"|"_Reserved8"|"_Reserved9"|"a"|"b"|"c"|"d"|"e");
+export type F64=number;
+export type QpidAreaMetaData={"orderInList":U32;"constructionType":ConstructionPointType;"area":Area;"location":[F64,F64,F64];};
+export type QpidArea={"qpidId":I32;"names":Record<Language,string>;"metadata":QpidAreaMetaData;};

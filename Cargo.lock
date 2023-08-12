@@ -3080,6 +3080,7 @@ dependencies = [
  "enum-iterator",
  "int-enum",
  "serde",
+ "typescript-type-def",
 ]
 
 [[package]]
