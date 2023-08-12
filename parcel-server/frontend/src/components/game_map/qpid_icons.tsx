@@ -22,15 +22,13 @@ const QpidIcons = ({ areas, area }: Props) => {
             area.metadata.area
           );
           return (
-            <>
-              <mesh key={area.qpidId} position={position}>
-                <boxGeometry args={[10, 10, 10]} />
-                <meshStandardMaterial color={"red"} />
-              </mesh>
-              <Html position={position}>
+            <mesh key={area.qpidId} position={position}>
+              <boxGeometry args={[10, 10, 10]} />
+              <meshStandardMaterial color={"red"} />
+              <Html>
                 <p>{area.names["en-us"]}</p>
               </Html>
-            </>
+            </mesh>
           );
         })}
     </>
