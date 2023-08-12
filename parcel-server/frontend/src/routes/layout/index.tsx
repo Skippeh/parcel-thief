@@ -38,7 +38,7 @@ const Layout = () => {
     <Wrapper>
       <Header />
       <OuterContent>
-        {!handle.noContentWrapper ? (
+        {!handle?.noContentWrapper ? (
           <Content>
             <CenterContainer>
               <PageTitle />
@@ -50,7 +50,7 @@ const Layout = () => {
         ) : (
           <Outlet />
         )}
-        {!handle.noFooter && <Footer />}
+        {!handle?.noFooter && <Footer />}
       </OuterContent>
     </Wrapper>
   );
