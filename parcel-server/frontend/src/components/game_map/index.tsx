@@ -9,24 +9,22 @@ import area02HeightTexture from "../../../../../assets/ds/levels/area02/area02_h
 import area04HeightTexture from "../../../../../assets/ds/levels/area04/area04_height_lores.jpg";
 import { TextureLoader } from "three";
 import THREE = require("three");
-
-export enum Area {
-  East = "area01",
-  Central = "area02",
-  West = "area04",
-}
+import QpidIcons from "./qpid_icons";
+import { getQpidAreas } from "../../services/game_data_service";
+import { useEffect, useState } from "react";
+import { Area, QpidArea } from "../../api_types";
 
 const Textures: Map<Area, string> = new Map([
-  [Area.East, area01Texture],
-  [Area.Central, area02Texture],
-  [Area.West, area04Texture],
+  ["area01", area01Texture],
+  ["area02", area02Texture],
+  ["area04", area04Texture],
 ]);
 
 const HeightTextures: Map<Area, string> = new Map<Area, string>(
   new Map([
-    [Area.East, area01HeightTexture],
-    [Area.Central, area02HeightTexture],
-    [Area.West, area04HeightTexture],
+    ["area01", area01HeightTexture],
+    ["area02", area02HeightTexture],
+    ["area04", area04HeightTexture],
   ])
 );
 
@@ -58,6 +56,24 @@ const MapRender = ({ area }: Props) => {
   planeTexture.needsUpdate = true;
   const heightTexture = useLoader(TextureLoader, HeightTextures.get(area));
 
+  const [qpidAreas, setQpidAreas] = useState<QpidArea[] | null | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    if (qpidAreas == null) {
+      (async () => {
+        const response = await getQpidAreas();
+
+        if (response.data != null) {
+          setQpidAreas(response.data);
+        } else {
+          alert("Failed to get qpid areas: " + response.error);
+        }
+      })();
+    }
+  }, []);
+
   return (
     <>
       <color attach="background" args={["black"]} />
@@ -76,18 +92,19 @@ const MapRender = ({ area }: Props) => {
           LEFT: THREE.MOUSE.PAN,
           MIDDLE: THREE.MOUSE.DOLLY,
         }}
-        minDistance={125}
-        maxDistance={1000}
+        minDistance={128}
+        maxDistance={1024}
         zoomSpeed={2}
       />
       <mesh position={[0, 0, 0]}>
-        <planeGeometry args={[1024, 1024, 128, 128]} />
+        <planeGeometry args={[1024, 1024, 256, 256]} />
         <meshStandardMaterial
           map={planeTexture}
           displacementMap={heightTexture}
-          displacementScale={100}
+          displacementScale={128}
         />
       </mesh>
+      {qpidAreas && <QpidIcons areas={qpidAreas} area={area} />}
     </>
   );
 };

@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
-import GameMap, { Area } from "../../../components/game_map";
+import GameMap from "../../../components/game_map";
+import { Area } from "../../../api_types";
 
 const Wrapper = styled.div`
   height: 100%;
@@ -12,11 +13,11 @@ const Map = () => {
   function mapArea(areaParam: string): Area {
     switch (areaParam) {
       case "east":
-        return Area.East;
+        return "area01";
       case "central":
-        return Area.Central;
+        return "area02";
       case "west":
-        return Area.West;
+        return "area04";
     }
   }
 
