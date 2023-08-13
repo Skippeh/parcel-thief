@@ -86,7 +86,7 @@ const QpidIcons = ({ areas, area }: Props) => {
             area.metadata.area
           );
           return (
-            <Html position={position}>
+            <Html key={area.qpidId} position={position}>
               <IconWrapper>
                 <div className="icons">
                   <img className="icon" src={getQpidAreaIcon(area)} />
