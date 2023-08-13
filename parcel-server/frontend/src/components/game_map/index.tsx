@@ -1,5 +1,5 @@
-import { MapControls, PerspectiveCamera } from "@react-three/drei";
-import { Canvas, useLoader, useThree } from "@react-three/fiber";
+import { Html, MapControls, PerspectiveCamera } from "@react-three/drei";
+import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
 import { styled } from "styled-components";
 import area01Texture from "../../../../../assets/ds/levels/area01/area01.jpg";
 import area02Texture from "../../../../../assets/ds/levels/area02/area02.jpg";
@@ -8,11 +8,12 @@ import area01HeightTexture from "../../../../../assets/ds/levels/area01/area01_h
 import area02HeightTexture from "../../../../../assets/ds/levels/area02/area02_height_lores.jpg";
 import area04HeightTexture from "../../../../../assets/ds/levels/area04/area04_height_lores.jpg";
 import { TextureLoader } from "three";
-import THREE = require("three");
+import { MapControls as MapControlsImpl } from "three-stdlib";
 import QpidIcons from "./qpid_icons";
 import { getQpidAreas } from "../../services/game_data_service";
-import { useEffect, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { Area, QpidArea } from "../../api_types";
+import Compass, { Tunnel as CompassTunnel } from "./compass";
 
 const Textures: Map<Area, string> = new Map([
   ["area01", area01Texture],
@@ -29,6 +30,7 @@ const HeightTextures: Map<Area, string> = new Map<Area, string>(
 );
 
 const Wrapper = styled.div`
+  position: relative;
   height: 100%;
 `;
 
@@ -36,17 +38,24 @@ interface Props {
   area: Area;
 }
 
+interface InnerProps extends Props {
+  mapControlsRef: RefObject<MapControlsImpl>;
+}
+
 const GameMap = (props: Props) => {
+  const mapControlsRef = useRef<MapControlsImpl>(null);
+
   return (
     <Wrapper>
       <Canvas frameloop="demand">
-        <MapRender {...props} />
+        <MapRender {...props} mapControlsRef={mapControlsRef} />
       </Canvas>
+      <CompassTunnel.Out />
     </Wrapper>
   );
 };
 
-const MapRender = ({ area }: Props) => {
+const MapRender = ({ area, mapControlsRef }: InnerProps) => {
   const three = useThree();
   const planeTexture = useLoader(TextureLoader, Textures.get(area));
   planeTexture.anisotropy = Math.min(
@@ -74,6 +83,11 @@ const MapRender = ({ area }: Props) => {
     }
   }, []);
 
+  useEffect(() => {
+    mapControlsRef.current.setAzimuthalAngle(0);
+    mapControlsRef.current.setPolarAngle(0);
+  }, [mapControlsRef, area]);
+
   return (
     <>
       <color attach="background" args={["black"]} />
@@ -86,6 +100,7 @@ const MapRender = ({ area }: Props) => {
         rotation={[-Math.PI / 2, 0, 0]}
       />
       <MapControls
+        ref={mapControlsRef}
         makeDefault
         maxPolarAngle={Math.PI / 2}
         minPolarAngle={-Math.PI / 2}
@@ -104,6 +119,7 @@ const MapRender = ({ area }: Props) => {
         />
       </mesh>
       {qpidAreas && <QpidIcons areas={qpidAreas} area={area} />}
+      <Compass controlsRef={mapControlsRef} />
     </>
   );
 };

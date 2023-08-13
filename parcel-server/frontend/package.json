@@ -50,6 +50,8 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.14.1",
     "styled-components": "^6.0.2",
-    "three": "^0.155.0"
+    "three": "^0.155.0",
+    "three-stdlib": "^2.24.2",
+    "tunnel-rat": "^0.1.2"
   }
 }
