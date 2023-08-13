@@ -3,6 +3,14 @@ import { Area, QpidArea } from "../../api_types";
 import { styled } from "styled-components";
 import IconPreppersShelter from "../../../../../assets/ds/icons/preppers.png";
 import IconDeliveryBase from "../../../../../assets/ds/icons/deliveryBase.png";
+import IconCrematory from "../../../../../assets/ds/icons/crematory.png";
+import IconWindFarm from "../../../../../assets/ds/icons/windfarm.png";
+import IconRainFarm from "../../../../../assets/ds/icons/rainfarm.png";
+import IconWeatherStation from "../../../../../assets/ds/icons/weather_station.png";
+import IconMamaFacility from "../../../../../assets/ds/icons/mama_facility.png";
+import IconHeartmanFacility from "../../../../../assets/ds/icons/heartman_facility.png";
+import IconRelayStation from "../../../../../assets/ds/icons/relay_station.png";
+import IconNpcPostbox from "../../../../../assets/ds/icons/postbox_npc.png";
 
 const IconWrapper = styled.div`
   transform: translateX(-50%);
@@ -116,7 +124,33 @@ function convertCoordinates(
   return [(x / xyScale) * 1024, (y / xyScale) * 1024, (z / zScale) * 128];
 }
 
-const IconOverrides: Map<number, string> = new Map([]);
+const IconOverrides: Map<number, string> = new Map([
+  // Incinerator West of Capital Knot City
+  [103, IconCrematory],
+  // Incinerator West of Lake Knot City
+  [236, IconCrematory],
+  // Wind Farm
+  [106, IconWindFarm],
+  // Timefall Farm
+  [204, IconRainFarm],
+  // Weather Station
+  [227, IconWeatherStation],
+  // Mama's Lab
+  [233, IconMamaFacility],
+  // Heartman's Lab
+  [239, IconHeartmanFacility],
+  // UCA-41-011: Potential Chiral Relay Construction Site
+  [250, IconRelayStation],
+  // Chiral Relay
+  [251, IconRelayStation],
+  // Various npc postboxes
+  [1100, IconNpcPostbox],
+  [1101, IconNpcPostbox],
+  [1290, IconNpcPostbox],
+  [1295, IconNpcPostbox],
+  [1296, IconNpcPostbox],
+  [1297, IconNpcPostbox],
+]);
 
 function getQpidAreaIcon(area: QpidArea): string {
   if (IconOverrides.has(area.qpidId)) {
