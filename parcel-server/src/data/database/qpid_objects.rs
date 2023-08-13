@@ -475,6 +475,21 @@ impl<'db> QpidObjects<'db> {
         Ok(result_objects)
     }
 
+    pub async fn find_objects_by_area(
+        &self,
+        area_hash: AreaHash,
+    ) -> Result<Vec<QpidObject>, QueryError> {
+        use crate::db::schema::qpid_objects::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        let objects = dsl::qpid_objects
+            .filter(dsl::area_id.eq(area_hash))
+            .get_results(conn)
+            .await?;
+
+        Ok(objects)
+    }
+
     pub async fn find_objects_by_id(&self, ids: &[String]) -> Result<Vec<QpidObject>, QueryError> {
         use crate::db::schema::qpid_objects::dsl;
         let conn = &mut *self.connection.get_pg_connection().await;

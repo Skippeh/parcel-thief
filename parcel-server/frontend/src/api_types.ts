@@ -53,3 +53,6 @@ export type Area=("area00"|"area01"|"area02"|"area03"|"area04"|"warrior01"|"warr
 export type F64=number;
 export type QpidAreaMetaData={"orderInList":U32;"constructionType":ConstructionPointType;"area":Area;"location":[F64,F64,F64];};
 export type QpidArea={"qpidId":I32;"names":Record<Language,string>;"metadata":QpidAreaMetaData;};
+export type F32=number;
+export type QpidObjectType=("unknown"|"ladder"|"climbingAnchor"|"bridge"|"timefallShelter"|"safehouse"|"zipline"|"jumpRamp"|"chiralBridge"|"sign"|"powerGenerator"|"postbox"|"watchtower"|"restingStone"|"peeMushroom"|"motorbike"|"truck"|"cargoCatapult"|"cargoCatapultPod");
+export type QpidObject={"id":string;"location":[F32,F32,F32];"objectType":QpidObjectType;"unknownType":([string,string]|null);};

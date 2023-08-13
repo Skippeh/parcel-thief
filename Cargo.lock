@@ -3045,6 +3045,7 @@ dependencies = [
  "diesel_derives",
  "flagset",
  "lazy_static",
+ "parcel-game-data",
  "rand",
  "rand_chacha",
  "serde",

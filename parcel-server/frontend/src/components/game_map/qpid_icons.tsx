@@ -1,5 +1,5 @@
 import { Html } from "@react-three/drei";
-import { Area, QpidArea } from "../../api_types";
+import { Area, QpidArea, QpidObject, QpidObjectType } from "../../api_types";
 import IconPreppersShelter from "../../../../../assets/ds/icons/preppers.png";
 import IconDeliveryBase from "../../../../../assets/ds/icons/deliveryBase.png";
 import IconCrematory from "../../../../../assets/ds/icons/crematory.png";
@@ -10,11 +10,28 @@ import IconMamaFacility from "../../../../../assets/ds/icons/mama_facility.png";
 import IconHeartmanFacility from "../../../../../assets/ds/icons/heartman_facility.png";
 import IconRelayStation from "../../../../../assets/ds/icons/relay_station.png";
 import IconNpcPostbox from "../../../../../assets/ds/icons/postbox_npc.png";
+import IconMotorbike from "../../../../../assets/ds/icons/motorbike.png";
+import IconTruck from "../../../../../assets/ds/icons/truck.png";
+import IconLadder from "../../../../../assets/ds/icons/ladder.png";
+import IconSign from "../../../../../assets/ds/icons/signboard.png";
+import IconBridge from "../../../../../assets/ds/icons/bridge.png";
+import IconCargoCatapult from "../../../../../assets/ds/icons/cargo_catapult_online.png";
+import IconCargoCatapultPod from "../../../../../assets/ds/icons/cargo_catapult_pod.png";
+import IconOnlinePostBox from "../../../../../assets/ds/icons/postbox_online.png";
+import IconJumpRamp from "../../../../../assets/ds/icons/ramp.png";
+import IconRope from "../../../../../assets/ds/icons/rope.png";
+import IconRainShelter from "../../../../../assets/ds/icons/shelter.png";
+import IconWatchtower from "../../../../../assets/ds/icons/watchtower.png";
+import IconZipline from "../../../../../assets/ds/icons/zipline.png";
+import IconGenerator from "../../../../../assets/ds/icons/generator.png";
+import IconChiralBridge from "../../../../../assets/ds/icons/chiral_bridge.png";
+import IconSafehouse from "../../../../../assets/ds/icons/safehouse.png";
 import Icon from "./icon";
 
 interface Props {
   areas: QpidArea[];
   area: Area;
+  objects: QpidObject[];
 }
 
 // Don't show these areas on the map
@@ -25,7 +42,7 @@ const IgnoreQpidIds = new Set([
   251,
 ]);
 
-const QpidIcons = ({ areas, area }: Props) => {
+const QpidIcons = ({ areas, objects, area }: Props) => {
   return (
     <>
       {areas
@@ -49,7 +66,26 @@ const QpidIcons = ({ areas, area }: Props) => {
               />
             </Html>
           );
-        })}
+        })
+        .concat(
+          objects.map((object) => {
+            const position = convertCoordinates(object.location, area);
+
+            return (
+              <Html key={object.id} position={position}>
+                <div
+                  title={
+                    object.objectType != "unknown" && object.objectType != null
+                      ? object.objectType
+                      : JSON.stringify(object.unknownType)
+                  }
+                >
+                  <Icon iconSrc={getQpidObjectIcon(object.objectType)} />
+                </div>
+              </Html>
+            );
+          })
+        )}
     </>
   );
 };
@@ -84,7 +120,7 @@ function convertCoordinates(
   return [(x / xyScale) * 1024, (y / xyScale) * 1024, (z / zScale) * 128];
 }
 
-const IconOverrides: Map<number, string> = new Map([
+const AreaIconOverrides: Map<number, string> = new Map([
   // Incinerator West of Capital Knot City
   [103, IconCrematory],
   // Incinerator West of Lake Knot City
@@ -112,9 +148,30 @@ const IconOverrides: Map<number, string> = new Map([
   [1297, IconNpcPostbox],
 ]);
 
+const ObjectIcons: Map<QpidObjectType, string> = new Map([
+  ["motorbike", IconMotorbike],
+  ["truck", IconTruck],
+  ["ladder", IconLadder],
+  ["sign", IconSign],
+  ["bridge", IconBridge],
+  ["cargoCatapult", IconCargoCatapult],
+  ["cargoCatapultPod", IconCargoCatapultPod],
+  ["postbox", IconOnlinePostBox],
+  ["jumpRamp", IconJumpRamp],
+  ["climbingAnchor", IconRope],
+  ["timefallShelter", IconRainShelter],
+  ["watchtower", IconWatchtower],
+  ["zipline", IconZipline],
+  ["powerGenerator", IconGenerator],
+  ["chiralBridge", IconChiralBridge],
+  ["safehouse", IconSafehouse],
+  // no icon for peeMushroom
+  // no icon for restingStone
+]);
+
 function getQpidAreaIcon(area: QpidArea): string {
-  if (IconOverrides.has(area.qpidId)) {
-    return IconOverrides.get(area.qpidId);
+  if (AreaIconOverrides.has(area.qpidId)) {
+    return AreaIconOverrides.get(area.qpidId);
   }
 
   switch (area.metadata.constructionType) {
@@ -123,6 +180,14 @@ function getQpidAreaIcon(area: QpidArea): string {
     case "preppersShelter":
       return IconPreppersShelter;
   }
+}
+
+function getQpidObjectIcon(objectType: QpidObjectType): string {
+  if (ObjectIcons.has(objectType)) {
+    return ObjectIcons.get(objectType);
+  }
+
+  return null; // todo: return unknown icon src
 }
 
 export default QpidIcons;

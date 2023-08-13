@@ -177,7 +177,7 @@ pub enum ObjectType {
     #[serde(rename = "t")]
     Sign,
     #[serde(rename = "v")]
-    V,
+    Vehicle,
     #[serde(rename = "k")]
     K,
     #[serde(rename = "n")]

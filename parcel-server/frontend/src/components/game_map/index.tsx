@@ -12,8 +12,9 @@ import { MapControls as MapControlsImpl } from "three-stdlib";
 import QpidIcons from "./qpid_icons";
 import { getQpidAreas } from "../../services/game_data_service";
 import { RefObject, useEffect, useRef, useState } from "react";
-import { Area, QpidArea } from "../../api_types";
+import { Area, QpidArea, QpidObject } from "../../api_types";
 import Compass, { Tunnel as CompassTunnel } from "./compass";
+import { getQpidObjects } from "../../services/qpid_objects_service";
 
 const Textures: Map<Area, string> = new Map([
   ["area01", area01Texture],
@@ -68,6 +69,9 @@ const MapRender = ({ area, mapControlsRef }: InnerProps) => {
   const [qpidAreas, setQpidAreas] = useState<QpidArea[] | null | undefined>(
     undefined
   );
+  const [qpidObjects, setQpidObjects] = useState<
+    QpidObject[] | null | undefined
+  >(undefined);
 
   useEffect(() => {
     if (qpidAreas == null) {
@@ -78,6 +82,18 @@ const MapRender = ({ area, mapControlsRef }: InnerProps) => {
           setQpidAreas(response.data);
         } else {
           alert("Failed to get qpid areas: " + response.error);
+        }
+      })();
+    }
+
+    if (qpidObjects == null) {
+      (async () => {
+        const response = await getQpidObjects(area);
+
+        if (response.data != null) {
+          setQpidObjects(response.data);
+        } else {
+          alert("Failed to get qpid objects: " + response.error);
         }
       })();
     }
@@ -118,7 +134,9 @@ const MapRender = ({ area, mapControlsRef }: InnerProps) => {
           displacementScale={128}
         />
       </mesh>
-      {qpidAreas && <QpidIcons areas={qpidAreas} area={area} />}
+      {qpidAreas && qpidObjects && (
+        <QpidIcons areas={qpidAreas} objects={qpidObjects} area={area} />
+      )}
       <Compass controlsRef={mapControlsRef} />
     </>
   );

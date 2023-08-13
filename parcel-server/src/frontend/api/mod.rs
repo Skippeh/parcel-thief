@@ -23,5 +23,6 @@ pub fn configure_endpoints(cfg: &mut ServiceConfig) {
         .service(settings::set_server_settings)
         .service(settings::get_whitelist)
         .service(settings::set_whitelist)
-        .service(game_data::list_qpid_areas);
+        .service(game_data::list_qpid_areas)
+        .service(qpid_objects::list_qpid_objects);
 }

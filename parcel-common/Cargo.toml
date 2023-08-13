@@ -23,6 +23,7 @@ validator = { version = "0.16.0", features = ["derive"] }
 serde-enum-str = "0.3.2"
 typescript-type-def = { version = "0.5.7", optional = true }
 flagset = { version = "0.4.3", features = ["serde"] }
+parcel-game-data = { path = "../parcel-game-data" }
 
 [features]
 default = ["diesel"]

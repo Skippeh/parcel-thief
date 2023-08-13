@@ -7,6 +7,7 @@ use parcel_common::api_types::frontend::{
     },
     auth::*,
     baggages::*,
+    qpid_objects::QpidObject,
     settings::{SettingsValues, WhitelistEntry},
 };
 use parcel_game_data::QpidArea;
@@ -39,7 +40,7 @@ type Api = (
         ResetPasswordRequest,
         CreateFrontendAccountRequest,
     ),
-    (SettingsValues, WhitelistEntry, QpidArea),
+    (SettingsValues, WhitelistEntry, QpidArea, QpidObject),
 );
 
 fn generate_ts_types() {
