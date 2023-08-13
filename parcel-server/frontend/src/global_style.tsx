@@ -13,7 +13,7 @@ export default createGlobalStyle`
   }
 
   body {
-    font-family: "Open Sans";
+    font-family: "Inter";
     font-size: 0.9rem;
     color: ${Colors.whiteA.whiteA12};
     background: rgb(2, 0, 36);

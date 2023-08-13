@@ -1,4 +1,20 @@
 @font-face {
-  font-family: "Open Sans";
-  src: local("Open Sans"), url("fonts/OpenSans-Regular.ttf");
+  font-family: "Inter";
+  src: local("Inter"), url("fonts/Inter-Regular.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: local("Inter"), url("fonts/Inter-Bold.ttf");
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: local("Inter"), url("fonts/Inter-Light.ttf");
+  font-weight: 300;
+  font-style: normal;
 }
