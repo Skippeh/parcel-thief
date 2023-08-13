@@ -61,6 +61,14 @@ interface Props {
   area: Area;
 }
 
+// Don't show these areas on the map
+const IgnoreQpidIds = new Set([
+  // UCA-41-011: Potential Chiral Relay Construction Site
+  250,
+  // Chiral Relay
+  251,
+]);
+
 const QpidIcons = ({ areas, area }: Props) => {
   return (
     <>
@@ -69,7 +77,8 @@ const QpidIcons = ({ areas, area }: Props) => {
           (area2) =>
             area2.metadata.area === area &&
             (area2.metadata.constructionType == "deliveryBase" ||
-              area2.metadata.constructionType == "preppersShelter")
+              area2.metadata.constructionType == "preppersShelter") &&
+            !IgnoreQpidIds.has(area2.qpidId)
         )
         .map((area) => {
           const position = convertCoordinates(
