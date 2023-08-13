@@ -106,7 +106,7 @@ const MapRender = ({ area, mapControlsRef }: InnerProps) => {
         minPolarAngle={-Math.PI / 2}
         enableRotate
         enableDamping
-        minDistance={128}
+        minDistance={200}
         maxDistance={1024}
         zoomSpeed={2}
       />
