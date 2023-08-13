@@ -7,12 +7,9 @@ const Wrapper = styled.div`
   font-size: 12px;
   position: relative;
 
-  & img {
-    pointer-events: none;
-  }
-
   & .icons {
     width: 25px;
+    height: 25px;
     position: relative;
 
     & > img {
@@ -31,7 +28,7 @@ const Wrapper = styled.div`
 
   & .name {
     text-align: center;
-    margin-top: 1rem;
+    margin-top: -0.5rem;
     --shadow-color: rgba(44, 137, 231, 1);
     text-shadow: 0 0 20px var(--shadow-color), 0 0 20px var(--shadow-color),
       0 0 20px var(--shadow-color), 0 0 20px var(--shadow-color),
@@ -71,7 +68,7 @@ const Icon = ({ iconSrc, label }: Props) => {
         <div className="icons">
           <img className="icon" src={iconSrc} />
         </div>
-        <span className="name">{label}</span>
+        {label && <span className="name">{label}</span>}
       </div>
     </Wrapper>
   );
