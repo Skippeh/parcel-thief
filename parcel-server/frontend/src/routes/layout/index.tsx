@@ -16,6 +16,7 @@ const Wrapper = styled.div`
 
 const OuterContent = styled.div`
   height: 100%;
+  max-width: 100vw;
 `;
 
 const Content = styled.div`
