@@ -43,7 +43,7 @@ const Wrapper = styled.div`
     align-items: center;
     gap: 1rem;
 
-    transition: transform 0.1s ease-out;
+    transition: transform 0.2s cubic-bezier(0, 1, 1, 1);
   }
 
   &:hover .inner {
