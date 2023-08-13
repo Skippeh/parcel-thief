@@ -1,6 +1,5 @@
 import { Html } from "@react-three/drei";
 import { Area, QpidArea } from "../../api_types";
-import { styled } from "styled-components";
 import IconPreppersShelter from "../../../../../assets/ds/icons/preppers.png";
 import IconDeliveryBase from "../../../../../assets/ds/icons/deliveryBase.png";
 import IconCrematory from "../../../../../assets/ds/icons/crematory.png";
@@ -11,50 +10,7 @@ import IconMamaFacility from "../../../../../assets/ds/icons/mama_facility.png";
 import IconHeartmanFacility from "../../../../../assets/ds/icons/heartman_facility.png";
 import IconRelayStation from "../../../../../assets/ds/icons/relay_station.png";
 import IconNpcPostbox from "../../../../../assets/ds/icons/postbox_npc.png";
-
-const IconWrapper = styled.div`
-  transform: translateX(-50%);
-  user-select: none;
-  font-weight: 300;
-  width: 300px;
-  font-size: 12px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-
-  & img {
-    pointer-events: none;
-  }
-
-  & .icons {
-    width: 25px;
-    position: relative;
-
-    & > img {
-      width: 100%;
-      position: absolute;
-      left: 0;
-      top: 0;
-
-      &:first-child {
-        background: rgba(0, 0, 0, 0.3);
-        box-shadow: 0 0 17px #000;
-        border-radius: 50%;
-      }
-    }
-  }
-
-  & .name {
-    text-align: center;
-    margin-top: 1rem;
-    --shadow-color: rgba(44, 137, 231, 1);
-    text-shadow: 0 0 20px var(--shadow-color), 0 0 20px var(--shadow-color),
-      0 0 20px var(--shadow-color), 0 0 20px var(--shadow-color),
-      0 0 20px var(--shadow-color), 0 0 5px #000, 0 0 5px #000;
-  }
-`;
+import Icon from "./icon";
 
 interface Props {
   areas: QpidArea[];
@@ -87,15 +43,10 @@ const QpidIcons = ({ areas, area }: Props) => {
           );
           return (
             <Html key={area.qpidId} position={position}>
-              <IconWrapper>
-                <div className="icons">
-                  <img className="icon" src={getQpidAreaIcon(area)} />
-                </div>
-                <span className="name">
-                  <div className="background-blur" />
-                  {area.names["en-us"]}
-                </span>
-              </IconWrapper>
+              <Icon
+                iconSrc={getQpidAreaIcon(area)}
+                label={area.names["en-us"]}
+              />
             </Html>
           );
         })}
