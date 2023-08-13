@@ -1,5 +1,52 @@
 import { Html } from "@react-three/drei";
 import { Area, QpidArea } from "../../api_types";
+import { styled } from "styled-components";
+import IconPreppersShelter from "../../../../../assets/ds/icons/preppers.png";
+import IconDeliveryBase from "../../../../../assets/ds/icons/deliveryBase.png";
+
+const IconWrapper = styled.div`
+  transform: translateX(-50%);
+  user-select: none;
+  font-weight: 300;
+  width: 300px;
+  font-size: 12px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+
+  & img {
+    pointer-events: none;
+  }
+
+  & .icons {
+    width: 25px;
+    position: relative;
+
+    & > img {
+      width: 100%;
+      position: absolute;
+      left: 0;
+      top: 0;
+
+      &:first-child {
+        background: rgba(0, 0, 0, 0.3);
+        box-shadow: 0 0 17px #000;
+        border-radius: 50%;
+      }
+    }
+  }
+
+  & .name {
+    text-align: center;
+    margin-top: 1rem;
+    --shadow-color: rgba(44, 137, 231, 1);
+    text-shadow: 0 0 20px var(--shadow-color), 0 0 20px var(--shadow-color),
+      0 0 20px var(--shadow-color), 0 0 20px var(--shadow-color),
+      0 0 20px var(--shadow-color), 0 0 5px #000, 0 0 5px #000;
+  }
+`;
 
 interface Props {
   areas: QpidArea[];
@@ -22,13 +69,17 @@ const QpidIcons = ({ areas, area }: Props) => {
             area.metadata.area
           );
           return (
-            <mesh key={area.qpidId} position={position}>
-              <boxGeometry args={[10, 10, 10]} />
-              <meshStandardMaterial color={"red"} />
-              <Html>
-                <p>{area.names["en-us"]}</p>
-              </Html>
-            </mesh>
+            <Html position={position}>
+              <IconWrapper>
+                <div className="icons">
+                  <img className="icon" src={getQpidAreaIcon(area)} />
+                </div>
+                <span className="name">
+                  <div className="background-blur" />
+                  {area.names["en-us"]}
+                </span>
+              </IconWrapper>
+            </Html>
           );
         })}
     </>
@@ -41,6 +92,8 @@ const QpidIcons = ({ areas, area }: Props) => {
  * Game coordinates range from 0-7168 on the XYZ axis.
  *
  * This function scales the values to 0-1024.
+ *
+ * Note that some areas have different scaling due to different terrain size or max height.
  * @returns
  */
 function convertCoordinates(
@@ -61,6 +114,21 @@ function convertCoordinates(
   }
 
   return [(x / xyScale) * 1024, (y / xyScale) * 1024, (z / zScale) * 128];
+}
+
+const IconOverrides: Map<number, string> = new Map([]);
+
+function getQpidAreaIcon(area: QpidArea): string {
+  if (IconOverrides.has(area.qpidId)) {
+    return IconOverrides.get(area.qpidId);
+  }
+
+  switch (area.metadata.constructionType) {
+    case "deliveryBase":
+      return IconDeliveryBase;
+    case "preppersShelter":
+      return IconPreppersShelter;
+  }
 }
 
 export default QpidIcons;
