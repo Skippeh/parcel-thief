@@ -94,7 +94,7 @@ const MapRender = ({ area, mapControlsRef }: InnerProps) => {
       <ambientLight args={["white", 3]} />
       <PerspectiveCamera
         makeDefault
-        position={[0, 0, 1000]}
+        position={[0, 0, 1024]}
         up={[0, 0, 1]}
         // rotate facing down
         rotation={[-Math.PI / 2, 0, 0]}
@@ -102,7 +102,7 @@ const MapRender = ({ area, mapControlsRef }: InnerProps) => {
       <MapControls
         ref={mapControlsRef}
         makeDefault
-        maxPolarAngle={Math.PI / 2}
+        maxPolarAngle={Math.PI / 2 - Math.PI / 8}
         minPolarAngle={-Math.PI / 2}
         enableRotate
         enableDamping
