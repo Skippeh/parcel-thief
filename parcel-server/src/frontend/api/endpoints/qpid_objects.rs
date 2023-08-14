@@ -1,10 +1,15 @@
+use std::collections::HashMap;
+
 use actix_web::{
     get,
     web::{self, Data},
 };
 use parcel_common::api_types::{
     area::AreaHash,
-    frontend::qpid_objects::{QpidObject, QpidObjectType},
+    frontend::{
+        accounts::GameAccountSummary,
+        qpid_objects::{QpidObject, QpidObjectType},
+    },
 };
 use parcel_game_data::Area;
 
@@ -32,6 +37,18 @@ pub async fn list_qpid_objects(
 
     let conn = database.connect().await?;
     let qpid_objects = conn.qpid_objects().find_objects_by_area(area).await?;
+    let creator_names = conn
+        .accounts()
+        .get_by_ids(
+            &qpid_objects
+                .iter()
+                .map(|q| &q.creator_id)
+                .collect::<Vec<_>>(),
+        )
+        .await?
+        .into_iter()
+        .map(|account| (account.id, account.display_name))
+        .collect::<HashMap<_, _>>();
 
     ApiResponse::ok(
         qpid_objects
@@ -54,6 +71,13 @@ pub async fn list_qpid_objects(
                     ),
                     object_type,
                     unknown_type,
+                    creator: GameAccountSummary {
+                        name: creator_names
+                            .get(&q.creator_id)
+                            .cloned()
+                            .unwrap_or_default(),
+                        id: q.creator_id,
+                    },
                 }
             })
             .collect(),

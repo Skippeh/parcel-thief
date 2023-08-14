@@ -55,4 +55,5 @@ export type QpidAreaMetaData={"orderInList":U32;"constructionType":ConstructionP
 export type QpidArea={"qpidId":I32;"names":Record<Language,string>;"metadata":QpidAreaMetaData;};
 export type F32=number;
 export type QpidObjectType=("unknown"|"ladder"|"climbingAnchor"|"bridge"|"timefallShelter"|"safehouse"|"zipline"|"jumpRamp"|"chiralBridge"|"sign"|"powerGenerator"|"postbox"|"watchtower"|"restingStone"|"peeMushroom"|"motorbike"|"truck"|"cargoCatapult"|"cargoCatapultPod");
-export type QpidObject={"id":string;"location":[F32,F32,F32];"objectType":QpidObjectType;"unknownType":([string,string]|null);};
+export type GameAccountSummary={"id":string;"name":string;};
+export type QpidObject={"id":string;"location":[F32,F32,F32];"objectType":QpidObjectType;"unknownType":([string,string]|null);"creator":GameAccountSummary;};

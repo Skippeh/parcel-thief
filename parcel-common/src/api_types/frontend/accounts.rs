@@ -31,6 +31,14 @@ pub struct GameAccountListItem {
     pub last_login: String,
 }
 
+#[derive(Debug, Clone, Serialize)]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
+#[serde(rename_all = "camelCase")]
+pub struct GameAccountSummary {
+    pub id: String,
+    pub name: String,
+}
+
 #[derive(Debug, Clone, Deserialize)]
 #[cfg_attr(feature = "ts", derive(TypeDef))]
 #[serde(rename_all = "camelCase")]

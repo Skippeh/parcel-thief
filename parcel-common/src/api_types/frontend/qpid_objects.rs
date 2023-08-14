@@ -5,7 +5,9 @@ use typescript_type_def::TypeDef;
 
 use crate::api_types::object::ObjectType;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+use super::accounts::GameAccountSummary;
+
+#[derive(Debug, Clone, Serialize)]
 #[cfg_attr(feature = "ts", derive(TypeDef))]
 #[serde(rename_all = "camelCase")]
 pub struct QpidObject {
@@ -13,6 +15,7 @@ pub struct QpidObject {
     pub location: (f32, f32, f32),
     pub object_type: QpidObjectType,
     pub unknown_type: Option<(String, String)>,
+    pub creator: GameAccountSummary,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
