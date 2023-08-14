@@ -180,13 +180,14 @@ pub enum ObjectType {
     Vehicle,
     #[serde(rename = "k")]
     K,
+    /// A stone created from a player sleeping. First of two types (not sure what the difference is)
     #[serde(rename = "n")]
-    N,
+    RestingStone1,
     #[serde(rename = "h")]
     H,
-    /// A stone created from a player sleeping.
+    /// The second type of stone created from a player sleeping (not sure what the difference is)
     #[serde(rename = "e")]
-    RestingStone,
+    RestingStone2,
     #[serde(rename = "u")]
     U,
     #[serde(rename = "i")]

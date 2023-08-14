@@ -47,7 +47,8 @@ impl<'a> From<(ObjectType, &'a str)> for QpidObjectType {
             ObjectType::PeeMushroom => QpidObjectType::PeeMushroom,
             ObjectType::Postbox => QpidObjectType::Postbox,
             ObjectType::PowerGenerator => QpidObjectType::PowerGenerator,
-            ObjectType::RestingStone => QpidObjectType::RestingStone,
+            ObjectType::RestingStone1 => QpidObjectType::RestingStone,
+            ObjectType::RestingStone2 => QpidObjectType::RestingStone,
             ObjectType::Sign => QpidObjectType::Sign,
             ObjectType::Watchtower => QpidObjectType::Watchtower,
             ObjectType::Vehicle => match sub_type {
