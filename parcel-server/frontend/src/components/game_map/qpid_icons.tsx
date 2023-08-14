@@ -84,10 +84,11 @@ const QpidIcons = ({ areas, objects, area }: Props) => {
                 <Html key={object.id} position={position}>
                   <div
                     title={
-                      object.objectType != "unknown" &&
+                      (object.objectType != "unknown" &&
                       object.objectType != null
                         ? object.objectType
-                        : JSON.stringify(object.unknownType)
+                        : JSON.stringify(object.unknownType)) +
+                      ` (${object.creator.name})`
                     }
                   >
                     <Icon iconSrc={getQpidObjectIcon(object.objectType)} />
