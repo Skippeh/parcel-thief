@@ -26,6 +26,7 @@ import IconZipline from "../../../../../assets/ds/icons/zipline.png";
 import IconGenerator from "../../../../../assets/ds/icons/generator.png";
 import IconChiralBridge from "../../../../../assets/ds/icons/chiral_bridge.png";
 import IconSafehouse from "../../../../../assets/ds/icons/safehouse.png";
+import IconQuestionMark from "../../../../../assets/ds/icons/question_mark.png";
 import Icon from "./icon";
 
 interface Props {
@@ -187,7 +188,7 @@ function getQpidObjectIcon(objectType: QpidObjectType): string {
     return ObjectIcons.get(objectType);
   }
 
-  return null; // todo: return unknown icon src
+  return IconQuestionMark;
 }
 
 export default QpidIcons;
