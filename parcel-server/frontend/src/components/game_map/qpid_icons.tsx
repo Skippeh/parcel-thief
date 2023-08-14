@@ -43,6 +43,11 @@ const IgnoreQpidIds = new Set([
   251,
 ]);
 
+const IgnoreObjectTypes = new Set<QpidObjectType>([
+  "peeMushroom",
+  "restingStone",
+]);
+
 const QpidIcons = ({ areas, objects, area }: Props) => {
   return (
     <>
@@ -69,23 +74,26 @@ const QpidIcons = ({ areas, objects, area }: Props) => {
           );
         })
         .concat(
-          objects.map((object) => {
-            const position = convertCoordinates(object.location, area);
+          objects
+            .filter((o) => !IgnoreObjectTypes.has(o.objectType))
+            .map((object) => {
+              const position = convertCoordinates(object.location, area);
 
-            return (
-              <Html key={object.id} position={position}>
-                <div
-                  title={
-                    object.objectType != "unknown" && object.objectType != null
-                      ? object.objectType
-                      : JSON.stringify(object.unknownType)
-                  }
-                >
-                  <Icon iconSrc={getQpidObjectIcon(object.objectType)} />
-                </div>
-              </Html>
-            );
-          })
+              return (
+                <Html key={object.id} position={position}>
+                  <div
+                    title={
+                      object.objectType != "unknown" &&
+                      object.objectType != null
+                        ? object.objectType
+                        : JSON.stringify(object.unknownType)
+                    }
+                  >
+                    <Icon iconSrc={getQpidObjectIcon(object.objectType)} />
+                  </div>
+                </Html>
+              );
+            })
         )}
     </>
   );
