@@ -46,6 +46,7 @@ const IgnoreQpidIds = new Set([
 const IgnoreObjectTypes = new Set<QpidObjectType>([
   "peeMushroom",
   "restingStone",
+  "sign",
 ]);
 
 const QpidIcons = ({ areas, objects, area }: Props) => {
