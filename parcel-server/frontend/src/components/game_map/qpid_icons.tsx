@@ -82,7 +82,11 @@ const QpidIcons = ({ areas, objects, area }: Props) => {
             area.metadata.area
           );
           return (
-            <Html key={area.qpidId} position={position}>
+            <Html
+              key={area.qpidId}
+              position={position}
+              zIndexRange={getImportanceZIndexRange("high")}
+            >
               <Icon
                 iconSrc={getQpidAreaIcon(area)}
                 label={area.names["en-us"]}
@@ -100,7 +104,11 @@ const QpidIcons = ({ areas, objects, area }: Props) => {
               const importance = getQpidObjectImportance(object.objectType);
 
               return (
-                <Html key={object.id} position={position}>
+                <Html
+                  key={object.id}
+                  position={position}
+                  zIndexRange={getImportanceZIndexRange(importance)}
+                >
                   <div
                     title={
                       (object.objectType != "unknown" &&
@@ -232,4 +240,15 @@ function getQpidObjectImportance(objectType: QpidObjectType): "low" | "high" {
       return "low";
   }
 }
+
+function getImportanceZIndexRange(
+  importance: "low" | "high"
+): [number, number] {
+  if (importance == "high") {
+    return [200, 299];
+  } else if (importance == "low") {
+    return [100, 199];
+  }
+}
+
 export default QpidIcons;
