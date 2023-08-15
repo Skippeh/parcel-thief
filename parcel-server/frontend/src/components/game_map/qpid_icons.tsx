@@ -97,6 +97,7 @@ const QpidIcons = ({ areas, objects, area }: Props) => {
             .filter((o) => !IgnoreObjectTypes.has(o.objectType))
             .map((object) => {
               const position = convertCoordinates(object.location, area);
+              const importance = getQpidObjectImportance(object.objectType);
 
               return (
                 <Html key={object.id} position={position}>
@@ -111,7 +112,7 @@ const QpidIcons = ({ areas, objects, area }: Props) => {
                   >
                     <Icon
                       iconSrc={getQpidObjectIcon(object.objectType)}
-                      importance="low"
+                      importance={importance}
                       cameraDistance={cameraDistance}
                     />
                   </div>
@@ -223,4 +224,12 @@ function getQpidObjectIcon(objectType: QpidObjectType): string {
   return IconQuestionMark;
 }
 
+function getQpidObjectImportance(objectType: QpidObjectType): "low" | "high" {
+  switch (objectType) {
+    case "postbox":
+      return "high";
+    default:
+      return "low";
+  }
+}
 export default QpidIcons;
