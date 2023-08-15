@@ -37,6 +37,7 @@ pub struct QpidObject {
     pub sub_type: String,
     pub updated_time: NaiveDateTime,
     pub object_type: ObjectType,
+    pub is_deleted: bool,
 }
 
 #[derive(Debug, Insertable)]

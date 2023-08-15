@@ -351,6 +351,18 @@ impl<'db> QpidObjects<'db> {
                 self.add_tag(conn, object_id, &format!("del_{}", account_id))
                     .await?;
 
+                // If the owner is deleting their own object, set is_deleted to true which will prevent this object
+                // from showing up in other people's worlds unless they already had it from before.
+                // This enables other users to keep giving likes and using postboxes for example while also preventing
+                // new users from discovering this object.
+                if &object.creator_id == account_id {
+                    diesel::update(dsl::qpid_objects)
+                        .filter(dsl::id.eq(object_id))
+                        .set(dsl::is_deleted.eq(true))
+                        .execute(conn)
+                        .await?;
+                }
+
                 if object.object_type == ObjectType::Sign {
                     use crate::db::schema::qpid_object_comments::dsl;
 
@@ -450,6 +462,7 @@ impl<'db> QpidObjects<'db> {
                 .filter(dsl::area_id.eq_any(area_hashes))
                 .filter(dsl::creator_id.eq_any(priority_ids))
                 .filter(not(dsl::creator_id.eq_any(exclude_account_ids)))
+                .filter(not(dsl::is_deleted))
                 .limit(limit)
                 .get_results::<QpidObject>(conn)
                 .await?;
@@ -464,6 +477,7 @@ impl<'db> QpidObjects<'db> {
                 .filter(dsl::area_id.eq_any(area_hashes))
                 .filter(not(dsl::creator_id.eq_any(priority_ids)))
                 .filter(not(dsl::creator_id.eq_any(exclude_account_ids)))
+                .filter(not(dsl::is_deleted))
                 .limit(limit - result_objects.len() as i64)
                 .get_results::<QpidObject>(conn)
                 .await?;
@@ -484,6 +498,7 @@ impl<'db> QpidObjects<'db> {
 
         let objects = dsl::qpid_objects
             .filter(dsl::area_id.eq(area_hash))
+            .filter(not(dsl::is_deleted))
             .get_results(conn)
             .await?;
 

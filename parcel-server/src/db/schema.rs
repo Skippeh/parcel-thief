@@ -382,6 +382,7 @@ diesel::table! {
         sub_type -> Varchar,
         updated_time -> Timestamp,
         object_type -> Varchar,
+        is_deleted -> Bool,
     }
 }
 
