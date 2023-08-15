@@ -30,6 +30,8 @@ const HeightTextures: Map<Area, string> = new Map<Area, string>(
   ])
 );
 
+export const MaxCameraDistance = 1024;
+
 const Wrapper = styled.div`
   position: relative;
   height: 100%;
@@ -110,7 +112,7 @@ const MapRender = ({ area, mapControlsRef }: InnerProps) => {
       <ambientLight args={["white", 3]} />
       <PerspectiveCamera
         makeDefault
-        position={[0, 0, 1024]}
+        position={[0, 0, MaxCameraDistance]}
         up={[0, 0, 1]}
         // rotate facing down
         rotation={[-Math.PI / 2, 0, 0]}
@@ -123,7 +125,7 @@ const MapRender = ({ area, mapControlsRef }: InnerProps) => {
         enableRotate
         enableDamping
         minDistance={200}
-        maxDistance={1024}
+        maxDistance={MaxCameraDistance}
         zoomSpeed={2}
       />
       <mesh position={[0, 0, 0]}>
