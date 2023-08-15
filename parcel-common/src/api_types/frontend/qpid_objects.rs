@@ -61,6 +61,7 @@ impl<'a> From<(ObjectType, &'a str)> for QpidObjectType {
                 _ => QpidObjectType::Unknown,
             },
             ObjectType::Bridge => QpidObjectType::Bridge,
+            ObjectType::ClimbingAnchor => QpidObjectType::ClimbingAnchor,
             _ => QpidObjectType::Unknown,
         }
     }

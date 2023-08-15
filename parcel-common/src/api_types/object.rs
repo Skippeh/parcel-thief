@@ -164,7 +164,7 @@ pub enum ObjectType {
     #[serde(rename = "a")]
     A,
     #[serde(rename = "r")]
-    R1,
+    ClimbingAnchor,
     #[serde(rename = "l")]
     Ladder,
     #[serde(rename = "s")]
