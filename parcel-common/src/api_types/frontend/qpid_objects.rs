@@ -27,7 +27,7 @@ pub enum QpidObjectType {
     ClimbingAnchor,
     Bridge,
     TimefallShelter,
-    Safehouse,
+    SafeHouse,
     Zipline,
     JumpRamp,
     ChiralBridge,
@@ -53,11 +53,14 @@ impl<'a> From<(ObjectType, &'a str)> for QpidObjectType {
             ObjectType::RestingStone1 => QpidObjectType::RestingStone,
             ObjectType::RestingStone2 => QpidObjectType::RestingStone,
             ObjectType::Sign => QpidObjectType::Sign,
-            ObjectType::Watchtower => QpidObjectType::Watchtower,
+            ObjectType::WatchTower => QpidObjectType::Watchtower,
+            ObjectType::SafeHouse => QpidObjectType::SafeHouse,
             ObjectType::Vehicle => match sub_type {
                 "Motorbike" => QpidObjectType::Motorbike,
+                "Truck" => QpidObjectType::Truck,
                 _ => QpidObjectType::Unknown,
             },
+            ObjectType::Bridge => QpidObjectType::Bridge,
             _ => QpidObjectType::Unknown,
         }
     }

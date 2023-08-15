@@ -168,11 +168,11 @@ pub enum ObjectType {
     #[serde(rename = "l")]
     Ladder,
     #[serde(rename = "s")]
-    S,
+    SafeHouse,
     #[serde(rename = "w")]
-    Watchtower,
+    WatchTower,
     #[serde(rename = "b")]
-    B1,
+    Bridge,
     /// Subtype holds the type of the sign.
     #[serde(rename = "t")]
     Sign,
