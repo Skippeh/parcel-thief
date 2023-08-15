@@ -25,7 +25,7 @@ import IconWatchtower from "../../../../../assets/ds/icons/watchtower.png";
 import IconZipline from "../../../../../assets/ds/icons/zipline.png";
 import IconGenerator from "../../../../../assets/ds/icons/generator.png";
 import IconChiralBridge from "../../../../../assets/ds/icons/chiral_bridge.png";
-import IconSafehouse from "../../../../../assets/ds/icons/safehouse.png";
+import IconSafeHouse from "../../../../../assets/ds/icons/safehouse.png";
 import IconQuestionMark from "../../../../../assets/ds/icons/question_mark.png";
 import Icon from "./icon";
 
@@ -175,7 +175,7 @@ const ObjectIcons: Map<QpidObjectType, string> = new Map([
   ["zipline", IconZipline],
   ["powerGenerator", IconGenerator],
   ["chiralBridge", IconChiralBridge],
-  ["safehouse", IconSafehouse],
+  ["safeHouse", IconSafeHouse],
   // no icon for peeMushroom
   // no icon for restingStone
 ]);
