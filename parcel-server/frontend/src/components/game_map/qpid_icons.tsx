@@ -28,6 +28,10 @@ import IconChiralBridge from "../../../../../assets/ds/icons/chiral_bridge.png";
 import IconSafeHouse from "../../../../../assets/ds/icons/safehouse.png";
 import IconQuestionMark from "../../../../../assets/ds/icons/question_mark.png";
 import Icon from "./icon";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useEffect, useState } from "react";
+import { MaxCameraDistance as MaxCameraDistance } from ".";
+import { MapControls } from "three-stdlib";
 
 interface Props {
   areas: QpidArea[];
@@ -50,6 +54,18 @@ const IgnoreObjectTypes = new Set<QpidObjectType>([
 ]);
 
 const QpidIcons = ({ areas, objects, area }: Props) => {
+  const three = useThree();
+  const controls = three.controls as MapControls;
+  const [cameraDistance, setCameraDistance] = useState(MaxCameraDistance);
+
+  useFrame(() => {
+    const roundedDistance = Math.round(controls.getDistance());
+
+    if (roundedDistance != cameraDistance) {
+      setCameraDistance(roundedDistance);
+    }
+  });
+
   return (
     <>
       {areas
@@ -70,6 +86,8 @@ const QpidIcons = ({ areas, objects, area }: Props) => {
               <Icon
                 iconSrc={getQpidAreaIcon(area)}
                 label={area.names["en-us"]}
+                importance="high"
+                cameraDistance={cameraDistance}
               />
             </Html>
           );
@@ -91,7 +109,11 @@ const QpidIcons = ({ areas, objects, area }: Props) => {
                       ` (${object.creator.name})`
                     }
                   >
-                    <Icon iconSrc={getQpidObjectIcon(object.objectType)} />
+                    <Icon
+                      iconSrc={getQpidObjectIcon(object.objectType)}
+                      importance="low"
+                      cameraDistance={cameraDistance}
+                    />
                   </div>
                 </Html>
               );

@@ -1,11 +1,12 @@
 import styled from "styled-components";
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{ $scale: number }>`
   transform: translateX(-50%);
   user-select: none;
   font-weight: 300;
   font-size: 12px;
   position: relative;
+  pointer-events: ${(p) => (p.$scale <= 0.25 ? "none" : "auto")};
 
   & .icons {
     width: 25px;
@@ -38,6 +39,8 @@ const Wrapper = styled.div`
   }
 
   & .inner {
+    transform: scale(${(p) => p.$scale});
+
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -55,15 +58,34 @@ const Wrapper = styled.div`
 interface Props {
   iconSrc: string;
   label?: string;
+  importance: "low" | "high";
+  cameraDistance: number;
 }
 
-const Icon = ({ iconSrc, label }: Props) => {
+const Icon = ({ iconSrc, label, importance, cameraDistance }: Props) => {
   function onClick() {
     console.log("clicked");
   }
 
+  function getScale() {
+    if (importance == "high") {
+      return 1;
+    } else if (importance == "low") {
+      // scale from 1-0 between min and max
+      const MinHeight = 200;
+      const MaxHeight = 600;
+      if (cameraDistance <= MinHeight) {
+        return 1;
+      } else if (cameraDistance >= MaxHeight) {
+        return 0;
+      } else {
+        return 1 - (cameraDistance - MinHeight) / (MaxHeight - MinHeight);
+      }
+    }
+  }
+
   return (
-    <Wrapper>
+    <Wrapper $scale={getScale()}>
       <div className="inner" onClick={onClick}>
         <div className="icons">
           <img className="icon" src={iconSrc} />
