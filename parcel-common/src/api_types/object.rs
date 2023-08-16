@@ -179,7 +179,7 @@ pub enum ObjectType {
     #[serde(rename = "v")]
     Vehicle,
     #[serde(rename = "k")]
-    K,
+    LongRangeVehicle,
     /// A stone created from a player sleeping. First of two types (not sure what the difference is)
     #[serde(rename = "n")]
     RestingStone1,

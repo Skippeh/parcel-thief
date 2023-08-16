@@ -55,7 +55,7 @@ impl<'a> From<(ObjectType, &'a str)> for QpidObjectType {
             ObjectType::Sign => QpidObjectType::Sign,
             ObjectType::WatchTower => QpidObjectType::Watchtower,
             ObjectType::SafeHouse => QpidObjectType::SafeHouse,
-            ObjectType::Vehicle => match sub_type {
+            ObjectType::Vehicle | ObjectType::LongRangeVehicle => match sub_type {
                 "Motorbike" => QpidObjectType::Motorbike,
                 "Truck" => QpidObjectType::Truck,
                 _ => QpidObjectType::Unknown,
