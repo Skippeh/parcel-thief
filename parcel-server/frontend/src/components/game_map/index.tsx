@@ -101,7 +101,7 @@ const MapRender = ({ area }: Props) => {
 
     if (baggages == null) {
       (async () => {
-        const response = await getBaggages();
+        const response = await getBaggages(area);
 
         if (response.data != null) {
           setBaggages(response.data);

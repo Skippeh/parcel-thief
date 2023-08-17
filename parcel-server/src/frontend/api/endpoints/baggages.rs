@@ -1,8 +1,12 @@
 use std::collections::HashMap;
 
-use actix_web::{get, web::Data};
+use actix_web::{
+    get,
+    web::{self, Data},
+};
 use anyhow::Context;
 use parcel_common::api_types::{
+    area::AreaHash,
     frontend::{
         accounts::GameAccountSummary,
         baggages::{
@@ -12,11 +16,12 @@ use parcel_common::api_types::{
     },
     mission::{MissionType, OnlineMissionType, ProgressState},
 };
-use parcel_game_data::{ContentsType, GameData, Language};
+use parcel_game_data::{Area, ContentsType, GameData, Language};
 
 use crate::{
     data::database::Database,
     frontend::{
+        error::ApiError,
         jwt_session::JwtSession,
         result::{ApiResponse, ApiResult},
     },
@@ -256,12 +261,19 @@ pub async fn list_wasted_cargo(
     ApiResponse::ok(ListWastedCargoResponse { baggages })
 }
 
-#[get("baggages")]
+#[get("baggages/{area}")]
 pub async fn list_cargo(
     _session: JwtSession,
     database: Data<Database>,
     game_data: Data<GameData>,
+    area: web::Path<Area>,
 ) -> ApiResult<Vec<Baggage>> {
+    let area = match area.into_inner() {
+        Area::Area01 => Ok(AreaHash::EasternRegion),
+        Area::Area02 => Ok(AreaHash::CentralRegion),
+        Area::Area04 => Ok(AreaHash::WesternRegion),
+        _ => Err(ApiError::Unprocessable(anyhow::anyhow!("Invalid area"))),
+    }?;
     let mut result = Vec::new();
     let conn = database.connect().await?;
     let missions = conn.missions();
@@ -276,7 +288,10 @@ pub async fn list_cargo(
             &[ProgressState::Available, ProgressState::Ready],
             None,
         )
-        .await?;
+        .await?
+        .into_iter()
+        .filter(|m| m.area_id == area)
+        .collect::<Vec<_>>();
     let data_missions = missions.query_mission_data(data_missions).await?;
 
     log::debug!("{} missions", data_missions.len());

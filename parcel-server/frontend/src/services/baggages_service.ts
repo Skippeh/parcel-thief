@@ -1,5 +1,6 @@
 import { ApiResponse, callApi } from ".";
 import {
+  Area,
   Baggage,
   ListLostCargoResponse,
   ListSharedCargoResponse,
@@ -24,6 +25,6 @@ export async function getWastedCargoList(): Promise<
   return await callApi("baggages/list/wastedCargo", "GET");
 }
 
-export async function getBaggages(): Promise<ApiResponse<Baggage[]>> {
-  return await callApi("baggages", "GET");
+export async function getBaggages(area: Area): Promise<ApiResponse<Baggage[]>> {
+  return await callApi(`baggages/${area}`, "GET");
 }
