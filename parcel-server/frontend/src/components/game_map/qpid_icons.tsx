@@ -1,5 +1,11 @@
 import { Html } from "@react-three/drei";
-import { Area, QpidArea, QpidObject, QpidObjectType } from "../../api_types";
+import {
+  Area,
+  Baggage,
+  QpidArea,
+  QpidObject,
+  QpidObjectType,
+} from "../../api_types";
 import IconPreppersShelter from "../../../../../assets/ds/icons/preppers.png";
 import IconDeliveryBase from "../../../../../assets/ds/icons/deliveryBase.png";
 import IconCrematory from "../../../../../assets/ds/icons/crematory.png";
@@ -27,6 +33,8 @@ import IconGenerator from "../../../../../assets/ds/icons/generator.png";
 import IconChiralBridge from "../../../../../assets/ds/icons/chiral_bridge.png";
 import IconSafeHouse from "../../../../../assets/ds/icons/safehouse.png";
 import IconQuestionMark from "../../../../../assets/ds/icons/question_mark.png";
+import IconCargo from "../../../../../assets/ds/icons/cargo.png";
+import IconLostCargo from "../../../../../assets/ds/icons/lost_cargo.png";
 import Icon from "./icon";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useState } from "react";
@@ -37,6 +45,7 @@ interface Props {
   areas: QpidArea[];
   area: Area;
   objects: QpidObject[];
+  baggages: Baggage[];
 }
 
 // Don't show these areas on the map
@@ -53,7 +62,7 @@ const IgnoreObjectTypes = new Set<QpidObjectType>([
   "sign",
 ]);
 
-const QpidIcons = ({ areas, objects, area }: Props) => {
+const QpidIcons = ({ areas, objects, baggages, area }: Props) => {
   const three = useThree();
   const controls = three.controls as MapControls;
   const [cameraDistance, setCameraDistance] = useState(MaxCameraDistance);
@@ -127,6 +136,26 @@ const QpidIcons = ({ areas, objects, area }: Props) => {
                 </Html>
               );
             })
+            .concat(
+              baggages.map((baggage) => {
+                const position = convertCoordinates(baggage.location, area);
+                return (
+                  <Html
+                    key={baggage.id}
+                    position={position}
+                    zIndexRange={getImportanceZIndexRange("low")}
+                  >
+                    <div title={baggage.name + ` (${baggage.creator.name})`}>
+                      <Icon
+                        iconSrc={getBaggageIcon(baggage)}
+                        importance="high"
+                        cameraDistance={cameraDistance}
+                      />
+                    </div>
+                  </Html>
+                );
+              })
+            )
         )}
     </>
   );
@@ -238,6 +267,17 @@ function getQpidObjectImportance(objectType: QpidObjectType): "low" | "high" {
       return "high";
     default:
       return "low";
+  }
+}
+
+function getBaggageIcon(baggage: Baggage): string {
+  switch (baggage.category) {
+    case "commodity":
+    case "special": {
+      return IconLostCargo;
+    }
+    default:
+      return IconCargo;
   }
 }
 

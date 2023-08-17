@@ -57,3 +57,5 @@ export type F32=number;
 export type QpidObjectType=("unknown"|"ladder"|"climbingAnchor"|"bridge"|"timefallShelter"|"safeHouse"|"zipline"|"jumpRamp"|"chiralBridge"|"sign"|"powerGenerator"|"postbox"|"watchtower"|"restingStone"|"peeMushroom"|"motorbike"|"truck"|"cargoCatapult"|"cargoCatapultPod");
 export type GameAccountSummary={"id":string;"name":string;};
 export type QpidObject={"id":string;"location":[F32,F32,F32];"objectType":QpidObjectType;"unknownType":([string,string]|null);"creator":GameAccountSummary;};
+export type ContentsType=("commodity"|"weapon"|"equipment"|"special"|"rawMaterial");
+export type Baggage={"missionId":string;"id":I64;"name":string;"amount":I32;"location":[F32,F32,F32];"targetLocationId":(I32|null);"targetLocationName":(string|null);"category":ContentsType;"isWasted":boolean;"isBroken":boolean;"creator":GameAccountSummary;};

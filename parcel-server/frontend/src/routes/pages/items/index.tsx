@@ -2,9 +2,9 @@ import * as React from "react";
 import SharedCargoTable from "./shared_cargo_table";
 import { useState } from "react";
 import {
-  getLostCargo,
-  getSharedCargo,
-  getWastedCargo,
+  getLostCargoList,
+  getSharedCargoList,
+  getWastedCargoList,
 } from "../../../services/baggages_service";
 import {
   LostCargoListItem,
@@ -32,7 +32,7 @@ const Items = () => {
     // fetch items if there are no items yet
     (async () => {
       if (sharedItems == null) {
-        const response = await getSharedCargo();
+        const response = await getSharedCargoList();
 
         if (response.data != null) {
           setSharedItems(response.data.baggages);
@@ -43,7 +43,7 @@ const Items = () => {
       }
 
       if (lostItems == null) {
-        const response = await getLostCargo();
+        const response = await getLostCargoList();
 
         if (response.data != null) {
           setLostItems(response.data.baggages);
@@ -54,7 +54,7 @@ const Items = () => {
       }
 
       if (wastedItems == null) {
-        const response = await getWastedCargo();
+        const response = await getWastedCargoList();
 
         if (response.data != null) {
           setWastedItems(response.data.baggages);

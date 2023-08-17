@@ -2,6 +2,9 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "ts")]
+use typescript_type_def::TypeDef;
+
 use crate::{Language, ObjectMetaData};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -83,6 +86,7 @@ pub enum ContentsDamageType {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
 #[serde(rename_all = "camelCase")]
 #[repr(u8)]
 pub enum ContentsType {

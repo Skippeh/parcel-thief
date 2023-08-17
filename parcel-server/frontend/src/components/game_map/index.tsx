@@ -12,9 +12,10 @@ import { MapControls as MapControlsImpl } from "three-stdlib";
 import QpidIcons from "./qpid_icons";
 import { getQpidAreas } from "../../services/game_data_service";
 import { RefObject, useEffect, useRef, useState } from "react";
-import { Area, QpidArea, QpidObject } from "../../api_types";
+import { Area, Baggage, QpidArea, QpidObject } from "../../api_types";
 import Compass, { Tunnel as CompassTunnel } from "./compass";
 import { getQpidObjects } from "../../services/qpid_objects_service";
+import { getBaggages } from "../../services/baggages_service";
 
 const Textures: Map<Area, string> = new Map([
   ["area01", area01Texture],
@@ -41,24 +42,19 @@ interface Props {
   area: Area;
 }
 
-interface InnerProps extends Props {
-  mapControlsRef: RefObject<MapControlsImpl>;
-}
-
 const GameMap = (props: Props) => {
-  const mapControlsRef = useRef<MapControlsImpl>(null);
-
   return (
     <Wrapper>
       <Canvas frameloop="demand">
-        <MapRender {...props} mapControlsRef={mapControlsRef} />
+        <MapRender {...props} />
       </Canvas>
       <CompassTunnel.Out />
     </Wrapper>
   );
 };
 
-const MapRender = ({ area, mapControlsRef }: InnerProps) => {
+const MapRender = ({ area }: Props) => {
+  const mapControlsRef = useRef<MapControlsImpl>(null);
   const three = useThree();
   const planeTexture = useLoader(TextureLoader, Textures.get(area));
   planeTexture.anisotropy = Math.min(
@@ -74,6 +70,9 @@ const MapRender = ({ area, mapControlsRef }: InnerProps) => {
   const [qpidObjects, setQpidObjects] = useState<
     QpidObject[] | null | undefined
   >(undefined);
+  const [baggages, setBaggages] = useState<Baggage[] | null | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     if (qpidAreas == null) {
@@ -96,6 +95,18 @@ const MapRender = ({ area, mapControlsRef }: InnerProps) => {
           setQpidObjects(response.data);
         } else {
           alert("Failed to get qpid objects: " + response.error);
+        }
+      })();
+    }
+
+    if (baggages == null) {
+      (async () => {
+        const response = await getBaggages();
+
+        if (response.data != null) {
+          setBaggages(response.data);
+        } else {
+          alert("Failed to get baggages: " + response.error);
         }
       })();
     }
@@ -136,8 +147,13 @@ const MapRender = ({ area, mapControlsRef }: InnerProps) => {
           displacementScale={128}
         />
       </mesh>
-      {qpidAreas && qpidObjects && (
-        <QpidIcons areas={qpidAreas} objects={qpidObjects} area={area} />
+      {qpidAreas && qpidObjects && baggages && (
+        <QpidIcons
+          areas={qpidAreas}
+          objects={qpidObjects}
+          baggages={baggages}
+          area={area}
+        />
       )}
       <Compass controlsRef={mapControlsRef} />
     </>

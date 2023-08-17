@@ -1,14 +1,7 @@
 use std::{fs::File, path::Path, process::Command};
 
 use parcel_common::api_types::frontend::{
-    accounts::{
-        CreateCredentialsRequest, CreateFrontendAccountRequest, FrontendAccount,
-        ListAccountsResponse, ListAccountsType, ResetPasswordRequest, SetAccountPermissionsRequest,
-    },
-    auth::*,
-    baggages::*,
-    qpid_objects::QpidObject,
-    settings::{SettingsValues, WhitelistEntry},
+    accounts::*, auth::*, baggages::*, qpid_objects::*, settings::*,
 };
 use parcel_game_data::QpidArea;
 use typescript_type_def::{write_definition_file, DefinitionFileOptions};
@@ -40,7 +33,13 @@ type Api = (
         ResetPasswordRequest,
         CreateFrontendAccountRequest,
     ),
-    (SettingsValues, WhitelistEntry, QpidArea, QpidObject),
+    (
+        SettingsValues,
+        WhitelistEntry,
+        QpidArea,
+        QpidObject,
+        Baggage,
+    ),
 );
 
 fn generate_ts_types() {

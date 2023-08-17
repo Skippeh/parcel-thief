@@ -1,24 +1,29 @@
 import { ApiResponse, callApi } from ".";
 import {
+  Baggage,
   ListLostCargoResponse,
   ListSharedCargoResponse,
   ListWastedCargoResponse,
 } from "../api_types";
 
-export async function getSharedCargo(): Promise<
+export async function getSharedCargoList(): Promise<
   ApiResponse<ListSharedCargoResponse>
 > {
-  return await callApi("baggages/sharedCargo", "GET");
+  return await callApi("baggages/list/sharedCargo", "GET");
 }
 
-export async function getLostCargo(): Promise<
+export async function getLostCargoList(): Promise<
   ApiResponse<ListLostCargoResponse>
 > {
-  return await callApi("baggages/lostCargo", "GET");
+  return await callApi("baggages/list/lostCargo", "GET");
 }
 
-export async function getWastedCargo(): Promise<
+export async function getWastedCargoList(): Promise<
   ApiResponse<ListWastedCargoResponse>
 > {
-  return await callApi("baggages/wastedCargo", "GET");
+  return await callApi("baggages/list/wastedCargo", "GET");
+}
+
+export async function getBaggages(): Promise<ApiResponse<Baggage[]>> {
+  return await callApi("baggages", "GET");
 }

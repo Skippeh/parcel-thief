@@ -1,14 +1,18 @@
 use std::collections::HashMap;
 
 use actix_web::{get, web::Data};
+use anyhow::Context;
 use parcel_common::api_types::{
-    frontend::baggages::{
-        ListLostCargoResponse, ListSharedCargoResponse, ListWastedCargoResponse, LostCargoListItem,
-        SharedCargoListItem, WastedCargoListItem,
+    frontend::{
+        accounts::GameAccountSummary,
+        baggages::{
+            Baggage, ListLostCargoResponse, ListSharedCargoResponse, ListWastedCargoResponse,
+            LostCargoListItem, SharedCargoListItem, WastedCargoListItem,
+        },
     },
     mission::{MissionType, OnlineMissionType, ProgressState},
 };
-use parcel_game_data::{GameData, Language};
+use parcel_game_data::{ContentsType, GameData, Language};
 
 use crate::{
     data::database::Database,
@@ -18,7 +22,7 @@ use crate::{
     },
 };
 
-#[get("baggages/sharedCargo")]
+#[get("baggages/list/sharedCargo")]
 pub async fn list_shared_cargo(
     _session: JwtSession,
     database: Data<Database>,
@@ -100,7 +104,7 @@ pub async fn list_shared_cargo(
     ApiResponse::ok(ListSharedCargoResponse { baggages })
 }
 
-#[get("baggages/lostCargo")]
+#[get("baggages/list/lostCargo")]
 pub async fn list_lost_cargo(
     _session: JwtSession,
     database: Data<Database>,
@@ -188,7 +192,7 @@ pub async fn list_lost_cargo(
     ApiResponse::ok(ListLostCargoResponse { baggages })
 }
 
-#[get("baggages/wastedCargo")]
+#[get("baggages/list/wastedCargo")]
 pub async fn list_wasted_cargo(
     _session: JwtSession,
     database: Data<Database>,
@@ -250,4 +254,89 @@ pub async fn list_wasted_cargo(
     }
 
     ApiResponse::ok(ListWastedCargoResponse { baggages })
+}
+
+#[get("baggages")]
+pub async fn list_cargo(
+    _session: JwtSession,
+    database: Data<Database>,
+    game_data: Data<GameData>,
+) -> ApiResult<Vec<Baggage>> {
+    let mut result = Vec::new();
+    let conn = database.connect().await?;
+    let missions = conn.missions();
+    let wasteds = conn.wasted_baggages();
+    let accounts = conn.accounts();
+
+    let data_missions = missions
+        .find_missions(
+            &[OnlineMissionType::Private, OnlineMissionType::Dynamic],
+            &[MissionType::LostObject],
+            &[], // no excluded accounts
+            &[ProgressState::Available, ProgressState::Ready],
+            None,
+        )
+        .await?;
+    let data_missions = missions.query_mission_data(data_missions).await?;
+
+    log::debug!("{} missions", data_missions.len());
+
+    for mission in data_missions {
+        let creator = accounts
+            .get_by_ids(&[&mission.mission.creator_id])
+            .await?
+            .into_iter()
+            .next()
+            .map(|acc| acc.display_name)
+            .unwrap_or_else(|| "Deleted account".into());
+
+        for baggage in mission.baggages {
+            let mut item_name = game_data
+                .baggage_name(baggage.name_hash as u32, Language::English)
+                .map(|n| n.to_owned())
+                .unwrap_or_else(|| baggage.name_hash.to_string());
+
+            // Replace '{0}' with the amount
+            item_name = item_name.replace("{0}", baggage.amount.to_string().as_str());
+
+            let baggage_data = game_data.baggages.get(&(baggage.name_hash as u32));
+
+            let category = baggage_data
+                .map(|b| b.baggage_metadata.type_contents)
+                .context("Missing baggage data")?;
+
+            let target_location_id = if mission.mission.qpid_end_location == -1 {
+                None
+            } else {
+                Some(mission.mission.qpid_end_location)
+            };
+
+            let target_location_name = game_data
+                .qpid_area_name(mission.mission.qpid_end_location, Language::English)
+                .map(|n| n.to_owned());
+
+            result.push(Baggage {
+                mission_id: mission.mission.id.clone(),
+                id: baggage.id,
+                creator: GameAccountSummary {
+                    id: mission.mission.creator_id.clone(),
+                    name: creator.clone(),
+                },
+                amount: baggage.amount,
+                category,
+                location: (
+                    (baggage.x as f64 / 100f64) as f32,
+                    (baggage.y as f64 / 100f64) as f32,
+                    (baggage.z as f64 / 100f64) as f32,
+                ),
+                name: item_name,
+                target_location_id,
+                target_location_name,
+                is_broken: false,
+                is_wasted: false,
+            })
+        }
+    }
+
+    ApiResponse::ok(result)
 }
