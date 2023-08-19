@@ -42,3 +42,9 @@ impl<T: Read + Clone> DerefMut for Array<T> {
         &mut self.0
     }
 }
+
+impl<T: Read + Clone> From<Array<T>> for Vec<T> {
+    fn from(arr: Array<T>) -> Self {
+        arr.0
+    }
+}
