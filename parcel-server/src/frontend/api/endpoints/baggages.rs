@@ -5,6 +5,7 @@ use actix_web::{
     web::{self, Data},
 };
 use anyhow::Context;
+use itertools::Itertools;
 use parcel_common::api_types::{
     area::AreaHash,
     frontend::{
@@ -294,14 +295,26 @@ pub async fn list_cargo(
         .collect::<Vec<_>>();
     let data_missions = missions.query_mission_data(data_missions).await?;
 
+    let wasted_baggages = wasteds.get_all_baggages().await?;
+
+    let mut creator_ids = data_missions
+        .iter()
+        .map(|mission| &mission.mission.creator_id)
+        .collect::<Vec<_>>();
+    creator_ids.extend(wasted_baggages.iter().map(|b| &b.creator_id));
+
+    let creators = accounts
+        .get_by_ids(&creator_ids)
+        .await?
+        .into_iter()
+        .map(|acc| (acc.id.clone(), acc))
+        .collect::<HashMap<_, _>>();
+
     for mission in data_missions {
-        let creator = accounts
-            .get_by_ids(&[&mission.mission.creator_id])
-            .await?
-            .into_iter()
-            .next()
-            .map(|acc| acc.display_name)
-            .unwrap_or_else(|| "Deleted account".into());
+        let creator = creators
+            .get(&mission.mission.creator_id)
+            .map(|acc| acc.display_name.as_ref())
+            .unwrap_or_else(|| "Deleted account");
 
         for baggage in mission.baggages {
             let mut item_name = game_data
@@ -333,7 +346,7 @@ pub async fn list_cargo(
                 id: baggage.id,
                 creator: GameAccountSummary {
                     id: mission.mission.creator_id.clone(),
-                    name: creator.clone(),
+                    name: creator.to_owned(),
                 },
                 amount: baggage.amount,
                 category,
@@ -349,6 +362,48 @@ pub async fn list_cargo(
                 is_wasted: false,
             })
         }
+    }
+
+    for baggage in wasted_baggages {
+        let creator = creators
+            .get(&baggage.creator_id)
+            .map(|acc| acc.display_name.as_ref())
+            .unwrap_or_else(|| "Deleted account");
+
+        let mut item_name = game_data
+            .baggage_name(baggage.item_hash as u32, Language::English)
+            .map(|n| n.to_owned())
+            .unwrap_or_else(|| baggage.item_hash.to_string());
+
+        // Replace '{0}' with the amount
+        item_name = item_name.replace("{0}", "1");
+
+        let baggage_data = game_data.baggages.get(&(baggage.item_hash as u32));
+
+        let category = baggage_data
+            .map(|b| b.baggage_metadata.type_contents)
+            .context("Missing baggage data")?;
+
+        result.push(Baggage {
+            mission_id: baggage.id,
+            id: 0,
+            amount: 1,
+            category,
+            is_broken: baggage.broken,
+            is_wasted: true,
+            location: (
+                (baggage.x as f64 / 100f64) as f32,
+                (baggage.y as f64 / 100f64) as f32,
+                (baggage.z as f64 / 100f64) as f32,
+            ),
+            name: item_name,
+            target_location_id: None,
+            target_location_name: None,
+            creator: GameAccountSummary {
+                id: baggage.creator_id,
+                name: creator.to_owned(),
+            },
+        })
     }
 
     ApiResponse::ok(result)
