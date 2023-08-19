@@ -1,4 +1,5 @@
 mod baggages;
+mod lost_baggages;
 pub mod qpid_areas;
 mod readers;
 
@@ -22,6 +23,9 @@ struct Options {
 pub struct GameDataExport {
     pub baggages: BTreeMap<u32, Baggage>,
     pub qpid_areas: BTreeMap<i32, QpidArea>,
+    /// The key is the qpid id of the delivery point and the value is a list of
+    /// baggage name hashes (which matches a key in the `self.baggages` map).
+    pub lost_baggages: BTreeMap<i32, Vec<u32>>,
 }
 
 fn main() -> Result<(), anyhow::Error> {
@@ -33,6 +37,7 @@ fn main() -> Result<(), anyhow::Error> {
         .context("Could not read baggages")?;
     qpid_areas::read_qpid_areas(&mut load_context, &mut output.qpid_areas)
         .context("Could not read qpid areas")?;
+    lost_baggages::read_lost_baggages(&mut load_context, &mut output.lost_baggages)?;
 
     let new_file = std::fs::File::create(args.output_path)?;
     serde_json::to_writer_pretty(new_file, &output)?;

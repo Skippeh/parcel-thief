@@ -8,6 +8,7 @@ use super::{
     localized_text_resource::LocalizedTextResource,
     mission_static_abstract_point_resource::MissionStaticAbstractPointResource,
     reference::{Ref, UnresolvedRef},
+    RTTITypeHash,
 };
 
 impl super::Read for Area {
@@ -117,6 +118,12 @@ impl super::Read for DeliveryPointInfoResource {
             extend_description_text,
             special_report_on_place,
         })
+    }
+}
+
+impl super::ReadRTTIType for DeliveryPointInfoResource {
+    fn rtti_type() -> RTTITypeHash {
+        RTTITypeHash::DeliveryPointInfoResource
     }
 }
 

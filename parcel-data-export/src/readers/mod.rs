@@ -10,10 +10,17 @@ use int_enum::IntEnum;
 use uuid::Uuid;
 
 use self::{
-    baggage_list_item::BaggageListItem, commodity_list_item::CommodityListItem,
-    core_file::CoreFile, delivery_point_info_resource::DeliveryPointInfoResource,
-    equipment_list_item::EquipmentListItem, localized_text_resource::LocalizedTextResource,
-    raw_material_list_item::RawMaterialListItem, weapon_list_item::WeaponListItem,
+    baggage_list_item::BaggageListItem,
+    commodity_list_item::CommodityListItem,
+    core_file::CoreFile,
+    delivery_point_info_resource::DeliveryPointInfoResource,
+    equipment_list_item::EquipmentListItem,
+    localized_text_resource::LocalizedTextResource,
+    lost_baggage_with_name_and_icon_list::{
+        LostBaggageWithNameAndIconListCollection, LostBaggageWithNameAndIconListResource,
+    },
+    raw_material_list_item::RawMaterialListItem,
+    weapon_list_item::WeaponListItem,
 };
 
 pub mod array;
@@ -26,6 +33,7 @@ pub mod equipment_list_item;
 pub mod game_list_item_base;
 pub mod game_list_item_base_with_icon;
 pub mod localized_text_resource;
+pub mod lost_baggage_with_name_and_icon_list;
 pub mod mission_abstract_point_resource;
 mod mission_static_abstract_point_resource;
 pub mod raw_material_list_item;
@@ -54,6 +62,8 @@ pub enum RTTITypeHash {
     BaggageListItem = 0x72CB5ED4F1C815EE,
     LocalizedTextResource = 0x31BE502435317445,
     DeliveryPointInfoResource = 0x202B5F4B6410D206,
+    LostBaggageWithNameAndIconListResource = 0x543FA27CF297F87C,
+    LostBaggageWithNameAndIconListCollection = 0x55CFF394707F7123,
 }
 
 #[derive(Debug, Clone, enum_as_inner::EnumAsInner)]
@@ -65,6 +75,8 @@ pub enum RTTIType {
     BaggageListItem(BaggageListItem),
     LocalizedTextResource(LocalizedTextResource),
     DeliveryPointInfoResource(DeliveryPointInfoResource),
+    LostBaggageWithNameAndIconListResource(LostBaggageWithNameAndIconListResource),
+    LostBaggageWithNameAndIconListCollection(LostBaggageWithNameAndIconListCollection),
 }
 
 impl RTTIType {
@@ -77,6 +89,8 @@ impl RTTIType {
             RTTIType::BaggageListItem(item) => &item.object_uuid,
             RTTIType::LocalizedTextResource(item) => &item.object_uuid,
             RTTIType::DeliveryPointInfoResource(item) => &item.object_uuid,
+            RTTIType::LostBaggageWithNameAndIconListResource(item) => &item.object_uuid,
+            RTTIType::LostBaggageWithNameAndIconListCollection(item) => &item.object_uuid,
         }
     }
 }

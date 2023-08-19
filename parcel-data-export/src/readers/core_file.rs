@@ -5,11 +5,17 @@ use int_enum::IntEnum;
 use uuid::Uuid;
 
 use super::{
-    baggage_list_item::BaggageListItem, commodity_list_item::CommodityListItem,
+    baggage_list_item::BaggageListItem,
+    commodity_list_item::CommodityListItem,
     delivery_point_info_resource::DeliveryPointInfoResource,
-    equipment_list_item::EquipmentListItem, localized_text_resource::LocalizedTextResource,
-    raw_material_list_item::RawMaterialListItem, weapon_list_item::WeaponListItem, LoadContext,
-    RTTIType, RTTITypeHash, Read, ReadRTTIType,
+    equipment_list_item::EquipmentListItem,
+    localized_text_resource::LocalizedTextResource,
+    lost_baggage_with_name_and_icon_list::{
+        LostBaggageWithNameAndIconListCollection, LostBaggageWithNameAndIconListResource,
+    },
+    raw_material_list_item::RawMaterialListItem,
+    weapon_list_item::WeaponListItem,
+    LoadContext, RTTIType, RTTITypeHash, Read, ReadRTTIType,
 };
 
 #[derive(Debug, Clone)]
@@ -174,6 +180,14 @@ fn read_object(
         Ok(RTTITypeHash::DeliveryPointInfoResource) => {
             let item = DeliveryPointInfoResource::read(reader, context)?;
             Ok(RTTIType::DeliveryPointInfoResource(item))
+        }
+        Ok(RTTITypeHash::LostBaggageWithNameAndIconListCollection) => {
+            let item = LostBaggageWithNameAndIconListCollection::read(reader, context)?;
+            Ok(RTTIType::LostBaggageWithNameAndIconListCollection(item))
+        }
+        Ok(RTTITypeHash::LostBaggageWithNameAndIconListResource) => {
+            let item = LostBaggageWithNameAndIconListResource::read(reader, context)?;
+            Ok(RTTIType::LostBaggageWithNameAndIconListResource(item))
         }
         _ => anyhow::bail!("Unknown RTTI type hash"),
     }
