@@ -75,47 +75,43 @@ const MapRender = ({ area }: Props) => {
   );
 
   useEffect(() => {
-    if (qpidAreas == null) {
-      (async () => {
-        const response = await getQpidAreas();
+    (async () => {
+      const [areasResponseTask, objectsResponseTask, baggagesResponseTask] = [
+        getQpidAreas(),
+        getQpidObjects(area),
+        getBaggages(area),
+      ];
 
-        if (response.data != null) {
-          setQpidAreas(response.data);
-        } else {
-          alert("Failed to get qpid areas: " + response.error);
-        }
-      })();
+      const [areasResponse, objectsResponse, baggagesResponse] = [
+        await areasResponseTask,
+        await objectsResponseTask,
+        await baggagesResponseTask,
+      ];
+
+      if (areasResponse.data != null) {
+        setQpidAreas(areasResponse.data);
+      } else {
+        alert("Failed to get qpid areas: " + areasResponse.error);
+      }
+
+      if (objectsResponse.data != null) {
+        setQpidObjects(objectsResponse.data);
+      } else {
+        alert("Failed to get qpid objects: " + objectsResponse.error);
+      }
+
+      if (baggagesResponse.data != null) {
+        setBaggages(baggagesResponse.data);
+      } else {
+        alert("Failed to get baggages: " + baggagesResponse.error);
+      }
+    })();
+
+    if (mapControlsRef.current != null) {
+      mapControlsRef.current.setAzimuthalAngle(0);
+      mapControlsRef.current.setPolarAngle(0);
     }
-
-    if (qpidObjects == null) {
-      (async () => {
-        const response = await getQpidObjects(area);
-
-        if (response.data != null) {
-          setQpidObjects(response.data);
-        } else {
-          alert("Failed to get qpid objects: " + response.error);
-        }
-      })();
-    }
-
-    if (baggages == null) {
-      (async () => {
-        const response = await getBaggages(area);
-
-        if (response.data != null) {
-          setBaggages(response.data);
-        } else {
-          alert("Failed to get baggages: " + response.error);
-        }
-      })();
-    }
-  }, []);
-
-  useEffect(() => {
-    mapControlsRef.current.setAzimuthalAngle(0);
-    mapControlsRef.current.setPolarAngle(0);
-  }, [mapControlsRef, area]);
+  }, [area]);
 
   return (
     <>
