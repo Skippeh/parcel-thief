@@ -65,7 +65,8 @@ impl CoreFile {
                     // Don't log unknown type hashes to avoid log spam
                     if !err.to_string().contains("Unknown RTTI type hash") {
                         println!(
-                            "Could not read object {obj_type_name}: {err} (offset after read: {})",
+                            "Could not read object {obj_type_name} from {}: {err} (offset after read: {})",
+                            context.current_file_path().expect("Current file path should always be Some"),
                             (reader.pos - slice_reader.length) + slice_reader.pos
                         );
                     }
