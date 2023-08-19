@@ -16,7 +16,7 @@ use parcel_common::api_types::{
     },
     mission::{MissionType, OnlineMissionType, ProgressState},
 };
-use parcel_game_data::{Area, ContentsType, GameData, Language};
+use parcel_game_data::{Area, GameData, Language};
 
 use crate::{
     data::database::Database,
@@ -293,8 +293,6 @@ pub async fn list_cargo(
         .filter(|m| m.area_id == area)
         .collect::<Vec<_>>();
     let data_missions = missions.query_mission_data(data_missions).await?;
-
-    log::debug!("{} missions", data_missions.len());
 
     for mission in data_missions {
         let creator = accounts
