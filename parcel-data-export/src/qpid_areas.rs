@@ -46,7 +46,7 @@ pub fn read_qpid_areas(
                 }
 
                 let relative_path = load_context.get_relative_path(&file_path)?;
-                let core_file = load_context.load_file(relative_path)?;
+                let core_file = load_context.load_file(relative_path)?.clone(); // cloning is necessary to avoid borrowing issues. there is probably a better way but i don't know it
 
                 for delivery_point in
                     core_file.get_objects(&RTTITypeHash::DeliveryPointInfoResource)?
@@ -69,7 +69,7 @@ pub fn read_qpid_areas(
                         _ => continue,
                     }
 
-                    let names = get_names(delivery_point);
+                    let names = get_names(delivery_point, load_context)?;
 
                     // If there's no localization text for this area it's probably not relevant
                     if names.is_empty() {
@@ -99,10 +99,13 @@ pub fn read_qpid_areas(
     Ok(())
 }
 
-fn get_names(delivery_point: &DeliveryPointInfoResource) -> BTreeMap<Language, String> {
+fn get_names(
+    delivery_point: &DeliveryPointInfoResource,
+    load_context: &mut LoadContext,
+) -> Result<BTreeMap<Language, String>, anyhow::Error> {
     let mut names = BTreeMap::new();
 
-    if let Some(text) = delivery_point.description_text.as_ref() {
+    if let Some(text) = delivery_point.description_text.load_resolve(load_context)? {
         let text = text
             .as_localized_text_resource()
             .expect("Text should always be LocalizedTextResource");
@@ -112,5 +115,5 @@ fn get_names(delivery_point: &DeliveryPointInfoResource) -> BTreeMap<Language, S
         }
     }
 
-    names
+    Ok(names)
 }

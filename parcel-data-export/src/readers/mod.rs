@@ -83,6 +83,7 @@ impl RTTIType {
 pub struct LoadContext {
     base_directory: PathBuf,
     files: HashMap<String, CoreFile>,
+    load_queue: Vec<String>,
 }
 
 impl LoadContext {
@@ -90,6 +91,7 @@ impl LoadContext {
         Self {
             base_directory: data_directory,
             files: HashMap::new(),
+            load_queue: Vec::new(),
         }
     }
 
@@ -102,6 +104,12 @@ impl LoadContext {
         path: &'a Path,
     ) -> Result<&'a Path, std::path::StripPrefixError> {
         path.strip_prefix(&self.base_directory)
+    }
+
+    /// Returns the relative file path to the current file being loaded.
+    /// The path always includes the '.core' extension.
+    pub fn current_file_path(&self) -> Option<&String> {
+        self.load_queue.last()
     }
 
     pub fn load_file(&mut self, path: &Path) -> Result<&CoreFile, anyhow::Error> {
@@ -121,12 +129,21 @@ impl LoadContext {
                 .expect("File should always be found"));
         }
 
-        let file_path = self.base_directory.join(path);
-        let mut file = File::open(file_path.clone())
-            .with_context(|| format!("Loading file: {file_path:?}"))?;
-        let file = CoreFile::from_file(&mut file, self)?;
+        self.load_queue.push(path_str.clone());
 
-        self.files.insert(path_str.clone(), file);
+        let load_result = || -> anyhow::Result<_> {
+            let file_path = self.base_directory.join(path);
+            let mut file = File::open(file_path.clone())
+                .with_context(|| format!("Loading file: {file_path:?}"))?;
+            let file = CoreFile::from_file(&mut file, self)?;
+
+            self.files.insert(path_str.clone(), file);
+            Ok(())
+        }();
+
+        self.load_queue.pop(); // always pop current file regardless of success
+
+        load_result?;
 
         let result = self
             .files
@@ -134,5 +151,17 @@ impl LoadContext {
             .expect("File should always be found");
 
         Ok(result)
+    }
+
+    pub fn get_file(&self, path: &Path) -> Option<&CoreFile> {
+        let mut path = path.to_owned();
+
+        if path.extension().is_none() {
+            path = path.with_extension("core");
+        }
+
+        let path_str = path.to_string_lossy().into_owned();
+
+        self.files.get(&path_str)
     }
 }

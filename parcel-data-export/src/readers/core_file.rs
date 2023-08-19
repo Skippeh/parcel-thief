@@ -12,14 +12,14 @@ use super::{
     RTTIType, RTTITypeHash, Read, ReadRTTIType,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Entry {
     pub type_hash: u64,
     pub uuid: Uuid,
     pub value: RTTIType,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CoreFile {
     entries: Vec<Entry>,
 
