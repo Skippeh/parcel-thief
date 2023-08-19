@@ -76,6 +76,10 @@ const MapRender = ({ area }: Props) => {
 
   useEffect(() => {
     (async () => {
+      setQpidAreas(undefined);
+      setQpidObjects(undefined);
+      setBaggages(undefined);
+
       const [areasResponseTask, objectsResponseTask, baggagesResponseTask] = [
         getQpidAreas(),
         getQpidObjects(area),
@@ -92,18 +96,21 @@ const MapRender = ({ area }: Props) => {
         setQpidAreas(areasResponse.data);
       } else {
         alert("Failed to get qpid areas: " + areasResponse.error);
+        setQpidAreas(null);
       }
 
       if (objectsResponse.data != null) {
         setQpidObjects(objectsResponse.data);
       } else {
         alert("Failed to get qpid objects: " + objectsResponse.error);
+        setQpidObjects(null);
       }
 
       if (baggagesResponse.data != null) {
         setBaggages(baggagesResponse.data);
       } else {
         alert("Failed to get baggages: " + baggagesResponse.error);
+        setBaggages(null);
       }
     })();
 
