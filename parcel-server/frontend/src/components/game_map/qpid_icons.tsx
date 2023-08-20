@@ -101,7 +101,9 @@ const QpidIcons = ({ areas, objects, baggages, area }: Props) => {
                 label={area.names["en-us"]}
                 importance="high"
                 cameraDistance={cameraDistance}
-              />
+              >
+                This is the location of {area.names["en-us"]}
+              </Icon>
             </Html>
           );
         })
@@ -131,7 +133,9 @@ const QpidIcons = ({ areas, objects, baggages, area }: Props) => {
                       iconSrc={getQpidObjectIcon(object.objectType)}
                       importance={importance}
                       cameraDistance={cameraDistance}
-                    />
+                    >
+                      This is a(n) {object.objectType}
+                    </Icon>
                   </div>
                 </Html>
               );
@@ -150,7 +154,9 @@ const QpidIcons = ({ areas, objects, baggages, area }: Props) => {
                         iconSrc={getBaggageIcon(baggage)}
                         importance="high"
                         cameraDistance={cameraDistance}
-                      />
+                      >
+                        This is {baggage.amount}x {baggage.name}
+                      </Icon>
                     </div>
                   </Html>
                 );

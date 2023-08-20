@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import * as Popover from "../popover";
 
 const Wrapper = styled.div<{ $scale: number }>`
   transform: translateX(-50%);
@@ -24,6 +25,12 @@ const Wrapper = styled.div<{ $scale: number }>`
         box-shadow: 0 0 17px #000;
         border-radius: 50%;
       }
+    }
+
+    & > .anchor {
+      position: absolute;
+      left: 25px;
+      top: 12px;
     }
   }
 
@@ -55,18 +62,28 @@ const Wrapper = styled.div<{ $scale: number }>`
   }
 `;
 
-interface Props {
+const PopoverContent = styled(Popover.Content).attrs({
+  side: "right",
+})`
+  pointer-events: all;
+  user-select: all;
+  z-index: 1000;
+`;
+
+interface Props extends React.PropsWithChildren {
   iconSrc: string;
   label?: string;
   importance: "low" | "high";
   cameraDistance: number;
 }
 
-const Icon = ({ iconSrc, label, importance, cameraDistance }: Props) => {
-  function onClick() {
-    console.log("clicked");
-  }
-
+const Icon = ({
+  iconSrc,
+  label,
+  importance,
+  cameraDistance,
+  children,
+}: Props) => {
   function getScale() {
     if (importance == "high") {
       return 1;
@@ -86,12 +103,20 @@ const Icon = ({ iconSrc, label, importance, cameraDistance }: Props) => {
 
   return (
     <Wrapper $scale={getScale()}>
-      <div className="inner" onClick={onClick}>
-        <div className="icons">
-          <img className="icon" src={iconSrc} />
-        </div>
-        {label && <span className="name">{label}</span>}
-      </div>
+      <Popover.Root>
+        <Popover.Trigger>
+          <div className="inner">
+            <div className="icons">
+              <img className="icon" src={iconSrc} />
+              <Popover.Anchor className="anchor" />
+            </div>
+            {label && <span className="name">{label}</span>}
+          </div>
+        </Popover.Trigger>
+        <Popover.Portal>
+          <PopoverContent>{children}</PopoverContent>
+        </Popover.Portal>
+      </Popover.Root>
     </Wrapper>
   );
 };
