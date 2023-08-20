@@ -88,8 +88,6 @@ const Icon = ({
   cameraDistance,
   children,
 }: Props) => {
-  const popoverContainerRef = useRef<HTMLDivElement>(null);
-
   function getScale() {
     if (importance == "high") {
       return 1;
