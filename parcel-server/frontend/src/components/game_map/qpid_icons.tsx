@@ -6,6 +6,7 @@ import {
   QpidObject,
   QpidObjectType,
 } from "../../api_types";
+import Actions from "./actions";
 import IconPreppersShelter from "../../../../../assets/ds/icons/preppers.png";
 import IconDeliveryBase from "../../../../../assets/ds/icons/deliveryBase.png";
 import IconCrematory from "../../../../../assets/ds/icons/crematory.png";
@@ -102,7 +103,15 @@ const QpidIcons = ({ areas, objects, baggages, area }: Props) => {
                 importance="high"
                 cameraDistance={cameraDistance}
               >
-                This is the location of {area.names["en-us"]}
+                <Actions label={area.names["en-us"]}>
+                  <div>content test</div>
+                  <div>content test</div>
+                  <div>content test</div>
+                  <div>content test</div>
+                  <div>content test</div>
+                  <div>content test</div>
+                  <div>content test</div>
+                </Actions>
               </Icon>
             </Html>
           );

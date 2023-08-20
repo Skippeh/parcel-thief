@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import * as Popover from "../popover";
+import { useRef } from "react";
 
 const Wrapper = styled.div<{ $scale: number }>`
   transform: translateX(-50%);
@@ -64,6 +65,9 @@ const Wrapper = styled.div<{ $scale: number }>`
 
 const PopoverContent = styled(Popover.Content).attrs({
   side: "right",
+  align: "start",
+  alignOffset: -15,
+  avoidCollisions: false,
 })`
   pointer-events: all;
   user-select: all;
@@ -84,6 +88,8 @@ const Icon = ({
   cameraDistance,
   children,
 }: Props) => {
+  const popoverContainerRef = useRef<HTMLDivElement>(null);
+
   function getScale() {
     if (importance == "high") {
       return 1;
@@ -102,22 +108,24 @@ const Icon = ({
   }
 
   return (
-    <Wrapper $scale={getScale()}>
-      <Popover.Root>
-        <Popover.Trigger>
-          <div className="inner">
-            <div className="icons">
-              <img className="icon" src={iconSrc} />
-              <Popover.Anchor className="anchor" />
+    <>
+      <Wrapper $scale={getScale()}>
+        <Popover.Root>
+          <Popover.Trigger>
+            <div className="inner">
+              <div className="icons">
+                <img className="icon" src={iconSrc} />
+                <Popover.Anchor className="anchor" />
+              </div>
+              {label && <span className="name">{label}</span>}
             </div>
-            {label && <span className="name">{label}</span>}
-          </div>
-        </Popover.Trigger>
-        <Popover.Portal>
-          <PopoverContent>{children}</PopoverContent>
-        </Popover.Portal>
-      </Popover.Root>
-    </Wrapper>
+          </Popover.Trigger>
+          <Popover.Portal>
+            <PopoverContent>{children}</PopoverContent>
+          </Popover.Portal>
+        </Popover.Root>
+      </Wrapper>
+    </>
   );
 };
 
