@@ -10,7 +10,11 @@ import area04HeightTexture from "../../../../../assets/ds/levels/area04/area04_h
 import { TextureLoader } from "three";
 import { MapControls as MapControlsImpl } from "three-stdlib";
 import QpidIcons from "./qpid_icons";
-import { getQpidAreas } from "../../services/game_data_service";
+import {
+  QpidAreaWithChildren,
+  getQpidAreas,
+  organizeQpidAreas,
+} from "../../services/game_data_service";
 import { RefObject, useEffect, useRef, useState } from "react";
 import { Area, Baggage, QpidArea, QpidObject } from "../../api_types";
 import Compass, { Tunnel as CompassTunnel } from "./compass";
@@ -64,9 +68,9 @@ const MapRender = ({ area }: Props) => {
   planeTexture.needsUpdate = true;
   const heightTexture = useLoader(TextureLoader, HeightTextures.get(area));
 
-  const [qpidAreas, setQpidAreas] = useState<QpidArea[] | null | undefined>(
-    undefined
-  );
+  const [qpidAreas, setQpidAreas] = useState<
+    QpidAreaWithChildren[] | null | undefined
+  >(undefined);
   const [qpidObjects, setQpidObjects] = useState<
     QpidObject[] | null | undefined
   >(undefined);
@@ -92,26 +96,35 @@ const MapRender = ({ area }: Props) => {
         await baggagesResponseTask,
       ];
 
-      if (areasResponse.data != null) {
-        setQpidAreas(areasResponse.data);
-      } else {
-        alert("Failed to get qpid areas: " + areasResponse.error);
+      if (
+        areasResponse.error != null ||
+        objectsResponse.error != null ||
+        baggagesResponse.error != null
+      ) {
+        alert(
+          "Failed to get map data." +
+            "\nareas error: " +
+            areasResponse.error +
+            "\nobjects error: " +
+            objectsResponse.error +
+            "\nbaggages error: " +
+            baggagesResponse.error
+        );
         setQpidAreas(null);
-      }
-
-      if (objectsResponse.data != null) {
-        setQpidObjects(objectsResponse.data);
-      } else {
-        alert("Failed to get qpid objects: " + objectsResponse.error);
         setQpidObjects(null);
+        setBaggages(null);
+        return;
       }
 
-      if (baggagesResponse.data != null) {
-        setBaggages(baggagesResponse.data);
-      } else {
-        alert("Failed to get baggages: " + baggagesResponse.error);
-        setBaggages(null);
-      }
+      let [qpidAreas, objects, baggages] = organizeQpidAreas(
+        areasResponse.data,
+        objectsResponse.data,
+        baggagesResponse.data
+      );
+
+      setQpidAreas(qpidAreas);
+      setQpidObjects(objects);
+      setBaggages(baggages);
     })();
 
     if (mapControlsRef.current != null) {

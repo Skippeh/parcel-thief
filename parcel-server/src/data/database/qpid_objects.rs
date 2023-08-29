@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use chrono::Utc;
 use diesel::{dsl::not, prelude::*};
 use diesel_async::{
@@ -672,6 +674,24 @@ impl<'db> QpidObjects<'db> {
         }
 
         Ok(result)
+    }
+
+    pub async fn query_vehicle_infos(
+        &self,
+        object_ids: &[&str],
+    ) -> Result<HashMap<String, VehicleInfo>, QueryError> {
+        use crate::db::schema::qpid_object_vehicle_infos::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        let objects = dsl::qpid_object_vehicle_infos
+            .filter(dsl::object_id.eq_any(object_ids))
+            .get_results::<VehicleInfo>(conn)
+            .await?
+            .into_iter()
+            .map(|v| (v.object_id.clone(), v))
+            .collect::<HashMap<_, _>>();
+
+        Ok(objects)
     }
 
     pub async fn add_remove_tag_from_objects(

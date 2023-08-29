@@ -49,6 +49,15 @@ pub async fn list_qpid_objects(
         .into_iter()
         .map(|account| (account.id, account.display_name))
         .collect::<HashMap<_, _>>();
+    let vehicle_infos = conn
+        .qpid_objects()
+        .query_vehicle_infos(
+            &qpid_objects
+                .iter()
+                .map(|q| q.id.as_ref())
+                .collect::<Vec<_>>(),
+        )
+        .await?;
 
     ApiResponse::ok(
         qpid_objects
@@ -62,15 +71,35 @@ pub async fn list_qpid_objects(
                     _ => None,
                 };
 
+                let vehicle_info = vehicle_infos.get(&q.id);
+                let dividend = match vehicle_info {
+                    Some(v) => 10i32.pow(v.exponent as u32),
+                    None => 10i32.pow(q.exponent as u32),
+                } as f64;
+                let location = match vehicle_info {
+                    Some(v) => (
+                        (v.new_pos_x.unwrap_or(q.pos_x) as f64 / dividend) as f32,
+                        (v.new_pos_y.unwrap_or(q.pos_y) as f64 / dividend) as f32,
+                        (v.new_pos_z.unwrap_or(q.pos_z) as f64 / dividend) as f32,
+                    ),
+                    None => (
+                        (q.pos_x as f64 / dividend) as f32,
+                        (q.pos_y as f64 / dividend) as f32,
+                        (q.pos_z as f64 / dividend) as f32,
+                    ),
+                };
+                let is_lost = match vehicle_info {
+                    Some(v) => v.is_lost,
+                    None => true,
+                };
+
                 QpidObject {
                     id: q.id,
-                    location: (
-                        (q.pos_x as f64 / 100_000f64) as f32,
-                        (q.pos_y as f64 / 100_000f64) as f32,
-                        (q.pos_z as f64 / 100_000f64) as f32,
-                    ),
+                    location,
+                    location_id: q.qpid_id,
                     object_type,
                     unknown_type,
+                    is_lost,
                     creator: GameAccountSummary {
                         name: creator_names
                             .get(&q.creator_id)

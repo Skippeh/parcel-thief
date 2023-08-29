@@ -38,12 +38,33 @@ import IconCargo from "../../../../../assets/ds/icons/cargo.png";
 import IconLostCargo from "../../../../../assets/ds/icons/lost_cargo.png";
 import Icon from "./icon";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MaxCameraDistance as MaxCameraDistance } from ".";
 import { MapControls } from "three-stdlib";
+import * as Tabs from "../tabs";
+import { styled } from "styled-components";
+import { QpidAreaWithChildren } from "../../services/game_data_service";
+
+const TabsTrigger = styled(Tabs.Trigger)`
+  background: none;
+  padding: 0.5rem 1rem;
+
+  &:first-child {
+    border-top-left-radius: 0;
+  }
+
+  &:last-child {
+    border-top-right-radius: 0;
+  }
+`;
+const TabsContent = styled(Tabs.Content)`
+  & > *:first-child {
+    margin-top: 0.5rem;
+  }
+`;
 
 interface Props {
-  areas: QpidArea[];
+  areas: QpidAreaWithChildren[];
   area: Area;
   objects: QpidObject[];
   baggages: Baggage[];
@@ -104,13 +125,32 @@ const QpidIcons = ({ areas, objects, baggages, area }: Props) => {
                 cameraDistance={cameraDistance}
               >
                 <Actions label={area.names["en-us"]}>
-                  <div>content test</div>
-                  <div>content test</div>
-                  <div>content test</div>
-                  <div>content test</div>
-                  <div>content test</div>
-                  <div>content test</div>
-                  <div>content test</div>
+                  <Tabs.Root defaultValue="sharedCargo">
+                    <Tabs.List>
+                      <TabsTrigger value="sharedCargo">
+                        Shared cargo
+                      </TabsTrigger>
+                      {area.metadata.constructionType == "deliveryBase" && (
+                        <TabsTrigger value="garage">Garage</TabsTrigger>
+                      )}
+                      <TabsTrigger value="missions">Missions</TabsTrigger>
+                    </Tabs.List>
+                    <TabsContent value="sharedCargo">
+                      <div>
+                        There are {area.sharedCargo.length} shared cargo here
+                      </div>
+                    </TabsContent>
+                    {area.metadata.constructionType == "deliveryBase" && (
+                      <TabsContent value="garage">
+                        <div>
+                          There are {area.garage.length} vehicles stored here
+                        </div>
+                      </TabsContent>
+                    )}
+                    <TabsContent value="missions">
+                      <div>missions</div>
+                    </TabsContent>
+                  </Tabs.Root>
                 </Actions>
               </Icon>
             </Html>

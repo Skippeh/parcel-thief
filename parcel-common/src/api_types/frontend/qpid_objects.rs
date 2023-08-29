@@ -13,8 +13,12 @@ use super::accounts::GameAccountSummary;
 pub struct QpidObject {
     pub id: String,
     pub location: (f32, f32, f32),
+    pub location_id: i32,
     pub object_type: QpidObjectType,
     pub unknown_type: Option<(String, String)>,
+    /// Only applicable for vehicles. If true then the vehicle is not in a garage (i think).
+    /// For all other object types this is always true.
+    pub is_lost: bool,
     pub creator: GameAccountSummary,
 }
 

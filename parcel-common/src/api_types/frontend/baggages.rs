@@ -49,6 +49,7 @@ pub struct Baggage {
     pub name: String,
     pub amount: i32,
     pub location: (f32, f32, f32),
+    pub location_id: i32,
     pub target_location_id: Option<i32>,
     pub target_location_name: Option<String>,
     pub category: ContentsType,
