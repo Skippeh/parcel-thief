@@ -149,8 +149,6 @@ const MapRender = ({ area }: Props) => {
         makeDefault
         maxPolarAngle={Math.PI / 2 - Math.PI / 8}
         minPolarAngle={-Math.PI / 2}
-        enableRotate
-        enableDamping
         minDistance={200}
         maxDistance={MaxCameraDistance}
         zoomSpeed={2}
