@@ -41,7 +41,9 @@ export function organizeQpidAreas(
         continue;
       }
 
-      // check if cargo position matches qpid area position, or if cargo xy position is 0,0
+      // add to shared cargo if:
+      // - cargo position matches qpid area position
+      // - cargo xy position is 0,0
       if (
         cargo.location[0] == area.metadata.location[0] ||
         cargo.location[1] == area.metadata.location[1] ||
@@ -61,12 +63,14 @@ export function organizeQpidAreas(
         continue;
       }
 
-      // check if object position matches qpid area position, or if object xy position is 0,0, or if isLost is false
+      // add to garage if:
+      // - object position matches qpid area position
+      // - object xy position is 0,0
+      // - isLost is false
       if (
-        object.location[0] == area.metadata.location[0] ||
-        object.location[1] == area.metadata.location[1] ||
-        object.location[0] == 0 ||
-        object.location[1] == 0 ||
+        (object.location[0] == area.metadata.location[0] &&
+          object.location[1] == area.metadata.location[1]) ||
+        (object.location[0] == 0 && object.location[1] == 0) ||
         !object.isLost
       ) {
         garage.push(object);
