@@ -70,7 +70,7 @@ const PopoverContent = styled(Popover.Content).attrs({
   avoidCollisions: false,
 })`
   pointer-events: all;
-  user-select: all;
+  user-select: initial;
   z-index: 1000;
 `;
 
