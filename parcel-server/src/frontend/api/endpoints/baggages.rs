@@ -5,7 +5,6 @@ use actix_web::{
     web::{self, Data},
 };
 use anyhow::Context;
-use itertools::Itertools;
 use parcel_common::api_types::{
     area::AreaHash,
     frontend::{
