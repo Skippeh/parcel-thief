@@ -44,6 +44,8 @@ import { MapControls } from "three-stdlib";
 import * as Tabs from "../tabs";
 import { styled } from "styled-components";
 import { QpidAreaWithChildren } from "../../services/game_data_service";
+import VehicleList from "./vehicle_list";
+import SharedCargoList from "./shared_cargo_list";
 
 const TabsTrigger = styled(Tabs.Trigger)`
   background: none;
@@ -136,15 +138,11 @@ const QpidIcons = ({ areas, objects, baggages, area }: Props) => {
                       <TabsTrigger value="missions">Missions</TabsTrigger>
                     </Tabs.List>
                     <TabsContent value="sharedCargo">
-                      <div>
-                        There are {area.sharedCargo.length} shared cargo here
-                      </div>
+                      <SharedCargoList baggages={area.sharedCargo} />
                     </TabsContent>
                     {area.metadata.constructionType == "deliveryBase" && (
                       <TabsContent value="garage">
-                        <div>
-                          There are {area.garage.length} vehicles stored here
-                        </div>
+                        <VehicleList vehicles={area.garage} />
                       </TabsContent>
                     )}
                     <TabsContent value="missions">
