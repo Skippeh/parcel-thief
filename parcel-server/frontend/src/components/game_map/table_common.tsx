@@ -22,4 +22,8 @@ export const DefaultProps: AgGridReactProps = {
 
 export const TableWrapper = styled.div.attrs({
   className: "ag-theme-alpine-dark",
-})``;
+})`
+  --ag-header-height: 35px;
+  --ag-row-height: 35px;
+  --ag-font-size: 12px;
+`;
