@@ -67,7 +67,6 @@ const PopoverContent = styled(Popover.Content).attrs({
   side: "right",
   align: "start",
   alignOffset: -15,
-  avoidCollisions: false,
 })`
   pointer-events: all;
   user-select: initial;
