@@ -130,10 +130,12 @@ const QpidIcons = ({ areas, objects, baggages, area }: Props) => {
                   <Tabs.Root defaultValue="sharedCargo">
                     <Tabs.List>
                       <TabsTrigger value="sharedCargo">
-                        Shared cargo
+                        Shared cargo ({area.sharedCargo.length})
                       </TabsTrigger>
                       {area.metadata.constructionType == "deliveryBase" && (
-                        <TabsTrigger value="garage">Garage</TabsTrigger>
+                        <TabsTrigger value="garage">
+                          Garage ({area.garage.length})
+                        </TabsTrigger>
                       )}
                       <TabsTrigger value="missions">Missions</TabsTrigger>
                     </Tabs.List>
