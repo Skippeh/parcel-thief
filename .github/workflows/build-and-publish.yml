@@ -14,11 +14,11 @@ jobs:
       - name: Install cargo toolchain (stable)
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable-x86_64-pc-windows-msvc
+          toolchain: 1.71.0 # later versions seem to get an internal compiler error when building atm
       - name: Install cargo toolchain (nightly)
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2023-05-21-x86_64-pc-windows-msvc
+          toolchain: nightly-2023-06-27 # latest working version as of 2023-09-07 that doesn't get an internal compiler error
       - name: Restore cargo cache
         uses: actions/cache@v3
         with:
@@ -55,13 +55,13 @@ jobs:
       - name: Build parcel-client
         uses: actions-rs/cargo@v1
         with:
-          toolchain: nightly-2023-05-21-x86_64-pc-windows-msvc
+          toolchain: nightly-2023-06-27
           command: build
           args: --release -p parcel-client --target x86_64-pc-windows-msvc
       - name: Build client-injector
         uses: actions-rs/cargo@v1
         with:
-          toolchain: nightly-2023-05-21-x86_64-pc-windows-msvc
+          toolchain: nightly-2023-06-27
           command: build
           args: --release -p client-injector --target x86_64-pc-windows-msvc
       - name: Move dist files to temp folder
@@ -97,7 +97,7 @@ jobs:
       - name: Install cargo toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: 1.71.0 # later versions seem to get an internal compiler error when building atm
       - name: Restore cargo cache
         uses: actions/cache@v3
         with:
