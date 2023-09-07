@@ -28,4 +28,4 @@ parcel-game-data = { path = "../parcel-game-data" }
 [features]
 default = ["diesel"]
 diesel = ["dep:diesel", "dep:diesel_derives"]
-ts = ["dep:typescript-type-def"]
+ts = ["dep:typescript-type-def", "parcel-game-data/ts"]

@@ -143,8 +143,8 @@ fn parse_slot_info(ini_string: String) -> Result<SlotInfo, anyhow::Error> {
     modification_time /= 1000;
 
     let modification_time = NaiveDateTime::from_timestamp_millis(modification_time)
-        .context("ModificationTime is out of range")?;
-    let modification_time = DateTime::from_utc(modification_time, Utc);
+        .context("ModificationTime is out of range")?
+        .and_utc();
 
     Ok(SlotInfo {
         title: read_decode!(slot, "Title"),
