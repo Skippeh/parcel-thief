@@ -10,9 +10,6 @@ export const DefaultColDef: ColDef = {
 };
 
 export const DefaultProps: AgGridReactProps = {
-  pagination: true,
-  paginationPageSize: 5,
-  domLayout: "autoHeight",
   rowSelection: "single",
   suppressCellFocus: true,
   suppressRowClickSelection: true,
@@ -26,4 +23,5 @@ export const TableWrapper = styled.div.attrs({
   --ag-header-height: 35px;
   --ag-row-height: 35px;
   --ag-font-size: 12px;
+  height: 250px;
 `;
