@@ -10,3 +10,4 @@ members = [
     "parcel-data-export",
     "parcel-game-data",
 ]
+resolver = "2"
