@@ -15,6 +15,8 @@ const SharedCargoList = ({ baggages }: Props) => {
     },
     {
       field: "amount",
+      flex: 0,
+      width: 100,
     },
     {
       field: "category",
