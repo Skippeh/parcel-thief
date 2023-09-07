@@ -97,7 +97,7 @@ fn parse_micro_date_time(mut date: i64) -> Result<DateTime<Utc>, anyhow::Error> 
     date -= 62135596800000000; // epoch expressed in microseconds
 
     let date_time = NaiveDateTime::from_timestamp_micros(date)
-        .ok_or_else(|| anyhow::anyhow!("Date out of range"))?;
-    let date_time = DateTime::<Utc>::from_utc(date_time, Utc);
+        .ok_or_else(|| anyhow::anyhow!("Date out of range"))?
+        .and_utc();
     Ok(date_time)
 }
