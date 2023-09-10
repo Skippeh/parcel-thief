@@ -38,7 +38,7 @@ export default createGlobalStyle`
   input[type=text],
   input[type=password],
   textarea {
-    background: ${Colors.blueDark.blue5};
+    background: ${Colors.grayDark.gray4};
     color: ${Colors.whiteA.whiteA12};
     border: 1px solid ${Colors.whiteA.whiteA8};
     border-radius: 2px;
@@ -56,7 +56,7 @@ export default createGlobalStyle`
 
     &:read-only {
       cursor: not-allowed;
-      color: ${Colors.whiteA.whiteA10};
+      color: ${Colors.whiteA.whiteA11};
     }
   }
 
