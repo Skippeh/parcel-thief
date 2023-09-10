@@ -44,3 +44,6 @@ export const ValidityState = styled(Form.ValidityState)``;
 export const Submit = styled(Form.Submit)`
   margin-top: 1.5rem;
 `;
+export const Select = styled.select`
+  // todo: apply styling
+`;

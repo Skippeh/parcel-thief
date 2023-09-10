@@ -46,6 +46,7 @@ import { styled } from "styled-components";
 import { QpidAreaWithChildren } from "../../services/game_data_service";
 import VehicleList from "./vehicle_list";
 import SharedCargoList from "./shared_cargo_list";
+import Missions from "./missions";
 
 const TabsTrigger = styled(Tabs.Trigger)`
   background: none;
@@ -148,7 +149,10 @@ const QpidIcons = ({ areas, objects, baggages, area }: Props) => {
                       </TabsContent>
                     )}
                     <TabsContent value="missions">
-                      <div>missions</div>
+                      <Missions
+                        area={area.metadata.area}
+                        qpidId={area.qpidId}
+                      />
                     </TabsContent>
                   </Tabs.Root>
                 </Actions>
