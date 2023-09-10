@@ -31,8 +31,10 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
   const [lostBaggages, setLostBaggages] = useState<
     Record<number, LocalizedBaggageData[]> | null | undefined
   >(undefined);
-  const [startQpidId, setStartQpidArea] = useState<number>(defaultQpidId ?? -1);
-  const [destinationQpidId, setDestinationQpidArea] = useState<number>(-1);
+  const [startQpidId, setStartQpidArea] = useState<string>(
+    defaultQpidId.toString() ?? "-1"
+  );
+  const [destinationQpidId, setDestinationQpidArea] = useState<string>("-1");
   const [selectedBaggage, setSelectedBaggage] =
     useState<LocalizedBaggageData | null>(null);
 
@@ -75,7 +77,7 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
   }, []);
 
   function onDestinationChanged(qpidId: number) {
-    setDestinationQpidArea(qpidId);
+    setDestinationQpidArea(qpidId.toString());
     setSelectedBaggage(null);
   }
 
@@ -87,7 +89,7 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
           value={startQpidId}
           onChange={(e) => setStartQpidArea(e.target.value)}
         >
-          <option value={-1}>Select Start</option>
+          <option value={"-1"}>Select Start</option>
           {qpidAreas.map((qpidArea) => (
             <option key={qpidArea.qpidId} value={qpidArea.qpidId}>
               {qpidArea.names["en-us"]}
@@ -101,7 +103,7 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
           value={destinationQpidId}
           onChange={(e) => onDestinationChanged(e.target.value)}
         >
-          <option value={-1}>Select Destination</option>
+          <option value={"-1"}>Select Destination</option>
           {qpidAreas.map((qpidArea) => (
             <option key={qpidArea.qpidId} value={qpidArea.qpidId}>
               {qpidArea.names["en-us"]}
@@ -115,7 +117,7 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
           baggages={lostBaggages[destinationQpidId] || []}
           value={selectedBaggage}
           onChange={setSelectedBaggage}
-          disabled={destinationQpidId === -1}
+          disabled={destinationQpidId === "-1"}
         />
       </Form.Field>
     </Form.Root>
