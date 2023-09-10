@@ -123,6 +123,29 @@ export default createGlobalStyle`
     }
   }
 
+  select {
+    background: ${Colors.grayDark.gray4};
+    padding: 0.5rem;
+    color: ${Colors.whiteA.whiteA12};
+    border: 1px solid ${Colors.whiteA.whiteA11};
+
+    &:hover, &:focus-visible {
+      background: ${Colors.grayDark.gray3};
+      border: 1px solid ${Colors.whiteA.whiteA10};
+    }
+
+    &:disabled {
+      &,
+      &:hover,
+      &:focus-visible {
+        background: ${Colors.grayDark.gray5};
+        border: 1px solid ${Colors.whiteA.whiteA9};
+        color: ${Colors.whiteA.whiteA10};
+        cursor: not-allowed;
+      }
+    }
+  }
+
   .spin {
     animation: spin 1.5s linear infinite;
   }
