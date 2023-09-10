@@ -89,7 +89,7 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
           value={startQpidId}
           onChange={(e) => setStartQpidArea(e.target.value)}
         >
-          <option value={"-1"}>Select Start</option>
+          <option value="-1">Select Start</option>
           {qpidAreas.map((qpidArea) => (
             <option key={qpidArea.qpidId} value={qpidArea.qpidId}>
               {qpidArea.names["en-us"]}
@@ -103,7 +103,7 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
           value={destinationQpidId}
           onChange={(e) => onDestinationChanged(e.target.value)}
         >
-          <option value={"-1"}>Select Destination</option>
+          <option value="-1">Select Destination</option>
           {qpidAreas.map((qpidArea) => (
             <option key={qpidArea.qpidId} value={qpidArea.qpidId}>
               {qpidArea.names["en-us"]}
