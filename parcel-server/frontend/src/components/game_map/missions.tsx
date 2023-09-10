@@ -11,8 +11,8 @@ const DialogOverlay = styled(Dialog.Overlay)`
 `;
 
 const DialogContent = styled(Dialog.Content)`
-  max-width: 95%;
-  width: 1000px;
+  width: 95vw;
+  max-width: 1000px;
   z-index: 2000;
 `;
 
