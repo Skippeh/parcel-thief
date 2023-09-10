@@ -1,5 +1,11 @@
 import { ApiResponse, callApi } from ".";
-import { Baggage, QpidArea, QpidObject } from "../api_types";
+import {
+  Baggage,
+  Language,
+  LocalizedBaggageData,
+  QpidArea,
+  QpidObject,
+} from "../api_types";
 
 export interface QpidAreaWithChildren extends QpidArea {
   sharedCargo: Baggage[];
@@ -8,6 +14,15 @@ export interface QpidAreaWithChildren extends QpidArea {
 
 export function getQpidAreas(): Promise<ApiResponse<QpidArea[]>> {
   return callApi<QpidArea[]>("gameData/qpidAreas", "GET");
+}
+
+export function getLostBaggages(
+  language: Language
+): Promise<ApiResponse<Record<number, LocalizedBaggageData[]>>> {
+  return callApi(
+    `gameData/lostBaggages?lang=${encodeURIComponent(language)}`,
+    "GET"
+  );
 }
 
 /**

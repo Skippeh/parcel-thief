@@ -1,4 +1,4 @@
-use parcel_game_data::ContentsType;
+use parcel_game_data::{BaggageMetaData, ContentsType, Language, ObjectMetaData};
 use serde::Serialize;
 
 #[cfg(feature = "ts")]
@@ -77,4 +77,34 @@ pub struct ListLostCargoResponse {
 #[serde(rename_all = "camelCase")]
 pub struct ListWastedCargoResponse {
     pub baggages: Vec<WastedCargoListItem>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
+#[serde(rename_all = "camelCase")]
+pub struct LocalizedBaggageData {
+    pub name_hash: u32,
+    pub object_metadata: ObjectMetaData,
+    pub baggage_metadata: BaggageMetaData,
+    pub name: String,
+    pub description: String,
+}
+
+impl LocalizedBaggageData {
+    pub fn from_baggage_data(
+        baggage: parcel_game_data::Baggage,
+        language: Language,
+    ) -> LocalizedBaggageData {
+        LocalizedBaggageData {
+            name_hash: baggage.name_hash,
+            object_metadata: baggage.object_metadata,
+            baggage_metadata: baggage.baggage_metadata,
+            name: baggage.names.get(&language).cloned().unwrap_or_default(),
+            description: baggage
+                .descriptions
+                .get(&language)
+                .cloned()
+                .unwrap_or_default(),
+        }
+    }
 }

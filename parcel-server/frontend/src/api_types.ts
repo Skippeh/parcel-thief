@@ -200,3 +200,30 @@ export type Baggage = {
     "isBroken": boolean;
     "creator": GameAccountSummary;
 };
+export type ObjectMetaData = {
+    "uuid": string;
+};
+export type BaggageCaseType = ("normal" | "liquidOnly" | "weapon" | "item" | "equipment" | "bBPod" | "bodyBag" | "dummy" | "handcuffs" | "material" | "cart" | "constructionMachine" | "ladder" | "delicate" | "rope" | "vehicle" | "livingThing" | "smallDelicate" | "toxicGas");
+export type ContentsDamageType = ("normal" | "fragile" | "delicate" | "danger" | "sensitiveToTimefall" | "equipment" | "livingThing" | "mustKeepHorizontally" | "cool");
+export type VolumeType = ("small" | "medium" | "large" | "extraLarge" | "human");
+export type BaggageMetaData = {
+    "typeCase": BaggageCaseType;
+    "typeContentsDamage": ContentsDamageType;
+    "typeContents": ContentsType;
+    "typeVolume": VolumeType;
+    "amount": U32;
+    "subAmount": U32;
+    "weight": F32;
+    "durabilityContents": U32;
+    "durabilityCase": U32;
+    "initialDurabilityContents": U32;
+    "initialDurabilityCase": U32;
+    "missionId": U32;
+};
+export type LocalizedBaggageData = {
+    "nameHash": U32;
+    "objectMetadata": ObjectMetaData;
+    "baggageMetadata": BaggageMetaData;
+    "name": string;
+    "description": string;
+};

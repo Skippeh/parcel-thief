@@ -7,7 +7,7 @@ use typescript_type_def::TypeDef;
 
 use crate::{Language, ObjectMetaData};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Baggage {
     pub name_hash: u32,
@@ -17,7 +17,8 @@ pub struct Baggage {
     pub descriptions: BTreeMap<Language, String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
 #[serde(rename_all = "camelCase")]
 pub struct BaggageMetaData {
     pub type_case: BaggageCaseType,
@@ -46,6 +47,7 @@ pub enum BaggageAttribute {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
 #[serde(rename_all = "camelCase")]
 #[repr(u8)]
 pub enum BaggageCaseType {
@@ -71,6 +73,7 @@ pub enum BaggageCaseType {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
 #[serde(rename_all = "camelCase")]
 #[repr(u8)]
 pub enum ContentsDamageType {
@@ -98,6 +101,7 @@ pub enum ContentsType {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
 #[serde(rename_all = "camelCase")]
 #[repr(u8)]
 pub enum VolumeType {

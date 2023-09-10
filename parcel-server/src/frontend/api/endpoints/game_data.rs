@@ -1,5 +1,12 @@
-use actix_web::{get, web::Data};
-use parcel_game_data::{GameData, QpidArea};
+use std::collections::HashMap;
+
+use actix_web::{
+    get,
+    web::{Data, Query},
+};
+use parcel_common::api_types::frontend::baggages::LocalizedBaggageData;
+use parcel_game_data::{GameData, Language, QpidArea};
+use serde::Deserialize;
 
 use crate::frontend::{
     jwt_session::JwtSession,
@@ -12,4 +19,40 @@ pub async fn list_qpid_areas(
     game_data: Data<GameData>,
 ) -> ApiResult<Vec<QpidArea>> {
     ApiResponse::ok(game_data.qpid_areas.values().map(|q| q.clone()).collect())
+}
+
+#[derive(Deserialize)]
+pub struct LostBaggagesQuery {
+    #[serde(rename = "lang")]
+    language: Language,
+}
+
+#[get("gameData/lostBaggages")]
+pub async fn list_lost_baggages(
+    _session: JwtSession,
+    game_data: Data<GameData>,
+    query: Query<LostBaggagesQuery>,
+) -> ApiResult<HashMap<i32, Vec<LocalizedBaggageData>>> {
+    let qpid_ids = game_data
+        .qpid_areas
+        .values()
+        .map(|q| q.qpid_id)
+        .collect::<Vec<_>>();
+
+    let lost_baggages = game_data
+        .get_lost_baggages(&qpid_ids)
+        .into_iter()
+        // clone baggages
+        .map(|(qpid_id, baggages)| {
+            (
+                qpid_id,
+                baggages
+                    .into_iter()
+                    .map(|b| LocalizedBaggageData::from_baggage_data(b.clone(), query.language))
+                    .collect(),
+            )
+        })
+        .collect();
+
+    ApiResponse::ok(lost_baggages)
 }

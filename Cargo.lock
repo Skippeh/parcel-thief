@@ -3094,6 +3094,7 @@ dependencies = [
  "enum-as-inner",
  "enum-iterator",
  "int-enum",
+ "log",
  "serde",
  "typescript-type-def",
 ]

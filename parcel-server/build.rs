@@ -39,6 +39,7 @@ type Api = (
         QpidArea,
         QpidObject,
         Baggage,
+        LocalizedBaggageData,
     ),
 );
 
