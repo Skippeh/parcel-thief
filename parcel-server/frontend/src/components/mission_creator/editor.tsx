@@ -11,6 +11,7 @@ import {
   getLostBaggages,
   getQpidAreas,
 } from "../../services/game_data_service";
+import BaggageSelector from "./baggage_selector";
 
 interface Props {
   area: Area;
@@ -32,6 +33,8 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
   >(undefined);
   const [startQpidId, setStartQpidArea] = useState<number>(defaultQpidId ?? -1);
   const [destinationQpidId, setDestinationQpidArea] = useState<number>(-1);
+  const [selectedBaggage, setSelectedBaggage] =
+    useState<LocalizedBaggageData | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -71,6 +74,11 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
     })();
   }, []);
 
+  function onDestinationChanged(qpidId: number) {
+    setDestinationQpidArea(qpidId);
+    setSelectedBaggage(null);
+  }
+
   return !loading && qpidAreas != null && lostBaggages != null ? (
     <Form.Root>
       <Form.Field>
@@ -91,7 +99,7 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
         <Form.Label>Destination</Form.Label>
         <Form.Select
           value={destinationQpidId}
-          onChange={(e) => setDestinationQpidArea(e.target.value)}
+          onChange={(e) => onDestinationChanged(e.target.value)}
         >
           <option value={-1}>Select Destination</option>
           {qpidAreas.map((qpidArea) => (
@@ -103,16 +111,12 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
       </Form.Field>
       <Form.Field>
         <Form.Label>Baggage</Form.Label>
-        <Form.Select disabled={destinationQpidId === -1} value={-1}>
-          <option value={-1}>Select Baggage</option>
-          {destinationQpidId !== -1 &&
-            lostBaggages[destinationQpidId].map((baggage) => (
-              <option key={baggage.nameHash} value={baggage.nameHash}>
-                {baggage.name} ({baggage.baggageMetadata.typeVolume},{" "}
-                {baggage.baggageMetadata.weight} kg)
-              </option>
-            ))}
-        </Form.Select>
+        <BaggageSelector
+          baggages={lostBaggages[destinationQpidId] || []}
+          value={selectedBaggage}
+          onChange={setSelectedBaggage}
+          disabled={destinationQpidId === -1}
+        />
       </Form.Field>
     </Form.Root>
   ) : (
