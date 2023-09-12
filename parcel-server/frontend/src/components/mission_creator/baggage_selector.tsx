@@ -70,6 +70,13 @@ const DialogContent = styled(Dialog.Content)`
     max-width: 1000px;
     height: 300px;
   }
+
+  // 'Select' button styling
+  & button {
+    margin-left: 0;
+    margin-bottom: 0;
+    margin-top: 1.5rem;
+  }
 `;
 
 interface Props {
