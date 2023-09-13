@@ -227,3 +227,33 @@ export type LocalizedBaggageData = {
     "name": string;
     "description": string;
 };
+export type BaggageAmount = {
+    "nameHash": U32;
+    "amount": I32;
+};
+export type BaggageWithLocationAndAmount = {
+    "nameHash": U32;
+    "amount": I32;
+    "location": [F32, F32, F32];
+};
+export type EditMissionData = (({
+    "type": "delivery";
+} & {
+    "startQpidId": I32;
+    "endQpidId": I32;
+    "baggageAmounts": (BaggageAmount)[];
+}) | ({
+    "type": "collection";
+} & {
+    "targetQpidId": I32;
+    "baggageAmounts": (BaggageAmount)[];
+}) | ({
+    "type": "recovery";
+} & {
+    "targetQpidId": I32;
+    "baggages": (BaggageWithLocationAndAmount)[];
+}));
+export type EditMissionRequest = {
+    "missionId": (string | null);
+    "data": EditMissionData;
+};

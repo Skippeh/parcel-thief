@@ -32,6 +32,11 @@ export default createGlobalStyle`
       &:hover {
         color: ${Colors.skyDark.sky12};
       }
+
+      &.disabled {
+        color: ${Colors.whiteA.whiteA9};
+        cursor: default;
+      }
     }
   }
 

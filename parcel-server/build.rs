@@ -1,7 +1,7 @@
 use std::{fs::File, path::Path, process::Command};
 
 use parcel_common::api_types::frontend::{
-    accounts::*, auth::*, baggages::*, qpid_objects::*, settings::*,
+    accounts::*, auth::*, baggages::*, missions::EditMissionRequest, qpid_objects::*, settings::*,
 };
 use parcel_game_data::QpidArea;
 use typescript_type_def::{write_definition_file, DefinitionFileOptions};
@@ -40,6 +40,7 @@ type Api = (
         QpidObject,
         Baggage,
         LocalizedBaggageData,
+        EditMissionRequest,
     ),
 );
 
