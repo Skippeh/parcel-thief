@@ -10,7 +10,7 @@ import {
   getLostBaggages,
   getQpidAreas,
 } from "../../../services/game_data_service";
-import { Wizard } from "react-use-wizard";
+import { Wizard } from "../../wizard";
 import Header from "./header";
 import MissionTypeStep from "./mission_type_step";
 import styled from "styled-components";

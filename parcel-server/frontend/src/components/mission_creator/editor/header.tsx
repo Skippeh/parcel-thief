@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { EditMissionData } from "../../../api_types";
 import * as Colors from "@radix-ui/colors";
-import { useWizard } from "react-use-wizard";
+import { useWizard } from "../../wizard";
 import { PropsWithChildren } from "react";
 
 const Wrapper = styled.div`
