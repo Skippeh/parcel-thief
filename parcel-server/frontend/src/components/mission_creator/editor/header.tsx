@@ -36,9 +36,10 @@ const Wrapper = styled.div`
 interface StepProps extends PropsWithChildren {
   step: number;
   disabled?: boolean;
+  title?: string;
 }
 
-const Step = ({ step, disabled, children }: StepProps) => {
+const Step = ({ step, disabled, title, children }: StepProps) => {
   const { goToStep, activeStep } = useWizard();
 
   return (
@@ -46,6 +47,7 @@ const Step = ({ step, disabled, children }: StepProps) => {
       <a
         className={disabled && "disabled"}
         onClick={() => !disabled && goToStep(step)}
+        title={title}
       >
         {children}
       </a>
@@ -65,9 +67,14 @@ const Header = ({ data }: HeaderProps) => {
           <>
             <Step step={1}>Pickup location</Step>
             <Step step={2}>Dropoff location</Step>
-            <Step step={3} disabled={data.endQpidId == -1}>
+            <Step
+              step={3}
+              disabled={data.endQpidId == -1}
+              title={data.endQpidId == -1 && "Choose dropoff location first"}
+            >
               Cargo
             </Step>
+            <Step step={4}>Reward</Step>
           </>
         );
       }

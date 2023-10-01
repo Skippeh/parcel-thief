@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   Area,
+  BaggageAmount,
   ConstructionPointType,
   EditMissionData,
   LocalizedBaggageData,
@@ -87,6 +88,17 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
     })();
   }, []);
 
+  function renderDeliverySteps() {
+    return (
+      <>
+        <div>pickup location</div>
+        <div>dropoff location</div>
+        <div>cargo</div>
+        <div>reward</div>
+      </>
+    );
+  }
+
   return !loading && qpidAreas != null && lostBaggages != null ? (
     <Wrapper>
       <Wizard header={<Header data={data} />} wrapper={<StepsWrapper />}>
@@ -95,6 +107,7 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
           setData={setData}
           defaultQpidId={defaultQpidId}
         />
+        {data?.type === "delivery" && renderDeliverySteps()}
       </Wizard>
     </Wrapper>
   ) : (
