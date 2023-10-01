@@ -3,6 +3,7 @@ import * as React from "react";
 import * as logger from "./logger";
 import { Handler, WizardProps } from "./types";
 import WizardContext from "./wizardContext";
+import flattenChildren from "react-keyed-flatten-children";
 
 const Wizard: React.FC<React.PropsWithChildren<WizardProps>> = React.memo(
   ({ header, footer, children, wrapper: Wrapper, startIndex = 0 }) => {
@@ -12,7 +13,7 @@ const Wizard: React.FC<React.PropsWithChildren<WizardProps>> = React.memo(
     const hasPreviousStep = React.useRef(false);
     const nextStepHandler = React.useRef<Handler>(() => {});
     const [stepCount, setStepCount] = React.useState(
-      React.Children.toArray(children).length
+      flattenChildren(children).length
     );
 
     // Disable exhaustive-deps warning for this effect.
@@ -20,7 +21,7 @@ const Wizard: React.FC<React.PropsWithChildren<WizardProps>> = React.memo(
     // when the children changes, and not also when activeStep changes.
     /* eslint-disable react-hooks/exhaustive-deps */
     React.useEffect(() => {
-      const newCount = React.Children.toArray(children).length;
+      const newCount = flattenChildren(children).length;
       setStepCount(newCount);
 
       if (activeStep >= newCount) {
@@ -103,7 +104,7 @@ const Wizard: React.FC<React.PropsWithChildren<WizardProps>> = React.memo(
     );
 
     const activeStepContent = React.useMemo(() => {
-      const reactChildren = React.Children.toArray(children);
+      const reactChildren = flattenChildren(children);
 
       // No steps passed
       if (reactChildren.length === 0) {
