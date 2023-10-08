@@ -22,8 +22,6 @@ const Wizard: React.FC<React.PropsWithChildren<WizardProps>> = React.memo(
       const newCount = flattenChildren(children).length;
       stepCount.current = newCount;
 
-      console.log("new step count", newCount);
-
       if (activeStep >= newCount) {
         setActiveStep(newCount - 1);
 
