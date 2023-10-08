@@ -15,6 +15,7 @@ import { Wizard } from "../../wizard";
 import Header from "./header";
 import MissionTypeStep from "./mission_type_step";
 import styled from "styled-components";
+import LocationSelector from "../location_selector";
 
 const Wrapper = styled.div`
   display: grid;
@@ -40,9 +41,9 @@ interface Props {
 
 const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
   const [loading, setLoading] = useState(false);
-  const [qpidAreas, setQpidAreas] = useState<QpidArea[] | null | undefined>(
-    undefined
-  );
+  const [qpidAreas, setQpidAreas] = useState<
+    Record<number, QpidArea> | null | undefined
+  >(undefined);
   const [lostBaggages, setLostBaggages] = useState<
     Record<number, LocalizedBaggageData[]> | null | undefined
   >(undefined);
@@ -73,6 +74,10 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
                 lostBaggages.data[a.qpidId] != null
             )
             .sort((a, b) => a.names["en-us"].localeCompare(b.names["en-us"]))
+            .reduce((acc, qpidArea) => {
+              acc[qpidArea.qpidId] = qpidArea;
+              return acc;
+            }, {})
         );
       } else {
         setQpidAreas(null);
@@ -89,10 +94,31 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
   }, []);
 
   function renderDeliverySteps() {
+    if (data.type !== "delivery") {
+      return null;
+    }
+
     return (
       <>
-        <div>pickup location</div>
-        <div>dropoff location</div>
+        <div>
+          <LocationSelector
+            locations={Object.values(qpidAreas)}
+            value={qpidAreas[data.startQpidId]}
+            onChange={(qpidArea) =>
+              setData({ ...data, startQpidId: qpidArea.qpidId })
+            }
+          />
+        </div>
+        <div>
+          <LocationSelector
+            locations={Object.values(qpidAreas)}
+            referenceLocation={qpidAreas[data.startQpidId]}
+            value={qpidAreas[data.endQpidId]}
+            onChange={(qpidArea) =>
+              setData({ ...data, endQpidId: qpidArea.qpidId })
+            }
+          />
+        </div>
         <div>cargo</div>
         <div>reward</div>
       </>
