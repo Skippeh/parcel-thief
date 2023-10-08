@@ -12,9 +12,7 @@ const Wizard: React.FC<React.PropsWithChildren<WizardProps>> = React.memo(
     const hasNextStep = React.useRef(true);
     const hasPreviousStep = React.useRef(false);
     const nextStepHandler = React.useRef<Handler>(() => {});
-    const [stepCount, setStepCount] = React.useState(
-      flattenChildren(children).length
-    );
+    const stepCount = React.useRef(flattenChildren(children).length);
 
     // Disable exhaustive-deps warning for this effect.
     // The reason is because we only want this effect to run
@@ -22,7 +20,9 @@ const Wizard: React.FC<React.PropsWithChildren<WizardProps>> = React.memo(
     /* eslint-disable react-hooks/exhaustive-deps */
     React.useEffect(() => {
       const newCount = flattenChildren(children).length;
-      setStepCount(newCount);
+      stepCount.current = newCount;
+
+      console.log("new step count", newCount);
 
       if (activeStep >= newCount) {
         setActiveStep(newCount - 1);
@@ -35,7 +35,7 @@ const Wizard: React.FC<React.PropsWithChildren<WizardProps>> = React.memo(
     }, [children]);
     /* eslint-enable react-hooks/exhaustive-deps */
 
-    hasNextStep.current = activeStep < stepCount - 1;
+    hasNextStep.current = activeStep < stepCount.current - 1;
     hasPreviousStep.current = activeStep > 0;
 
     const goToNextStep = React.useRef(() => {
@@ -52,7 +52,7 @@ const Wizard: React.FC<React.PropsWithChildren<WizardProps>> = React.memo(
     });
 
     const goToStep = React.useRef((stepIndex: number) => {
-      if (stepIndex >= 0 && stepIndex < stepCount) {
+      if (stepIndex >= 0 && stepIndex < stepCount.current) {
         nextStepHandler.current = null;
         setActiveStep(stepIndex);
       } else {
@@ -95,7 +95,7 @@ const Wizard: React.FC<React.PropsWithChildren<WizardProps>> = React.memo(
         handleStep: handleStep.current,
         isLoading,
         activeStep,
-        stepCount,
+        stepCount: stepCount.current,
         isFirstStep: !hasPreviousStep.current,
         isLastStep: !hasNextStep.current,
         goToStep: goToStep.current,
