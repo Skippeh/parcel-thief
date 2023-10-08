@@ -70,7 +70,9 @@ const Header = ({ data }: HeaderProps) => {
             <Step
               step={3}
               disabled={data.endQpidId == -1}
-              title={data.endQpidId == -1 && "Choose dropoff location first"}
+              title={
+                (data.endQpidId == -1 && "Choose dropoff location first") || ""
+              }
             >
               Cargo
             </Step>
