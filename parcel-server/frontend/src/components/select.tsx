@@ -46,6 +46,10 @@ const styles: StylesConfig = {
     ...base,
     color: Colors.grayDark.gray12,
   }),
+  input: (base) => ({
+    ...base,
+    color: Colors.grayDark.gray12,
+  }),
 };
 
 export default <
