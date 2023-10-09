@@ -70,6 +70,12 @@ const LocationSelector = ({
 
   function internalOnChange(ev: React.ChangeEvent<HTMLSelectElement>) {
     const qpidId = parseInt(ev.target.value);
+
+    if (qpidId == 0) {
+      onChange(null);
+      return;
+    }
+
     const qpidArea = locations.find((a) => a.qpidId === qpidId);
 
     if (qpidArea == null) {

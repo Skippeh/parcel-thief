@@ -105,7 +105,7 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
             locations={Object.values(qpidAreas)}
             value={qpidAreas[data.startQpidId]}
             onChange={(qpidArea) =>
-              setData({ ...data, startQpidId: qpidArea.qpidId })
+              setData({ ...data, startQpidId: qpidArea?.qpidId ?? 0 })
             }
           />
         </div>
@@ -115,7 +115,7 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
             referenceLocation={qpidAreas[data.startQpidId]}
             value={qpidAreas[data.endQpidId]}
             onChange={(qpidArea) =>
-              setData({ ...data, endQpidId: qpidArea.qpidId })
+              setData({ ...data, endQpidId: qpidArea?.qpidId ?? 0 })
             }
           />
         </div>
