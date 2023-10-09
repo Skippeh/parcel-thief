@@ -16,6 +16,7 @@ import Header from "./header";
 import MissionTypeStep from "./mission_type_step";
 import styled from "styled-components";
 import LocationSelector from "../location_selector";
+import * as Form from "../../form";
 
 const Wrapper = styled.div`
   display: grid;
@@ -101,23 +102,33 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
     return (
       <>
         <div>
-          <LocationSelector
-            locations={Object.values(qpidAreas)}
-            value={qpidAreas[data.startQpidId]}
-            onChange={(qpidArea) =>
-              setData({ ...data, startQpidId: qpidArea?.qpidId ?? 0 })
-            }
-          />
+          <Form.Root>
+            <Form.Field>
+              <Form.Label>Pickup location</Form.Label>
+              <LocationSelector
+                locations={Object.values(qpidAreas)}
+                value={qpidAreas[data.startQpidId]}
+                onChange={(qpidArea) =>
+                  setData({ ...data, startQpidId: qpidArea?.qpidId ?? 0 })
+                }
+              />
+            </Form.Field>
+          </Form.Root>
         </div>
         <div>
-          <LocationSelector
-            locations={Object.values(qpidAreas)}
-            referenceLocation={qpidAreas[data.startQpidId]}
-            value={qpidAreas[data.endQpidId]}
-            onChange={(qpidArea) =>
-              setData({ ...data, endQpidId: qpidArea?.qpidId ?? 0 })
-            }
-          />
+          <Form.Root>
+            <Form.Field>
+              <Form.Label>Dropoff location</Form.Label>
+              <LocationSelector
+                locations={Object.values(qpidAreas)}
+                referenceLocation={qpidAreas[data.startQpidId]}
+                value={qpidAreas[data.endQpidId]}
+                onChange={(qpidArea) =>
+                  setData({ ...data, endQpidId: qpidArea?.qpidId ?? 0 })
+                }
+              />
+            </Form.Field>
+          </Form.Root>
         </div>
         <div>cargo</div>
         <div>reward</div>
