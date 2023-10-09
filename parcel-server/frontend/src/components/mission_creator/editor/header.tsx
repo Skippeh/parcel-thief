@@ -45,7 +45,7 @@ const Step = ({ step, disabled, title, children }: StepProps) => {
   return (
     <li className={activeStep === step ? "active" : ""}>
       <a
-        className={disabled && "disabled"}
+        className={disabled ? "disabled" : ""}
         onClick={() => !disabled && goToStep(step)}
         title={title}
       >
