@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Select from "../select";
 import { QpidArea } from "../../api_types";
 import { distanceBetween } from "../../utils/table_value_formatters/vector_math";
 
@@ -68,34 +69,28 @@ const LocationSelector = ({
     }
   }
 
-  function internalOnChange(ev: React.ChangeEvent<HTMLSelectElement>) {
-    const qpidId = parseInt(ev.target.value);
-
-    if (qpidId == 0) {
+  function internalOnChange(value: QpidArea | null) {
+    if (value == null) {
       onChange(null);
       return;
     }
 
-    const qpidArea = locations.find((a) => a.qpidId === qpidId);
-
-    if (qpidArea == null) {
-      throw new Error("Unexpected qpid id");
-    }
-
     if (onChange != null) {
-      onChange(qpidArea);
+      onChange(value);
     }
   }
 
   return (
-    <select onChange={internalOnChange} value={value?.qpidId.toString() ?? "0"}>
-      <option value="0">Select a location</option>
-      {sortedLocations.map((location) => (
-        <option key={location.qpidId} value={location.qpidId.toString()}>
-          {getLocationName(location)}
-        </option>
-      ))}
-    </select>
+    <Select
+      onChange={internalOnChange}
+      value={value}
+      isClearable
+      isSearchable
+      placeholder="Select a location"
+      getOptionLabel={(option) => getLocationName(option)}
+      isOptionSelected={(value2) => value?.qpidId === value2?.qpidId}
+      options={sortedLocations}
+    />
   );
 };
 
