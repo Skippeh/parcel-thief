@@ -120,6 +120,7 @@ const QpidIcons = ({ areas, objects, baggages, area }: Props) => {
               key={area.qpidId}
               position={position}
               zIndexRange={getImportanceZIndexRange("high")}
+              style={{ pointerEvents: "none" }}
             >
               <Icon
                 iconSrc={getQpidAreaIcon(area)}
@@ -172,6 +173,7 @@ const QpidIcons = ({ areas, objects, baggages, area }: Props) => {
                   key={object.id}
                   position={position}
                   zIndexRange={getImportanceZIndexRange(importance)}
+                  style={{ pointerEvents: "none" }}
                 >
                   <div
                     title={
@@ -201,6 +203,7 @@ const QpidIcons = ({ areas, objects, baggages, area }: Props) => {
                     key={baggage.id}
                     position={position}
                     zIndexRange={getImportanceZIndexRange("low")}
+                    style={{ pointerEvents: "none" }}
                   >
                     <div title={baggage.name + ` (${baggage.creator.name})`}>
                       <Icon
