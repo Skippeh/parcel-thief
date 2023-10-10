@@ -15,8 +15,8 @@ import { Wizard } from "../../wizard";
 import Header from "./header";
 import MissionTypeStep from "./mission_type_step";
 import styled from "styled-components";
-import LocationSelector from "../location_selector";
 import * as Form from "../../form";
+import { renderDeliverySteps } from "./delivery";
 
 const Wrapper = styled.div`
   display: grid;
@@ -94,59 +94,20 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
     })();
   }, []);
 
-  function renderDeliverySteps() {
-    if (data.type !== "delivery") {
-      return null;
-    }
-
-    return (
-      <>
-        <div>
-          <Form.Root>
-            <Form.Field>
-              <Form.Label>Pickup location</Form.Label>
-              <LocationSelector
-                locations={Object.values(qpidAreas)}
-                value={qpidAreas[data.startQpidId]}
-                onChange={(qpidArea) =>
-                  setData({ ...data, startQpidId: qpidArea?.qpidId ?? 0 })
-                }
-              />
-            </Form.Field>
-          </Form.Root>
-        </div>
-        <div>
-          <Form.Root>
-            <Form.Field>
-              <Form.Label>Dropoff location</Form.Label>
-              <LocationSelector
-                locations={Object.values(qpidAreas)}
-                referenceLocation={qpidAreas[data.startQpidId]}
-                value={qpidAreas[data.endQpidId]}
-                onChange={(qpidArea) =>
-                  setData({ ...data, endQpidId: qpidArea?.qpidId ?? 0 })
-                }
-              />
-            </Form.Field>
-          </Form.Root>
-        </div>
-        <div>cargo</div>
-        <div>reward</div>
-      </>
-    );
-  }
-
   return !loading && qpidAreas != null && lostBaggages != null ? (
-    <Wrapper>
-      <Wizard header={<Header data={data} />} wrapper={<StepsWrapper />}>
-        <MissionTypeStep
-          data={data}
-          setData={setData}
-          defaultQpidId={defaultQpidId}
-        />
-        {data?.type === "delivery" && renderDeliverySteps()}
-      </Wizard>
-    </Wrapper>
+    <Form.Root>
+      <Wrapper>
+        <Wizard header={<Header data={data} />} wrapper={<StepsWrapper />}>
+          <MissionTypeStep
+            data={data}
+            setData={setData}
+            defaultQpidId={defaultQpidId}
+          />
+          {data?.type === "delivery" &&
+            renderDeliverySteps(data, setData, qpidAreas)}
+        </Wizard>
+      </Wrapper>
+    </Form.Root>
   ) : (
     "Loading data..."
   );

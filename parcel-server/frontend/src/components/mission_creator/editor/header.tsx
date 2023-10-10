@@ -3,6 +3,7 @@ import { EditMissionData } from "../../../api_types";
 import * as Colors from "@radix-ui/colors";
 import { useWizard } from "../../wizard";
 import { PropsWithChildren } from "react";
+import { renderDeliveryHeaderSteps } from "./delivery";
 
 const Wrapper = styled.div`
   width: 250px;
@@ -39,7 +40,7 @@ interface StepProps extends PropsWithChildren {
   title?: string;
 }
 
-const Step = ({ step, disabled, title, children }: StepProps) => {
+export const Step = ({ step, disabled, title, children }: StepProps) => {
   const { goToStep, activeStep } = useWizard();
 
   return (
@@ -63,22 +64,7 @@ const Header = ({ data }: HeaderProps) => {
   function renderSteps() {
     switch (data?.type) {
       case "delivery": {
-        return (
-          <>
-            <Step step={1}>Pickup location</Step>
-            <Step step={2}>Dropoff location</Step>
-            <Step
-              step={3}
-              disabled={data.endQpidId <= 0}
-              title={
-                (data.endQpidId <= 0 && "Choose dropoff location first") || ""
-              }
-            >
-              Cargo
-            </Step>
-            <Step step={4}>Reward</Step>
-          </>
-        );
+        return renderDeliveryHeaderSteps(data);
       }
       case "collection": {
         return <></>;
