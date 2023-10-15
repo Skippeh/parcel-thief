@@ -59,6 +59,7 @@ const CargoAmountSelector = ({ values, onChange, baggages }: Props) => {
   const columnDefs: ColDef[] = [
     {
       field: "cargo.name",
+      headerName: "Name",
     },
     {
       field: "amount",
