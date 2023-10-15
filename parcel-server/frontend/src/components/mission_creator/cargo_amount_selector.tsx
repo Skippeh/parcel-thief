@@ -50,6 +50,12 @@ const CargoAmountSelector = ({ values, onChange, baggages }: Props) => {
     ]);
   }
 
+  function onClickClear() {
+    if (confirm("Are you sure you want to remove all cargo?")) {
+      onChange([]);
+    }
+  }
+
   const columnDefs: ColDef[] = [
     {
       field: "cargo.name",
@@ -142,7 +148,12 @@ const CargoAmountSelector = ({ values, onChange, baggages }: Props) => {
           text="Add"
           onChange={onAddBaggage}
         />
-        <button type="button" className="warning">
+        <button
+          type="button"
+          className="warning"
+          onClick={onClickClear}
+          disabled={values.length === 0}
+        >
           Clear
         </button>
       </div>
