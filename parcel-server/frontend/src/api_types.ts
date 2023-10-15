@@ -242,16 +242,19 @@ export type EditMissionData = (({
     "startQpidId": I32;
     "endQpidId": I32;
     "baggageAmounts": (BaggageAmount)[];
+    "rewardAmounts": (BaggageAmount)[];
 }) | ({
     "type": "collection";
 } & {
     "targetQpidId": I32;
     "baggageAmounts": (BaggageAmount)[];
+    "rewardAmounts": (BaggageAmount)[];
 }) | ({
     "type": "recovery";
 } & {
     "targetQpidId": I32;
     "baggages": (BaggageWithLocationAndAmount)[];
+    "rewardAmounts": (BaggageAmount)[];
 }));
 export type EditMissionRequest = {
     "missionId": (string | null);

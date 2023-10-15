@@ -12,16 +12,19 @@ pub enum EditMissionData {
         start_qpid_id: i32,
         end_qpid_id: i32,
         baggage_amounts: Vec<BaggageAmount>,
+        reward_amounts: Vec<BaggageAmount>,
     },
     #[serde(rename_all = "camelCase")]
     Collection {
         target_qpid_id: i32,
         baggage_amounts: Vec<BaggageAmount>,
+        reward_amounts: Vec<BaggageAmount>,
     },
     #[serde(rename_all = "camelCase")]
     Recovery {
         target_qpid_id: i32,
         baggages: Vec<BaggageWithLocationAndAmount>,
+        reward_amounts: Vec<BaggageAmount>,
     },
 }
 

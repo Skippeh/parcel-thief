@@ -23,18 +23,21 @@ const MissionTypeStep = ({ data, setData, defaultQpidId }: Props) => {
           startQpidId: defaultQpidId ?? -1,
           endQpidId: -1,
           baggageAmounts: [],
+          rewardAmounts: [],
         });
       } else if (newValue === "collection") {
         setData({
           type: newValue,
           targetQpidId: defaultQpidId ?? -1,
           baggageAmounts: [],
+          rewardAmounts: [],
         });
       } else if (newValue === "recovery") {
         setData({
           type: newValue,
           targetQpidId: defaultQpidId ?? -1,
           baggages: [],
+          rewardAmounts: [],
         });
       } else if (newValue === "") {
         setData(null);
