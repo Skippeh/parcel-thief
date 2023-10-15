@@ -65,6 +65,17 @@ export function renderDeliverySteps(
     });
   }
 
+  function onRewardChanged(values: SelectedCargo[]) {
+    const baggageAmounts = values.map(({ cargo, amount }) => ({
+      nameHash: cargo.nameHash,
+      amount,
+    }));
+
+    setData({
+      ...data,
+    });
+  }
+
   return (
     <>
       <div>
@@ -104,7 +115,16 @@ export function renderDeliverySteps(
           </Form.Field>
         )}
       </div>
-      <div>reward</div>
+      <div>
+        <Form.Field>
+          <Form.Label>Reward</Form.Label>
+          <CargoAmountSelector
+            values={selectedCargo}
+            onChange={onRewardChanged}
+            baggages={[]}
+          />
+        </Form.Field>
+      </div>
     </>
   );
 }
