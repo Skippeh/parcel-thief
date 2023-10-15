@@ -76,7 +76,7 @@ export default createGlobalStyle`
     text-align: center;
     border-radius: 2px;
     user-select: none;
-    transition: background-color 0.1s ease-out;
+    transition: background-color 0.1s ease-out, filter 0.1s ease-out;
 
     &:hover, &:focus {
       color: inherit;
@@ -123,6 +123,27 @@ export default createGlobalStyle`
 
         &:hover, &:focus-visible {
           background: ${Colors.grayDark.gray7};
+        }
+      }
+    }
+
+    &.warning {
+      background: ${Colors.yellowDark.yellow8};
+
+      &:hover, &:focus-visible {
+        filter: brightness(1.1);
+      }
+
+      &:active {
+        filter: brightness(1.0);
+      }
+
+      &:disabled {
+        background: ${Colors.yellowDark.yellow7};
+
+        &:hover, &:focus-visible {
+          background: ${Colors.yellowDark.yellow7};
+          filter: brightness(1.0);
         }
       }
     }
