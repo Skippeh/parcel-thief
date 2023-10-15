@@ -1,6 +1,14 @@
-import { EditMissionData, QpidArea } from "../../../../api_types";
+import {
+  EditMissionData,
+  LocalizedBaggageData,
+  QpidArea,
+} from "../../../../api_types";
 import * as Form from "../../../form";
+import BaggageSelector from "../../baggage_selector";
 import LocationSelector from "../../location_selector";
+import CargoAmountSelector, {
+  SelectedCargo,
+} from "../../cargo_amount_selector";
 import { Step } from "../header";
 
 export function renderDeliveryHeaderSteps(
@@ -25,9 +33,37 @@ export function renderDeliveryHeaderSteps(
 export function renderDeliverySteps(
   data: EditMissionData & { type: "delivery" },
   setData: (data: EditMissionData | null) => void,
-  qpidAreas: Record<number, QpidArea>
+  qpidAreas: Record<number, QpidArea>,
+  lostBaggages: Record<number, LocalizedBaggageData[]>
 ) {
   const locations = Object.values(qpidAreas);
+  const flatLostBaggages = Object.values(lostBaggages).flat();
+  const selectedCargo: SelectedCargo[] = data.baggageAmounts.map(
+    ({ nameHash, amount }) => {
+      const baggage = flatLostBaggages.find((b) => b.nameHash === nameHash);
+
+      if (baggage == null) {
+        throw new Error(`Baggage not found: ${nameHash}`);
+      }
+
+      return {
+        cargo: baggage,
+        amount,
+      };
+    }
+  );
+
+  function onCargoChanged(values: SelectedCargo[]) {
+    const baggageAmounts = values.map(({ cargo, amount }) => ({
+      nameHash: cargo.nameHash,
+      amount,
+    }));
+
+    setData({
+      ...data,
+      baggageAmounts,
+    });
+  }
 
   return (
     <>
@@ -56,7 +92,18 @@ export function renderDeliverySteps(
           />
         </Form.Field>
       </div>
-      <div>cargo</div>
+      <div>
+        {data.endQpidId > 0 && lostBaggages[data.endQpidId] && (
+          <Form.Field>
+            <Form.Label>Cargo</Form.Label>
+            <CargoAmountSelector
+              values={selectedCargo}
+              onChange={onCargoChanged}
+              baggages={lostBaggages[data.endQpidId] ?? []}
+            />
+          </Form.Field>
+        )}
+      </div>
       <div>reward</div>
     </>
   );

@@ -104,7 +104,7 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
             defaultQpidId={defaultQpidId}
           />
           {data?.type === "delivery" &&
-            renderDeliverySteps(data, setData, qpidAreas)}
+            renderDeliverySteps(data, setData, qpidAreas, lostBaggages)}
         </Wizard>
       </Wrapper>
     </Form.Root>

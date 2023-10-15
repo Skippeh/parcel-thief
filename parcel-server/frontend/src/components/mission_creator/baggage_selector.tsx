@@ -14,46 +14,11 @@ import {
 import { useState } from "react";
 
 const DialogTrigger = styled(Dialog.Trigger)`
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0;
-  margin: 0.25rem 0;
-  background: ${Colors.grayDark.gray4};
-  border: 1px solid ${Colors.whiteA.whiteA11};
-  border-radius: 2px;
-
-  &:hover,
-  &:focus-visible {
-    background: ${Colors.grayDark.gray3};
-    border: 1px solid ${Colors.whiteA.whiteA10};
-  }
-
-  &:disabled {
-    &,
-    &:hover,
-    &:focus {
-      background: ${Colors.grayDark.gray5};
-      border: 1px solid ${Colors.whiteA.whiteA9};
-    }
-  }
-
-  // clear button styling
-  & button {
-    margin: 0;
-    border-radius: 0;
-    background: ${Colors.whiteA.whiteA11};
-    color: black;
-
-    &:hover,
-    &:focus-visible {
-      background: ${Colors.whiteA.whiteA10};
-      color: black;
-    }
-  }
 
   & .selectedValue {
-    padding: 0.6rem 0.9rem;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
@@ -85,6 +50,7 @@ interface Props {
   onChange?: (value: LocalizedBaggageData | null) => void;
   onValueCleared?: () => void;
   disabled?: boolean;
+  text?: string;
 }
 
 const BaggageSelector = ({
@@ -93,14 +59,15 @@ const BaggageSelector = ({
   disabled,
   onChange,
   onValueCleared,
+  text,
 }: Props) => {
   const [selectedRows, setSelectedRows] = useState<LocalizedBaggageData[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
 
   const defaultColDef: ColDef = {
-    sortable: true,
     filter: true,
     resizable: true,
+    sortable: true,
     flex: 1,
   };
   const columnDefs: ColDef[] = [
@@ -141,12 +108,12 @@ const BaggageSelector = ({
       return;
     }
 
-    onChange(selectedRows[0]);
+    onChange && onChange(selectedRows[0]);
     setModalOpen(false);
   }
 
   function onRowDoubleClicked(ev: RowDoubleClickedEvent<LocalizedBaggageData>) {
-    onChange(ev.data);
+    onChange && onChange(ev.data);
     setModalOpen(false);
   }
 
@@ -156,14 +123,14 @@ const BaggageSelector = ({
         <div className="selectedValue">
           {value != null
             ? `${value.name} (${value.baggageMetadata.typeVolume}, ${value.baggageMetadata.weight} kg)`
-            : "Select Baggage"}
+            : text ?? "Select Baggage"}
         </div>
         {value && !disabled && (
           <button
             type="button"
             onClick={(ev) => {
               ev.stopPropagation(); // prevent parent button from triggering
-              onChange(null);
+              onChange && onChange(null);
 
               if (onValueCleared) {
                 onValueCleared();
