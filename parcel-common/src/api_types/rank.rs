@@ -23,3 +23,9 @@ pub struct RankingRecord {
     #[serde(rename = "sid")]
     pub season_id: i32,
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct RankingRewards {
+    #[serde(rename = "ms")]
+    pub medals: [i32; 11],
+}

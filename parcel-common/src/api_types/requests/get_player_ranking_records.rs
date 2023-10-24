@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::api_types::rank::RankingRecord;
+use crate::api_types::rank::{RankingRecord, RankingRewards};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GetPlayerRankingRecordsRequest {
@@ -13,7 +13,7 @@ pub struct GetPlayerRankingRecordsResponse {
     #[serde(rename = "rs")]
     pub records: Vec<RankingRecord>,
     #[serde(rename = "rw")]
-    pub rewards: [i32; 11],
+    pub rewards: RankingRewards,
     #[serde(rename = "ut")]
     pub update_time: i64,
 }
