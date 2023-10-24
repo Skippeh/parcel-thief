@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GetHighwayResourcesRequest {
     #[serde(rename = "cds")]
-    pub constructions: Vec<ConstructionRequest>,
+    pub constructions: Option<Vec<ConstructionRequest>>,
     #[serde(rename = "rids")]
     pub resource_ids: Vec<i16>,
 }
