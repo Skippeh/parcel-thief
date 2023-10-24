@@ -1,10 +1,10 @@
-use std::collections::HashMap;
-
 use actix_web::{
     get,
     web::{Data, Query},
 };
-use parcel_common::api_types::frontend::baggages::LocalizedBaggageData;
+use parcel_common::api_types::frontend::baggages::{
+    ListLostBaggagesResponse, LocalizedBaggageData,
+};
 use parcel_game_data::{GameData, Language, QpidArea};
 use serde::Deserialize;
 
@@ -32,14 +32,14 @@ pub async fn list_lost_baggages(
     _session: JwtSession,
     game_data: Data<GameData>,
     query: Query<LostBaggagesQuery>,
-) -> ApiResult<HashMap<i32, Vec<LocalizedBaggageData>>> {
+) -> ApiResult<ListLostBaggagesResponse> {
     let qpid_ids = game_data
         .qpid_areas
         .values()
         .map(|q| q.qpid_id)
         .collect::<Vec<_>>();
 
-    let lost_baggages = game_data
+    let qpid_baggages = game_data
         .get_lost_baggages(&qpid_ids)
         .into_iter()
         // clone baggages
@@ -54,5 +54,8 @@ pub async fn list_lost_baggages(
         })
         .collect();
 
-    ApiResponse::ok(lost_baggages)
+    ApiResponse::ok(ListLostBaggagesResponse {
+        qpid_baggages,
+        generic_baggages: vec![],
+    })
 }

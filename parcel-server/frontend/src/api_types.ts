@@ -260,3 +260,7 @@ export type EditMissionRequest = {
     "missionId": (string | null);
     "data": EditMissionData;
 };
+export type ListLostBaggagesResponse = {
+    "qpidBaggages": Record<I32, (LocalizedBaggageData)[]>;
+    "genericBaggages": (LocalizedBaggageData)[];
+};

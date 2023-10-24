@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use parcel_game_data::{BaggageMetaData, ContentsType, Language, ObjectMetaData};
 use serde::Serialize;
 
@@ -77,6 +79,14 @@ pub struct ListLostCargoResponse {
 #[serde(rename_all = "camelCase")]
 pub struct ListWastedCargoResponse {
     pub baggages: Vec<WastedCargoListItem>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[cfg_attr(feature = "ts", derive(TypeDef))]
+#[serde(rename_all = "camelCase")]
+pub struct ListLostBaggagesResponse {
+    pub qpid_baggages: HashMap<i32, Vec<LocalizedBaggageData>>,
+    pub generic_baggages: Vec<LocalizedBaggageData>,
 }
 
 #[derive(Debug, Clone, Serialize)]

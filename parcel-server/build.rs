@@ -41,6 +41,7 @@ type Api = (
         Baggage,
         LocalizedBaggageData,
         EditMissionRequest,
+        ListLostBaggagesResponse,
     ),
 );
 

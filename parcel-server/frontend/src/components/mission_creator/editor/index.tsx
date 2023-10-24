@@ -72,7 +72,7 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
                 allowedConstructionTypes.includes(
                   a.metadata.constructionType
                 ) &&
-                lostBaggages.data[a.qpidId] != null
+                lostBaggages.data.qpidBaggages[a.qpidId] != null
             )
             .sort((a, b) => a.names["en-us"].localeCompare(b.names["en-us"]))
             .reduce((acc, qpidArea) => {
@@ -86,7 +86,7 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
       }
 
       if (lostBaggages.data != null) {
-        setLostBaggages(lostBaggages.data);
+        setLostBaggages(lostBaggages.data.qpidBaggages);
       } else {
         setLostBaggages(null);
         alert(`Failed to load lost baggages: ${lostBaggages.error}`);

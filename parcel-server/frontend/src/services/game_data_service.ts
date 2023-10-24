@@ -2,6 +2,7 @@ import { ApiResponse, callApi } from ".";
 import {
   Baggage,
   Language,
+  ListLostBaggagesResponse,
   LocalizedBaggageData,
   QpidArea,
   QpidObject,
@@ -18,7 +19,7 @@ export function getQpidAreas(): Promise<ApiResponse<QpidArea[]>> {
 
 export function getLostBaggages(
   language: Language
-): Promise<ApiResponse<Record<number, LocalizedBaggageData[]>>> {
+): Promise<ApiResponse<ListLostBaggagesResponse>> {
   return callApi(
     `gameData/lostBaggages?lang=${encodeURIComponent(language)}`,
     "GET"
