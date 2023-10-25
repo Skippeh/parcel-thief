@@ -86,7 +86,7 @@ pub struct ListWastedCargoResponse {
 #[serde(rename_all = "camelCase")]
 pub struct ListLostBaggagesResponse {
     pub qpid_baggages: HashMap<i32, Vec<LocalizedBaggageData>>,
-    pub generic_baggages: Vec<LocalizedBaggageData>,
+    pub raw_material_baggages: Vec<LocalizedBaggageData>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -105,11 +105,18 @@ impl LocalizedBaggageData {
         baggage: parcel_game_data::Baggage,
         language: Language,
     ) -> LocalizedBaggageData {
+        let name = baggage
+            .names
+            .get(&language)
+            .cloned()
+            .unwrap_or_default()
+            .replace("{0}", &baggage.baggage_metadata.amount.to_string());
+
         LocalizedBaggageData {
             name_hash: baggage.name_hash,
             object_metadata: baggage.object_metadata,
             baggage_metadata: baggage.baggage_metadata,
-            name: baggage.names.get(&language).cloned().unwrap_or_default(),
+            name,
             description: baggage
                 .descriptions
                 .get(&language)

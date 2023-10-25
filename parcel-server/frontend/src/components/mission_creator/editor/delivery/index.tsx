@@ -34,13 +34,29 @@ export function renderDeliverySteps(
   data: EditMissionData & { type: "delivery" },
   setData: (data: EditMissionData | null) => void,
   qpidAreas: Record<number, QpidArea>,
-  lostBaggages: Record<number, LocalizedBaggageData[]>
+  lostBaggages: Record<number, LocalizedBaggageData[]>,
+  rewardBaggages: LocalizedBaggageData[]
 ) {
   const locations = Object.values(qpidAreas);
   const flatLostBaggages = Object.values(lostBaggages).flat();
   const selectedCargo: SelectedCargo[] = data.baggageAmounts.map(
     ({ nameHash, amount }) => {
       const baggage = flatLostBaggages.find((b) => b.nameHash === nameHash);
+
+      if (baggage == null) {
+        throw new Error(`Baggage not found: ${nameHash}`);
+      }
+
+      return {
+        cargo: baggage,
+        amount,
+      };
+    }
+  );
+
+  const selectedRewards: SelectedCargo[] = data.rewardAmounts.map(
+    ({ nameHash, amount }) => {
+      const baggage = rewardBaggages.find((b) => b.nameHash === nameHash);
 
       if (baggage == null) {
         throw new Error(`Baggage not found: ${nameHash}`);
@@ -73,6 +89,7 @@ export function renderDeliverySteps(
 
     setData({
       ...data,
+      rewardAmounts: baggageAmounts,
     });
   }
 
@@ -119,9 +136,9 @@ export function renderDeliverySteps(
         <Form.Field>
           <Form.Label>Reward</Form.Label>
           <CargoAmountSelector
-            values={selectedCargo}
+            values={selectedRewards}
             onChange={onRewardChanged}
-            baggages={[]}
+            baggages={rewardBaggages}
           />
         </Form.Field>
       </div>

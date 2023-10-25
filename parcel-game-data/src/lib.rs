@@ -63,4 +63,34 @@ impl GameData {
 
         lost_baggages
     }
+
+    pub fn get_raw_materials_lost_baggages(&self) -> Vec<&Baggage> {
+        let mut lost_baggages = Vec::new();
+
+        for baggage in self.baggages.values() {
+            if baggage.baggage_metadata.type_contents != ContentsType::RawMaterial {
+                continue;
+            }
+
+            // Exclude any mission specific baggages that aren't usable by the player
+            if baggage.baggage_metadata.mission_id != 0 {
+                continue;
+            }
+
+            if let Some(name) = baggage.names.get(&Language::English) {
+                // It seem that all the usable raw materials have a {0} in the name which is replaced by the amount
+                if !name.contains("{0}") {
+                    continue;
+                }
+
+                // todo: At the moment there's almost always two of every material added, but they are still different. Will have to check if they're both usable or not
+            } else {
+                continue;
+            }
+
+            lost_baggages.push(baggage);
+        }
+
+        lost_baggages
+    }
 }

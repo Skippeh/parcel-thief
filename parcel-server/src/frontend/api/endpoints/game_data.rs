@@ -54,8 +54,14 @@ pub async fn list_lost_baggages(
         })
         .collect();
 
+    let raw_material_baggages = game_data
+        .get_raw_materials_lost_baggages()
+        .into_iter()
+        .map(|b| LocalizedBaggageData::from_baggage_data(b.clone(), query.language))
+        .collect();
+
     ApiResponse::ok(ListLostBaggagesResponse {
         qpid_baggages,
-        generic_baggages: vec![],
+        raw_material_baggages,
     })
 }

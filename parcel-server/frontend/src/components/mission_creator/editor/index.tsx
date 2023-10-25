@@ -48,6 +48,9 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
   const [lostBaggages, setLostBaggages] = useState<
     Record<number, LocalizedBaggageData[]> | null | undefined
   >(undefined);
+  const [rewardBaggages, setRewardBaggages] = useState<
+    LocalizedBaggageData[] | null | undefined
+  >(undefined);
   const [data, setData] = useState<EditMissionData | null>(null);
 
   useEffect(() => {
@@ -80,6 +83,8 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
               return acc;
             }, {})
         );
+
+        setRewardBaggages(lostBaggages.data.rawMaterialBaggages);
       } else {
         setQpidAreas(null);
         alert(`Failed to load qpid areas: ${qpidAreas.error}`);
@@ -104,7 +109,13 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
             defaultQpidId={defaultQpidId}
           />
           {data?.type === "delivery" &&
-            renderDeliverySteps(data, setData, qpidAreas, lostBaggages)}
+            renderDeliverySteps(
+              data,
+              setData,
+              qpidAreas,
+              lostBaggages,
+              rewardBaggages
+            )}
         </Wizard>
       </Wrapper>
     </Form.Root>
