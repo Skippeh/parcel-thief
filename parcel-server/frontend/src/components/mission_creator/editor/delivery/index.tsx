@@ -10,6 +10,34 @@ import CargoAmountSelector, {
   SelectedCargo,
 } from "../../cargo_amount_selector";
 import { Step } from "../header";
+import styled from "styled-components";
+
+const ReviewWrapper = styled.div`
+  & .buttons {
+    margin-top: 1rem;
+
+    & button {
+      margin-left: 0;
+    }
+  }
+`;
+
+const List = styled.ul`
+  margin-top: 0;
+  margin-bottom: 0;
+`;
+
+function dataIsValid(data: EditMissionData & { type: "delivery" }) {
+  if (data.startQpidId <= 0 || data.endQpidId <= 0) {
+    return false;
+  }
+
+  if (data.baggageAmounts.length === 0) {
+    return false;
+  }
+
+  return true;
+}
 
 export function renderDeliveryHeaderSteps(
   data: (EditMissionData & { type: "delivery" }) | null
@@ -26,6 +54,9 @@ export function renderDeliveryHeaderSteps(
         Cargo
       </Step>
       <Step step={4}>Reward</Step>
+      <Step step={5} disabled={!dataIsValid(data)}>
+        Review & Save
+      </Step>
     </>
   );
 }
@@ -35,7 +66,8 @@ export function renderDeliverySteps(
   setData: (data: EditMissionData | null) => void,
   qpidAreas: Record<number, QpidArea>,
   lostBaggages: Record<number, LocalizedBaggageData[]>,
-  rewardBaggages: LocalizedBaggageData[]
+  rewardBaggages: LocalizedBaggageData[],
+  onSave: () => void
 ) {
   const locations = Object.values(qpidAreas);
   const flatLostBaggages = Object.values(lostBaggages).flat();
@@ -93,6 +125,31 @@ export function renderDeliverySteps(
     });
   }
 
+  const startQpidLocation = qpidAreas[data.startQpidId];
+  const endQpidLocation = qpidAreas[data.endQpidId];
+  const selectedCargoBaggages = data.baggageAmounts.map(
+    ({ nameHash, amount }) => {
+      const baggage = flatLostBaggages.find((b) => b.nameHash === nameHash);
+
+      return {
+        hash: nameHash,
+        name: baggage?.name,
+        amount,
+      };
+    }
+  );
+  const selectedRewardBaggages = data.rewardAmounts.map(
+    ({ nameHash, amount }) => {
+      const baggage = rewardBaggages.find((b) => b.nameHash === nameHash);
+
+      return {
+        hash: nameHash,
+        name: baggage?.name,
+        amount,
+      };
+    }
+  );
+
   return (
     <>
       <div>
@@ -142,6 +199,54 @@ export function renderDeliverySteps(
           />
         </Form.Field>
       </div>
+      <ReviewWrapper>
+        <Form.Field>
+          <Form.Label>Mission type</Form.Label>
+          <Form.Control type="text" value="Delivery" readonly />
+        </Form.Field>
+        <Form.Field>
+          <Form.Label>Pickup location</Form.Label>
+          <Form.Control
+            type="text"
+            value={startQpidLocation?.names["en-us"]}
+            readonly
+          />
+        </Form.Field>
+        <Form.Field>
+          <Form.Label>Dropoff location</Form.Label>
+          <Form.Control
+            type="text"
+            value={endQpidLocation?.names["en-us"]}
+            readonly
+          />
+        </Form.Field>
+        <Form.Field>
+          <Form.Label>Cargo</Form.Label>
+          <List>
+            {selectedCargoBaggages.map(({ hash, name, amount }) => (
+              <li key={hash}>
+                {amount}x {name}
+              </li>
+            ))}
+          </List>
+        </Form.Field>
+        <Form.Field>
+          <Form.Label>Reward</Form.Label>
+          <List>
+            {selectedRewardBaggages.map(({ hash, name, amount }) => (
+              <li key={hash}>
+                {amount}x {name}
+              </li>
+            ))}
+          </List>
+          {selectedRewardBaggages.length === 0 ? <i>No rewards</i> : null}
+        </Form.Field>
+        <div className="buttons">
+          <button type="button" onClick={onSave}>
+            Save
+          </button>
+        </div>
+      </ReviewWrapper>
     </>
   );
 }

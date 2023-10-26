@@ -99,6 +99,10 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
     })();
   }, []);
 
+  function onSave() {
+    console.log("save mission", data);
+  }
+
   return !loading && qpidAreas != null && lostBaggages != null ? (
     <Form.Root>
       <Wrapper>
@@ -114,7 +118,8 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
               setData,
               qpidAreas,
               lostBaggages,
-              rewardBaggages
+              rewardBaggages,
+              onSave
             )}
         </Wizard>
       </Wrapper>
