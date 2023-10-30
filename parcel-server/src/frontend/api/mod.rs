@@ -26,5 +26,7 @@ pub fn configure_endpoints(cfg: &mut ServiceConfig) {
         .service(settings::set_whitelist)
         .service(game_data::list_qpid_areas)
         .service(game_data::list_lost_baggages)
-        .service(qpid_objects::list_qpid_objects);
+        .service(qpid_objects::list_qpid_objects)
+        .service(missions::create_mission)
+        .service(missions::get_missions);
 }

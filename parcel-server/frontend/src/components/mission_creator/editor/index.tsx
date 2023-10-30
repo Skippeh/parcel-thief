@@ -17,6 +17,7 @@ import MissionTypeStep from "./mission_type_step";
 import styled from "styled-components";
 import * as Form from "../../form";
 import { renderDeliverySteps } from "./delivery";
+import { createMission } from "../../../services/missions_service";
 
 const Wrapper = styled.div`
   display: grid;
@@ -99,8 +100,10 @@ const MissionEditor = ({ area, startQpidId: defaultQpidId }: Props) => {
     })();
   }, []);
 
-  function onSave() {
+  async function onSave() {
     console.log("save mission", data);
+    let response = await createMission(data);
+    console.log(response);
   }
 
   return !loading && qpidAreas != null && lostBaggages != null ? (
