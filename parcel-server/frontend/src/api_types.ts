@@ -229,11 +229,11 @@ export type LocalizedBaggageData = {
 };
 export type BaggageAmount = {
     "nameHash": U32;
-    "amount": I32;
+    "amount": U32;
 };
 export type BaggageWithLocationAndAmount = {
     "nameHash": U32;
-    "amount": I32;
+    "amount": U32;
     "location": [F32, F32, F32];
 };
 export type EditMissionData = (({

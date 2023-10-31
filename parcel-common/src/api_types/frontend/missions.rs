@@ -33,7 +33,7 @@ pub enum EditMissionData {
 #[serde(rename_all = "camelCase")]
 pub struct BaggageAmount {
     pub name_hash: u32,
-    pub amount: i32,
+    pub amount: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -41,7 +41,7 @@ pub struct BaggageAmount {
 #[serde(rename_all = "camelCase")]
 pub struct BaggageWithLocationAndAmount {
     pub name_hash: u32,
-    pub amount: i32,
+    pub amount: u32,
     pub location: (f32, f32, f32),
 }
 
