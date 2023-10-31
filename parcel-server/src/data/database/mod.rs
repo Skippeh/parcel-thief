@@ -1,4 +1,5 @@
 pub mod accounts;
+pub mod custom_missions;
 pub mod frontend_accounts;
 pub mod highway_resources;
 pub mod likes;
@@ -20,9 +21,10 @@ use futures_util::lock::{Mutex, MutexLockFuture};
 use crate::db::QueryError;
 
 use self::{
-    accounts::Accounts, frontend_accounts::FrontendAccounts, highway_resources::HighwayResources,
-    likes::Likes, missions::Missions, player_profiles::PlayerProfiles, qpid_objects::QpidObjects,
-    roads::Roads, wasted_baggages::WastedBaggages,
+    accounts::Accounts, custom_missions::CustomMissions, frontend_accounts::FrontendAccounts,
+    highway_resources::HighwayResources, likes::Likes, missions::Missions,
+    player_profiles::PlayerProfiles, qpid_objects::QpidObjects, roads::Roads,
+    wasted_baggages::WastedBaggages,
 };
 
 pub struct Database {
@@ -106,6 +108,10 @@ impl<'db> DatabaseConnection<'db> {
 
     pub fn missions(&self) -> Missions {
         Missions::new(self)
+    }
+
+    pub fn custom_missions(&self) -> CustomMissions {
+        CustomMissions::new(self)
     }
 
     pub fn likes(&self) -> Likes {
