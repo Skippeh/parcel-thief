@@ -1,4 +1,5 @@
 pub mod account;
+pub mod custom_mission;
 pub mod frontend_account;
 pub mod highway;
 pub mod like;

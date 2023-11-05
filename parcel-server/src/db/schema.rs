@@ -29,6 +29,35 @@ diesel::table! {
 }
 
 diesel::table! {
+    custom_mission_collection_cargo (id) {
+        id -> Int8,
+        custom_mission_id -> Nullable<Int8>,
+        item_hash -> Int4,
+        target_amount -> Int4,
+        current_amount -> Int4,
+    }
+}
+
+diesel::table! {
+    custom_mission_rewards (id) {
+        id -> Int8,
+        custom_mission_id -> Nullable<Int8>,
+        item_hash -> Int4,
+        amount -> Int4,
+    }
+}
+
+diesel::table! {
+    custom_missions (id) {
+        id -> Int8,
+        creator_id -> Nullable<Int8>,
+        #[sql_name = "type"]
+        type_ -> Int2,
+        created_at -> Timestamp,
+    }
+}
+
+diesel::table! {
     devoted_highway_resources (id) {
         id -> Int8,
         account_id -> Varchar,
@@ -179,6 +208,7 @@ diesel::table! {
         progress_state -> Int4,
         registered_time -> Timestamp,
         expiration_time -> Timestamp,
+        custom_mission_id -> Nullable<Int8>,
     }
 }
 
@@ -447,6 +477,9 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(custom_mission_collection_cargo -> custom_missions (custom_mission_id));
+diesel::joinable!(custom_mission_rewards -> custom_missions (custom_mission_id));
+diesel::joinable!(custom_missions -> frontend_accounts (creator_id));
 diesel::joinable!(devoted_highway_resources -> accounts (account_id));
 diesel::joinable!(frontend_account_credentials -> frontend_accounts (account_id));
 diesel::joinable!(frontend_account_provider_connections -> frontend_accounts (account_id));
@@ -460,6 +493,7 @@ diesel::joinable!(mission_dynamic_mission_infos -> missions (mission_id));
 diesel::joinable!(mission_relations -> accounts (account_id));
 diesel::joinable!(mission_relations -> missions (mission_id));
 diesel::joinable!(mission_supply_infos -> missions (mission_id));
+diesel::joinable!(missions -> custom_missions (custom_mission_id));
 diesel::joinable!(player_profiles -> accounts (account_id));
 diesel::joinable!(qpid_object_baggages -> accounts (creator));
 diesel::joinable!(qpid_object_baggages -> qpid_objects (object_id));
@@ -489,6 +523,9 @@ diesel::allow_tables_to_appear_in_same_query!(
     account_histories,
     account_strand_contracts,
     accounts,
+    custom_mission_collection_cargo,
+    custom_mission_rewards,
+    custom_missions,
     devoted_highway_resources,
     frontend_account_credentials,
     frontend_account_provider_connections,

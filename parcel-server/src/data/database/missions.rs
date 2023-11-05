@@ -46,6 +46,7 @@ impl<'db> Missions<'db> {
         &self,
         mission: &requests::add_missions::NewMission,
         owner_id: &str,
+        custom_mission_id: Option<i64>,
     ) -> Result<DbMission, QueryError> {
         let conn = &mut *self.connection.get_pg_connection().await;
 
@@ -71,6 +72,7 @@ impl<'db> Missions<'db> {
                         progress_state: ProgressState::Ready, // todo: this might be wrong
                         registered_time: &registered_time,
                         expiration_time: &expiration_time, // note: this isn't used yet (maybe it shouldn't be?)
+                        custom_mission_id,
                     })
                     .get_result::<Mission>(conn)
                     .await?;
@@ -247,6 +249,7 @@ impl<'db> Missions<'db> {
             .filter(dsl::mission_type.eq_any(mission_types))
             .filter(dsl::progress_state.eq_any(progress_states))
             .filter(not(dsl::creator_id.eq_any(exclude_accounts)))
+            .filter(dsl::custom_mission_id.is_null()) // exclude custom missions
             .into_boxed();
 
         if let Some(qpid_ids) = qpid_ids {

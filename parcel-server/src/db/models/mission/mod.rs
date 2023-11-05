@@ -32,6 +32,7 @@ pub struct Mission {
     pub progress_state: ProgressState,
     pub registered_time: NaiveDateTime,
     pub expiration_time: NaiveDateTime,
+    pub custom_mission_id: Option<i64>,
 }
 
 impl IntoDsApiType for Mission {
@@ -83,6 +84,7 @@ pub struct NewMission<'a> {
     pub progress_state: ProgressState,
     pub registered_time: &'a NaiveDateTime,
     pub expiration_time: &'a NaiveDateTime,
+    pub custom_mission_id: Option<i64>,
 }
 
 #[derive(Debug, AsChangeset, Default)]
