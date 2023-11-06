@@ -2,6 +2,7 @@ use actix_web::{
     put,
     web::{Data, Json},
 };
+use diesel_async::scoped_futures::ScopedFutureExt;
 use parcel_common::api_types::{
     requests::add_missions::{AddMissionsRequest, AddMissionsResponse},
     IntoDsApiType,
@@ -16,19 +17,27 @@ pub async fn add_missions(
     database: Data<Database>,
 ) -> Result<Json<AddMissionsResponse>, InternalError> {
     let conn = database.connect().await?;
-    let missions = conn.missions();
-    let mut saved_missions = Vec::new();
 
-    for mission in &request.missions {
-        saved_missions.push(
-            missions
-                .save_mission(mission, &session.account_id)
-                .await?
-                .into_ds_api_type(),
-        );
-    }
+    Ok(conn
+        .transaction(|conn| {
+            async {
+                let missions = conn.missions();
+                let mut saved_missions = Vec::new();
 
-    Ok(Json(AddMissionsResponse {
-        missions: saved_missions,
-    }))
+                for mission in &request.missions {
+                    saved_missions.push(
+                        missions
+                            .save_mission(mission, &session.account_id, None)
+                            .await?
+                            .into_ds_api_type(),
+                    );
+                }
+
+                Ok(Json(AddMissionsResponse {
+                    missions: saved_missions,
+                }))
+            }
+            .scope_boxed()
+        })
+        .await?)
 }
