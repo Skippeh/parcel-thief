@@ -24,6 +24,7 @@ serde-enum-str = "0.3.2"
 typescript-type-def = { version = "0.5.7", optional = true }
 flagset = { version = "0.4.3", features = ["serde"] }
 parcel-game-data = { path = "../parcel-game-data" }
+thiserror = "1.0"
 
 [features]
 default = ["diesel"]

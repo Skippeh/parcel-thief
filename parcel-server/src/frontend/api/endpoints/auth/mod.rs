@@ -57,6 +57,9 @@ pub async fn auth(
         Provider::Epic => {
             Err(anyhow::anyhow!("Epic auth is not implemented, use a local account").into())
         }
+        Provider::Server => {
+            Err(anyhow::anyhow!("Players can not authenticate a server account").into())
+        }
     }
 }
 

@@ -1,7 +1,7 @@
 use base64::Engine;
-use chrono::NaiveDateTime;
+use chrono::{NaiveDateTime, Utc};
 use diesel::prelude::*;
-use diesel_async::RunQueryDsl;
+use diesel_async::{scoped_futures::ScopedFutureExt, AsyncConnection, RunQueryDsl};
 use parcel_common::{api_types::auth::Provider, rand};
 
 use crate::db::{
@@ -40,6 +40,7 @@ impl<'db> Accounts<'db> {
                 provider: &provider,
                 provider_id,
                 last_login_date,
+                is_server: false,
             })
             .get_result(conn)
             .await?;
@@ -97,11 +98,50 @@ impl<'db> Accounts<'db> {
         Ok(accounts)
     }
 
-    pub async fn get_all(&self) -> Result<Vec<Account>, QueryError> {
+    pub async fn get_all_player_accounts(&self) -> Result<Vec<Account>, QueryError> {
         let conn = &mut *self.connection.get_pg_connection().await;
-        let accounts = accounts::table.get_results(conn).await?;
+        let accounts = accounts::table
+            .filter(accounts::is_server.eq(false))
+            .get_results(conn)
+            .await?;
 
         Ok(accounts)
+    }
+
+    pub async fn get_or_create_server_account(&self) -> Result<Account, QueryError> {
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        let account = accounts::table
+            .filter(accounts::is_server.eq(true))
+            .first(conn)
+            .await;
+
+        if let Ok(account) = account {
+            Ok(account)
+        } else {
+            let account = conn
+                .transaction::<_, QueryError, _>(|conn| {
+                    async {
+                        let account = diesel::insert_into(accounts::table)
+                            .values(&NewAccount {
+                                id: &generate_account_id(),
+                                display_name: "Custom Mission",
+                                provider: &Provider::Server,
+                                provider_id: "identity_0",
+                                last_login_date: &Utc::now().naive_utc(),
+                                is_server: true,
+                            })
+                            .get_result(conn)
+                            .await?;
+
+                        Ok(account)
+                    }
+                    .scope_boxed()
+                })
+                .await?;
+
+            Ok(account)
+        }
     }
 
     pub async fn update_display_name_and_last_login(

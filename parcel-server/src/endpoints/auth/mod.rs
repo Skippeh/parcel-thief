@@ -47,6 +47,7 @@ pub enum Error {
     InvalidCode,
     InternalError(InternalError),
     NotWhitelisted,
+    UnsupportedProvider,
 }
 
 impl From<crate::db::QueryError> for Error {
@@ -74,6 +75,9 @@ impl Display for Error {
             Error::NotWhitelisted => {
                 write!(f, "Account is not whitelisted")
             }
+            Error::UnsupportedProvider => {
+                write!(f, "Unsupported provider")
+            }
         }
     }
 }
@@ -86,6 +90,7 @@ impl CommonResponseError for Error {
             Error::InvalidCode => "AU-IC".into(),
             Error::InternalError(err) => err.get_status_code(),
             Error::NotWhitelisted => "AU-NW".into(),
+            Error::UnsupportedProvider => "AU-UP".into(),
         }
     }
 
@@ -95,6 +100,7 @@ impl CommonResponseError for Error {
             Error::InternalError(err) => err.get_http_status_code(),
             Error::InvalidCode => StatusCode::FORBIDDEN,
             Error::NotWhitelisted => StatusCode::FORBIDDEN,
+            Error::UnsupportedProvider => StatusCode::BAD_REQUEST,
         }
     }
 
@@ -104,6 +110,7 @@ impl CommonResponseError for Error {
             Error::InvalidCode => "invalid provider code".into(),
             Error::InternalError(err) => err.get_message(),
             Error::NotWhitelisted => "not whitelisted".into(),
+            Error::UnsupportedProvider => "unsupported provider".into(),
         }
     }
 }
@@ -125,6 +132,10 @@ pub async fn auth(
     let display_name;
 
     match &request.provider {
+        Provider::Server => {
+            // Players can't auth as a server account
+            return Err(Error::UnsupportedProvider);
+        }
         Provider::Steam => {
             let user_id = steam
                 .verify_user_auth_ticket(&request.code)

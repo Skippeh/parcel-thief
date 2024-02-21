@@ -3,6 +3,7 @@ use diesel::{
     backend::Backend, deserialize::FromSql, serialize::ToSql, sql_types::Integer, AsExpression,
     FromSqlRow,
 };
+use parcel_game_data::Area;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
 #[derive(
@@ -50,6 +51,23 @@ where
             1 => Ok(AreaHash::CentralRegion),
             2 => Ok(AreaHash::WesternRegion),
             other => Err(format!("Unknown AreaHash variant: {}", other).into()),
+        }
+    }
+}
+
+#[derive(Debug, thiserror::Error)]
+#[error("The area is not a valid online enabled area")]
+pub struct AreaNotValid;
+
+impl TryFrom<Area> for AreaHash {
+    type Error = AreaNotValid;
+
+    fn try_from(value: Area) -> Result<Self, Self::Error> {
+        match value {
+            Area::Area01 => Ok(AreaHash::EasternRegion),
+            Area::Area02 => Ok(AreaHash::CentralRegion),
+            Area::Area04 => Ok(AreaHash::WesternRegion),
+            _ => Err(AreaNotValid),
         }
     }
 }

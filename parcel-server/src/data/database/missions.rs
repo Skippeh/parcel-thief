@@ -249,7 +249,6 @@ impl<'db> Missions<'db> {
             .filter(dsl::mission_type.eq_any(mission_types))
             .filter(dsl::progress_state.eq_any(progress_states))
             .filter(not(dsl::creator_id.eq_any(exclude_accounts)))
-            .filter(dsl::custom_mission_id.is_null()) // exclude custom missions
             .into_boxed();
 
         if let Some(qpid_ids) = qpid_ids {

@@ -11,6 +11,7 @@ pub struct Account {
     pub provider: Provider,
     pub provider_id: String,
     pub last_login_date: NaiveDateTime,
+    pub is_server: bool,
 }
 
 #[derive(Insertable)]
@@ -21,6 +22,7 @@ pub struct NewAccount<'a> {
     pub provider: &'a Provider,
     pub provider_id: &'a str,
     pub last_login_date: &'a NaiveDateTime,
+    pub is_server: bool,
 }
 
 #[derive(Debug, Queryable)]

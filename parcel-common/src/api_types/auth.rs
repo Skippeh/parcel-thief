@@ -45,6 +45,8 @@ pub struct AuthResponse {
 #[cfg_attr(feature = "diesel", diesel(sql_type = Integer))]
 #[cfg_attr(feature = "ts", derive(TypeDef))]
 pub enum Provider {
+    #[serde(rename = "identity")]
+    Server = -1,
     #[serde(rename = "steam")]
     Steam = 0,
     #[serde(rename = "epic")]
@@ -54,6 +56,7 @@ pub enum Provider {
 impl Display for Provider {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Provider::Server => write!(f, "Server"),
             Provider::Steam => write!(f, "Steam"),
             Provider::Epic => write!(f, "Epic"),
         }
@@ -71,6 +74,7 @@ where
         out: &mut diesel::serialize::Output<'b, '_, DB>,
     ) -> diesel::serialize::Result {
         match self {
+            Provider::Server => (-1).to_sql(out),
             Provider::Steam => 0.to_sql(out),
             Provider::Epic => 1.to_sql(out),
         }
@@ -85,6 +89,7 @@ where
 {
     fn from_sql(bytes: DB::RawValue<'_>) -> diesel::deserialize::Result<Self> {
         match i32::from_sql(bytes)? {
+            -1 => Ok(Provider::Server),
             0 => Ok(Provider::Steam),
             1 => Ok(Provider::Epic),
             other => Err(format!("Unknown Provider variant: {}", other).into()),

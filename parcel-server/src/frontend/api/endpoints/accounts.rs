@@ -83,7 +83,7 @@ pub async fn list_accounts(
             let accounts = conn.accounts();
             let frontend_accounts = conn.frontend_accounts();
             let mut result = Vec::new();
-            let data_accounts = accounts.get_all().await?;
+            let data_accounts = accounts.get_all_player_accounts().await?;
 
             let mut frontend_ids = frontend_accounts
                 .get_ids_from_game_ids(

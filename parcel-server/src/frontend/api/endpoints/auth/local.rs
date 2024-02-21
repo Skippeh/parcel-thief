@@ -77,6 +77,7 @@ pub async fn auth_local(
                             }
                         }
                         Provider::Epic => None,
+                        Provider::Server => None,
                     },
                     None => None,
                 }

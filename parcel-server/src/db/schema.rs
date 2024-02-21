@@ -25,6 +25,7 @@ diesel::table! {
         provider -> Int4,
         provider_id -> Varchar,
         last_login_date -> Timestamp,
+        is_server -> Bool,
     }
 }
 
@@ -50,7 +51,7 @@ diesel::table! {
 diesel::table! {
     custom_missions (id) {
         id -> Int8,
-        creator_id -> Nullable<Int8>,
+        creator_id -> Int8,
         #[sql_name = "type"]
         type_ -> Int2,
         created_at -> Timestamp,
