@@ -93,9 +93,7 @@ pub async fn create_mission(
             let start_qpid_area = start_qpid_area.unwrap();
             let area_hash = area_hash.unwrap();
 
-            // todo: Add new custom mission to database
             let conn = database.connect().await?;
-
             conn.transaction(|conn| {
                 async {
                     let account = conn.accounts().get_or_create_server_account().await?;
@@ -105,7 +103,7 @@ pub async fn create_mission(
                         .await?;
 
                     let game_missions = conn.missions();
-                    // todo: for each baggage * amount: create game mission in shared box at start_qpid_id
+                    // for each baggage * amount: create game mission in shared box at start_qpid_id
                     for BaggageAmount { name_hash, amount } in &baggage_amounts {
                         for _ in 0..*amount {
                             game_missions
@@ -144,7 +142,12 @@ pub async fn create_mission(
                         }
                     }
 
-                    // todo: save reward baggages
+                    // save reward baggages
+                    for BaggageAmount { name_hash, amount } in &reward_amounts {
+                        custom_missions
+                            .create_reward(mission.id, *name_hash as i32, *amount as i32)
+                            .await?;
+                    }
 
                     Ok(())
                 }

@@ -1,7 +1,10 @@
 use diesel_async::RunQueryDsl;
 
 use crate::db::{
-    models::custom_mission::{CustomMission, CustomMissionType, NewCustomMission},
+    models::custom_mission::{
+        CustomMission, CustomMissionReward, CustomMissionType, NewCustomMission,
+        NewCustomMissionReward,
+    },
     QueryError,
 };
 
@@ -34,5 +37,26 @@ impl<'db> CustomMissions<'db> {
             .await?;
 
         Ok(mission)
+    }
+
+    pub async fn create_reward(
+        &self,
+        custom_mission_id: i64,
+        item_hash: i32,
+        amount: i32,
+    ) -> Result<CustomMissionReward, QueryError> {
+        use crate::db::schema::custom_mission_rewards::dsl;
+        let conn = &mut *self.connection.get_pg_connection().await;
+
+        let reward = diesel::insert_into(dsl::custom_mission_rewards)
+            .values(&NewCustomMissionReward {
+                custom_mission_id,
+                item_hash,
+                amount,
+            })
+            .get_result(conn)
+            .await?;
+
+        Ok(reward)
     }
 }
