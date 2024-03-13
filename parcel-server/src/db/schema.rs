@@ -42,7 +42,7 @@ diesel::table! {
 diesel::table! {
     custom_mission_rewards (id) {
         id -> Int8,
-        custom_mission_id -> Nullable<Int8>,
+        custom_mission_id -> Int8,
         item_hash -> Int4,
         amount -> Int4,
     }
