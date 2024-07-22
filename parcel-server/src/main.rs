@@ -149,6 +149,9 @@ async fn main() -> Result<()> {
     dotenv::dotenv().ok();
     let args = Options::parse();
 
+    // Create 'logs' directory
+    std::fs::create_dir_all("logs").context("Could not create logs directory")?;
+
     let colors = ColoredLevelConfig::new()
         .trace(Color::White)
         .info(Color::BrightGreen)

@@ -38,7 +38,11 @@ diesel-async = { version = "0.3.1", features = ["postgres"] }
 diesel_migrations = "2.0.0"
 dotenv = "0.15.0"
 itertools = "0.10.5"
-pg-embed = { git = "https://github.com/Skippeh/pg-embed.git" }
+postgresql_embedded = { version = "0.14.2", default-features = false, features = [
+    "rustls-tls",
+    "theseus",    # Use theseus postgresql binaries
+    #"zonky",     # Use zonky postgresql binaries
+] }
 lazy_static = "1.4.0"
 portpicker = "0.1.1"
 tokio = { version = "1.25.0", features = ["full"] }
