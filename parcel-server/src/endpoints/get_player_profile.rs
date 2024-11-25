@@ -52,13 +52,13 @@ pub async fn get_player_profile(
                 "steam" => {
                     id_queries
                         .entry(Provider::Steam)
-                        .or_insert(HashMap::new())
+                        .or_default()
                         .insert(id, &profile.id);
                 }
                 "epic" => {
                     id_queries
                         .entry(Provider::Epic)
-                        .or_insert(HashMap::new())
+                        .or_default()
                         .insert(id, &profile.id);
                 }
                 other => return Err(anyhow::anyhow!("Unexpected id type: {:?}", other).into()),

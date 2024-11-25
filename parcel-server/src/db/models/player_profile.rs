@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use chrono::NaiveDateTime;
+use chrono::{DateTime, NaiveDateTime};
 use diesel::{AsChangeset, Insertable, Queryable};
 use parcel_common::api_types::player_profile::BasicPlayerProfile;
 
@@ -70,7 +70,8 @@ impl TryFrom<(String, &BasicPlayerProfile)> for PlayerProfile {
             num_gold_medals: value.num_gold_medals,
             num_gold_medals_large: value.num_gold_medals_large,
             legend_count: value.legend_count,
-            last_login: NaiveDateTime::from_timestamp_opt(value.last_login, 0)
+            last_login: DateTime::from_timestamp(value.last_login, 0)
+                .map(|d| d.naive_utc())
                 .ok_or(DateOutOfRange)?,
             distance_traveled: value.distance_traveled,
             music_open_tracks: value.music_open_tracks as i64,
@@ -114,7 +115,7 @@ impl From<&PlayerProfile> for BasicPlayerProfile {
             num_gold_medals: value.num_gold_medals,
             num_gold_medals_large: value.num_gold_medals_large,
             legend_count: value.legend_count,
-            last_login: value.last_login.timestamp(),
+            last_login: value.last_login.and_utc().timestamp(),
             distance_traveled: value.distance_traveled,
             music_open_tracks: value.music_open_tracks as u64,
             name_hash: value.name_hash,
@@ -157,8 +158,9 @@ impl PlayerProfile {
         self.num_gold_medals = value.num_gold_medals;
         self.num_gold_medals_large = value.num_gold_medals_large;
         self.legend_count = value.legend_count;
-        self.last_login =
-            NaiveDateTime::from_timestamp_opt(value.last_login, 0).ok_or(DateOutOfRange)?;
+        self.last_login = DateTime::from_timestamp(value.last_login, 0)
+            .map(|d| d.naive_utc())
+            .ok_or(DateOutOfRange)?;
         self.distance_traveled = value.distance_traveled;
         self.music_open_tracks = value.music_open_tracks as i64;
         self.name_hash = value.name_hash;

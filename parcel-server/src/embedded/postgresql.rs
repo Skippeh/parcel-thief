@@ -1,6 +1,5 @@
 use std::{path::PathBuf, sync::Arc};
 
-use anyhow::Context;
 use futures_util::lock::Mutex;
 use postgresql_embedded::{PostgreSQL, Settings, VersionReq};
 

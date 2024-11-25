@@ -115,6 +115,7 @@ impl CommonResponseError for Error {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 #[get("auth/ds")]
 pub async fn auth(
     request: Query<AuthQuery>,
@@ -278,7 +279,7 @@ pub async fn auth(
             token,
             gateway: gateway_url,
             properties: SessionProperties {
-                last_login: login_date.timestamp(),
+                last_login: login_date.and_utc().timestamp(),
             },
         },
     }))

@@ -33,7 +33,7 @@ impl IntoDsApiType for RecycleMaterials {
                 self.mats_4,
                 self.mats_5,
             ],
-            recycle_time: self.recycle_time.timestamp_millis(),
+            recycle_time: self.recycle_time.and_utc().timestamp_millis(),
         }
     }
 }

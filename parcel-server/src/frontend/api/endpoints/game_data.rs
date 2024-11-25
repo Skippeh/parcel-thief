@@ -18,7 +18,7 @@ pub async fn list_qpid_areas(
     _session: JwtSession,
     game_data: Data<GameData>,
 ) -> ApiResult<Vec<QpidArea>> {
-    ApiResponse::ok(game_data.qpid_areas.values().map(|q| q.clone()).collect())
+    ApiResponse::ok(game_data.qpid_areas.values().cloned().collect())
 }
 
 #[derive(Deserialize)]

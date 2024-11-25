@@ -36,7 +36,7 @@ impl IntoDsApiType for Like {
             like_type: self.ty,
             online_id: self.online_id,
             summarized_player_count: 0,
-            time: self.time.timestamp_millis(),
+            time: self.time.and_utc().timestamp_millis(),
             account_id: self.from_id,
         }
     }

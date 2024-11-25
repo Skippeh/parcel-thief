@@ -43,7 +43,7 @@ pub async fn auth(
     match request.provider {
         Provider::Steam => {
             let redirector = Redirector::new(
-                &get_site_url(&http_request),
+                get_site_url(&http_request),
                 "/frontend/api/auth/callback/steam",
             )
             .map_err(|e| ApiError::Internal(anyhow::anyhow!("Failed to create redirector: {e}")))?;
@@ -92,9 +92,8 @@ pub async fn logout(
         .delete_session_by_token(&session.token)
         .await?;
 
-    let expiry_time = chrono::NaiveDateTime::from_timestamp_opt(session.expires_at, 0)
-        .ok_or_else(|| anyhow::anyhow!("Invalid expiry time"))?
-        .and_utc();
+    let expiry_time = chrono::DateTime::from_timestamp(session.expires_at, 0)
+        .ok_or_else(|| anyhow::anyhow!("Invalid expiry time"))?;
     session_blacklist_cache
         .insert(session.token, expiry_time)
         .await;

@@ -1,6 +1,6 @@
 use std::{collections::HashMap, fmt::Display};
 
-use chrono::{NaiveDateTime, Utc};
+use chrono::{DateTime, Utc};
 use diesel::prelude::*;
 use diesel_async::{scoped_futures::ScopedFutureExt, AsyncConnection, RunQueryDsl};
 
@@ -181,12 +181,12 @@ impl<'db> Likes<'db> {
     pub async fn get_likes_since(
         &self,
         account_id: &str,
-        since: &NaiveDateTime,
+        since: &DateTime<Utc>,
     ) -> Result<Vec<Like>, QueryError> {
         let conn = &mut *self.connection.get_pg_connection().await;
         Ok(dsl::likes
             .filter(dsl::to_id.eq(account_id))
-            .filter(dsl::time.gt(since))
+            .filter(dsl::time.gt(since.naive_utc()))
             .get_results(conn)
             .await?)
     }

@@ -357,7 +357,7 @@ impl<'db> QpidObjects<'db> {
                 // from showing up in other people's worlds unless they already had it from before.
                 // This enables other users to keep giving likes and using postboxes for example while also preventing
                 // new users from discovering this object.
-                if &object.creator_id == account_id {
+                if object.creator_id == account_id {
                     diesel::update(dsl::qpid_objects)
                         .filter(dsl::id.eq(object_id))
                         .set(dsl::is_deleted.eq(true))

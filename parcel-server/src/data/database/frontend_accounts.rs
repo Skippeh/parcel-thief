@@ -420,7 +420,7 @@ impl<'db> FrontendAccounts<'db> {
             .get_results::<i64>(&mut *conn_guard)
             .await?
             .into_iter()
-            .map(|perm| FlagSet::<FrontendPermissions>::new_truncated(perm))
+            .map(FlagSet::<FrontendPermissions>::new_truncated)
             .collect::<Vec<_>>();
 
         let mut create_account = true;

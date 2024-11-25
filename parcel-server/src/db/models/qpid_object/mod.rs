@@ -81,7 +81,7 @@ impl TryIntoDsApiType for QpidObject {
             rotation: (self.rot_x, self.rot_y, self.rot_z),
             sub_type: self.sub_type,
             object_type: self.object_type,
-            updated_time: self.updated_time.timestamp_millis(),
+            updated_time: self.updated_time.and_utc().timestamp_millis(),
             construction_materials_contributions: None,
             recycle_materials_contributions: None,
             priority: false,

@@ -67,6 +67,7 @@ pub enum RTTITypeHash {
 }
 
 #[derive(Debug, Clone, enum_as_inner::EnumAsInner)]
+#[allow(clippy::large_enum_variant)] // This is potentially bad for performance but this program is not performance critical anyway
 pub enum RTTIType {
     RawMaterialListItem(RawMaterialListItem),
     CommodityListItem(CommodityListItem),

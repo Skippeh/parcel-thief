@@ -19,6 +19,7 @@ pub struct SettingsValues {
 
 // This could be implemented automatically with macro trait at the moment,
 // but we're not doing that in case any non default value fields are added
+#[allow(clippy::derivable_impls)]
 impl Default for SettingsValues {
     fn default() -> Self {
         Self {

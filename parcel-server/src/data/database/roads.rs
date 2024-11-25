@@ -61,7 +61,7 @@ impl IntoDsApiType for DbRoad {
             max_height_difference: self.road.max_height_difference,
             online_id: self.road.id,
             path_length: self.road.length,
-            created_time: self.road.created_at.timestamp_millis(),
+            created_time: self.road.created_at.and_utc().timestamp_millis(),
             data_version: self.road.data_version,
             via_qpids,
         }
@@ -193,9 +193,7 @@ impl<'db> Roads<'db> {
 
             let mut via_qpids = HashMap::<String, Vec<RoadViaQpid>>::new();
             for via_qpid in all_via_qpids {
-                let vec = via_qpids
-                    .entry(via_qpid.road_id.clone())
-                    .or_insert_with(Vec::new);
+                let vec = via_qpids.entry(via_qpid.road_id.clone()).or_default();
                 vec.push(via_qpid);
             }
 

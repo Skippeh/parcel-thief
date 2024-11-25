@@ -262,7 +262,7 @@ async fn main() -> Result<()> {
     );
 
     migrate_database(&database_url).context("Could not apply pending database migrations")?;
-    create_admin_account_if_not_exists(&*database, &*hash_secret)
+    create_admin_account_if_not_exists(&database, &hash_secret)
         .await
         .context("Could not check for or create admin account")?;
 

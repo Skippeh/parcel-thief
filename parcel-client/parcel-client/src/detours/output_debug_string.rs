@@ -29,13 +29,19 @@ pub unsafe fn hook() -> Result<(), anyhow::Error> {
         .context("Could not get base address of OutputDebugStringW")?;
 
     OUTPUT_DEBUG_STRING_A_HOOK
-        .initialize(std::mem::transmute(addr_a), output_debug_string_a_detour)
+        .initialize(
+            std::mem::transmute::<usize, unsafe extern "fastcall" fn(*const char)>(addr_a),
+            output_debug_string_a_detour,
+        )
         .context("Could not initialize OutputDebugStringA detour")?
         .enable()
         .context("Could not enable OutputDebugStringA detour")?;
 
     OUTPUT_DEBUG_STRING_W_HOOK
-        .initialize(std::mem::transmute(addr_w), output_debug_string_w_detour)
+        .initialize(
+            std::mem::transmute::<usize, unsafe extern "fastcall" fn(*const u16)>(addr_w),
+            output_debug_string_w_detour,
+        )
         .context("Could not initialize OutputDebugStringW detour")?
         .enable()
         .context("Could not enable OutputDebugStringW detour")?;

@@ -2,7 +2,7 @@ use actix_web::{
     post,
     web::{Data, Json},
 };
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::{DateTime, Utc};
 use parcel_common::api_types::requests::get_highway_resources::{
     ConstructionContributors, Contributor, GetHighwayResourcesRequest, GetHighwayResourcesResponse,
     PutResource,
@@ -108,8 +108,7 @@ pub async fn get_highway_resources(
 fn parse_micro_date_time(mut date: i64) -> Result<DateTime<Utc>, anyhow::Error> {
     date -= 62135596800000000; // epoch expressed in microseconds
 
-    let date_time = NaiveDateTime::from_timestamp_micros(date)
-        .ok_or_else(|| anyhow::anyhow!("Date out of range"))?
-        .and_utc();
+    let date_time = DateTime::from_timestamp_micros(date)
+        .ok_or_else(|| anyhow::anyhow!("Date out of range"))?;
     Ok(date_time)
 }

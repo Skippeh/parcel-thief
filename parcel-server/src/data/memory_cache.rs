@@ -83,11 +83,11 @@ where
         let values = self.cache.iter().collect::<HashMap<_, _>>();
         let serialized = get_bincode_options()
             .serialize(&values)
-            .map_err(|err| CacheError::Serialize(err))?;
+            .map_err(CacheError::Serialize)?;
 
         tokio::fs::write(file_path, serialized)
             .await
-            .map_err(|err| CacheError::Io(err))?;
+            .map_err(CacheError::Io)?;
 
         Ok(())
     }
@@ -96,18 +96,16 @@ where
     async fn load_from_file(self, file_path: &Path) -> Result<Self, CacheError> {
         if !tokio::fs::try_exists(file_path)
             .await
-            .map_err(|err| CacheError::Io(err))?
+            .map_err(CacheError::Io)?
         {
             self.save_to_file(file_path).await?;
             return Ok(self);
         }
 
-        let deserialized = tokio::fs::read(file_path)
-            .await
-            .map_err(|err| CacheError::Io(err))?;
+        let deserialized = tokio::fs::read(file_path).await.map_err(CacheError::Io)?;
         let values: HashMap<K, V> = get_bincode_options()
             .deserialize(&deserialized)
-            .map_err(|err| CacheError::Serialize(err))?;
+            .map_err(CacheError::Serialize)?;
 
         let result = self;
 

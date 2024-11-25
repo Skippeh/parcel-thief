@@ -38,7 +38,7 @@ impl IntoDsApiType for AccountHistory {
 
     fn into_ds_api_type(self) -> Self::ApiType {
         Self::ApiType {
-            last_interaction_time: self.encountered_at.timestamp_millis(),
+            last_interaction_time: self.encountered_at.and_utc().timestamp_millis(),
             account_id: self.encountered_id,
         }
     }
@@ -65,7 +65,7 @@ impl IntoDsApiType for AccountStrandContract {
 
     fn into_ds_api_type(self) -> Self::ApiType {
         Self::ApiType {
-            added_time: self.created_at.timestamp_millis(),
+            added_time: self.created_at.and_utc().timestamp_millis(),
             account_id: self.contract_account_id,
         }
     }

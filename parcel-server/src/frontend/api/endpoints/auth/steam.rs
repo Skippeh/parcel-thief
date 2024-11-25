@@ -31,13 +31,13 @@ pub async fn steam_callback(
     server_settings: Data<ServerSettings>,
 ) -> Result<Redirect, ApiError> {
     let (request, verifier) =
-        Verifier::from_querystring(&request.query_string()).map_err(anyhow::Error::msg)?;
+        Verifier::from_querystring(request.query_string()).map_err(anyhow::Error::msg)?;
 
     let (parts, body) = request.into_parts();
 
     let client = reqwest::Client::new();
     let response = client
-        .post(&parts.uri.to_string())
+        .post(parts.uri.to_string())
         .header("Content-Type", "application/x-www-form-urlencoded")
         .body(body)
         .send()
@@ -151,7 +151,7 @@ async fn create_auth_response(
     let permissions = FlagSet::new_truncated(account.permissions);
     let permissions_vec = permissions.into_iter().collect();
     let (auth_token, expire_date) =
-        super::create_auth_token(&account, &jwt_secret).map_err(anyhow::Error::msg)?;
+        super::create_auth_token(&account, jwt_secret).map_err(anyhow::Error::msg)?;
 
     accounts
         .add_session(account.id, &auth_token, &expire_date.naive_utc())

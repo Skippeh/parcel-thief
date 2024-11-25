@@ -232,7 +232,7 @@ pub async fn create_credentials(
 
     // Verify that the account exists
     match account {
-        None => return Err(ApiError::NotFound),
+        None => Err(ApiError::NotFound),
         Some(_account) => {
             // Verify that the username isn't taken
             if accounts.username_exists(&request.username).await? {
@@ -285,7 +285,7 @@ pub async fn reset_password(
             // If account id matches current session make sure current password is correct
             if account_id == session.account_id {
                 let current_password_hash = hash_secret.hash_string(
-                    &request.current_password.as_deref().unwrap_or_else(|| ""),
+                    request.current_password.as_deref().unwrap_or(""),
                     &credentials.salt,
                 );
 
@@ -386,7 +386,7 @@ pub async fn create_frontend_account(
                             .add_provider_connection(&NewAccountProviderConnection {
                                 account_id: account.id,
                                 created_at: None,
-                                provider: provider,
+                                provider,
                                 provider_id: &provider_id,
                             })
                             .await?;

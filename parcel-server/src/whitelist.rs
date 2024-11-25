@@ -17,7 +17,7 @@ impl Whitelist {
             }
         }
 
-        return false;
+        false
     }
 }
 
@@ -76,7 +76,7 @@ impl super::settings::Persist<Whitelist> for WhitelistPersist {
         let mut contents = String::with_capacity(1024);
 
         for entry in data.0.iter() {
-            contents.push_str(&format!("{}", entry.provider_id.replace('\n', " ")));
+            contents.push_str(&entry.provider_id.replace('\n', " ").to_string());
 
             if let Some(name_reference) = &entry.name_reference {
                 contents.push_str(&format!(";{}", name_reference.replace('\n', " ")));

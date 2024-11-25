@@ -160,7 +160,7 @@ impl FromRequest for JwtSession {
                             Some(account) => {
                                 let permissions = FlagSet::new_truncated(account.permissions);
                                 session_permissions_cache
-                                    .insert(payload.account_id, permissions.clone())
+                                    .insert(payload.account_id, permissions)
                                     .await;
 
                                 permissions

@@ -23,8 +23,9 @@ pub async fn get_wasted_baggages(
     for qpid_id in request.0.qpid_ids {
         let last_date = if qpid_id.last_login_time > 0 {
             Some(
-                chrono::NaiveDateTime::from_timestamp_millis(qpid_id.last_login_time)
-                    .context("Date out of range")?,
+                chrono::DateTime::from_timestamp_millis(qpid_id.last_login_time)
+                    .context("Date out of range")?
+                    .naive_utc(),
             )
         } else {
             None

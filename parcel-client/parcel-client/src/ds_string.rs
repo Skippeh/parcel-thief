@@ -28,7 +28,7 @@ impl DsString {
     }
 
     unsafe fn internal_data(&self) -> &InternalData {
-        let self_ptr = std::mem::transmute::<_, *const u8>(self as *const Self);
+        let self_ptr = std::mem::transmute::<*const DsString, *const u8>(self as *const Self);
         &*self_ptr.sub(16).cast::<InternalData>()
     }
 
@@ -63,16 +63,16 @@ impl DsString {
     }
 }
 
-impl ToString for DsString {
-    fn to_string(&self) -> String {
-        self.as_ref().to_string_lossy().into_owned()
+impl std::fmt::Display for DsString {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.as_ref().to_string_lossy())
     }
 }
 
 impl AsRef<CStr> for DsString {
     fn as_ref(&self) -> &CStr {
         unsafe {
-            let ptr = std::mem::transmute::<_, *const u8>(self as *const DsString);
+            let ptr = std::mem::transmute::<*const DsString, *const u8>(self as *const DsString);
             let len = self.len();
             let bytes = &*std::ptr::slice_from_raw_parts(ptr, len + 1);
 

@@ -47,7 +47,7 @@ impl IntoDsApiType for ConstructionMaterials {
                 self.repair_4,
                 self.repair_5,
             ],
-            contribute_time: self.contribute_time.timestamp_millis(),
+            contribute_time: self.contribute_time.and_utc().timestamp_millis(),
         }
     }
 }

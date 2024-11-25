@@ -46,8 +46,10 @@ type Api = (
 );
 
 fn generate_ts_types() {
-    let mut options = DefinitionFileOptions::default();
-    options.root_namespace = None;
+    let options = DefinitionFileOptions {
+        root_namespace: None,
+        ..Default::default()
+    };
 
     let file = File::create("frontend/src/api_types.ts").unwrap();
     write_definition_file::<_, Api>(file, options).unwrap();
@@ -59,7 +61,7 @@ fn build_frontend_client() {
 
     let install_result = Command::new(&yarn_path)
         .arg("install")
-        .current_dir(&frontend_dir)
+        .current_dir(frontend_dir)
         .status()
         .expect("Could not run 'yarn install'");
 
@@ -69,7 +71,7 @@ fn build_frontend_client() {
 
     let build_result = Command::new(&yarn_path)
         .arg("checkTypingsAndBuild")
-        .current_dir(&frontend_dir)
+        .current_dir(frontend_dir)
         .status()
         .expect("Could not run 'yarn build'");
 

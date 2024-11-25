@@ -107,6 +107,7 @@ fn read_baggages_from_file(
     Ok(baggages)
 }
 
+#[allow(clippy::type_complexity)] // Returned value is only used in once place so i think it's fine
 fn get_names_and_descriptions(
     item: &GameListItemBase,
     load_context: &mut LoadContext,

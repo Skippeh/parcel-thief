@@ -36,7 +36,7 @@ impl<T: Sized + Read + ReadRTTIType> Ref<T> {
             Some((uuid, file_path)) => {
                 // load file from path and resolve reference
                 let file = load_context.load_file(file_path)?;
-                let object = file.find_object::<T>(&uuid)?;
+                let object = file.find_object::<T>(uuid)?;
 
                 Ok(object)
             }
@@ -54,7 +54,7 @@ impl<T: Sized + Read + ReadRTTIType> Ref<T> {
         match self.inner.as_ref() {
             Some((uuid, file_path)) => match load_context.get_file(file_path) {
                 Some(file) => {
-                    let object = file.find_object::<T>(&uuid)?;
+                    let object = file.find_object::<T>(uuid)?;
 
                     Ok(object)
                 }
@@ -83,14 +83,14 @@ impl<T: Sized + Read + ReadRTTIType> super::Read for Ref<T> {
                     context
                         .current_file_path()
                         .expect("Current file path should always be Some")
-                        .try_into()?,
+                        .into(),
                     uuid,
                 ))
             }
             // 2 = external link, 3 = external reference
             2 | 3 => {
                 let uuid = Uuid::from_slice_le(reader.read_bytes(16)?)?;
-                let path = DSString::read(reader, context)?.deref().try_into()?;
+                let path = DSString::read(reader, context)?.deref().into();
 
                 Ok(Self::new(path, uuid))
             }

@@ -31,22 +31,20 @@ impl GameData {
     pub fn baggage_name(&self, name_hash: u32, language: Language) -> Option<&String> {
         self.baggages
             .get(&name_hash)
-            .map(|b| b.names.get(&language))
-            .flatten()
+            .and_then(|b| b.names.get(&language))
     }
 
     pub fn qpid_area_name(&self, qpid_id: i32, language: Language) -> Option<&String> {
         self.qpid_areas
             .get(&qpid_id)
-            .map(|a| a.names.get(&language))
-            .flatten()
+            .and_then(|a| a.names.get(&language))
     }
 
     pub fn get_lost_baggages(&self, qpid_ids: &[i32]) -> HashMap<i32, Vec<&Baggage>> {
         let mut lost_baggages = HashMap::new();
 
         for qpid_id in qpid_ids {
-            if let Some(baggage_ids) = self.lost_baggages.get(&qpid_id) {
+            if let Some(baggage_ids) = self.lost_baggages.get(qpid_id) {
                 let mut baggages = Vec::with_capacity(baggage_ids.len());
 
                 for baggage_id in baggage_ids {

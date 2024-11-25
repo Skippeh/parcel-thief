@@ -2,7 +2,7 @@ use std::{cmp::min, ffi::CStr, fmt::Debug, fs::File};
 
 use anyhow::Context;
 use binary_reader::BinaryReader;
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::{DateTime, Utc};
 use ini::Ini;
 use murmurhash3::murmurhash3_x64_128;
 use percent_encoding::percent_decode_str;
@@ -142,9 +142,8 @@ fn parse_slot_info(ini_string: String) -> Result<SlotInfo, anyhow::Error> {
     modification_time -= 62135596800000000; // epoch expressed in microseconds
     modification_time /= 1000;
 
-    let modification_time = NaiveDateTime::from_timestamp_millis(modification_time)
-        .context("ModificationTime is out of range")?
-        .and_utc();
+    let modification_time = DateTime::from_timestamp_millis(modification_time)
+        .context("ModificationTime is out of range")?;
 
     Ok(SlotInfo {
         title: read_decode!(slot, "Title"),
@@ -181,7 +180,7 @@ fn decrypt_compressed_data(data: &mut Vec<u8>) -> Result<(), anyhow::Error> {
         // Remove file format type and file hash salt from source
         data.drain(0..8);
 
-        let mut hash = vec![0u8; 16];
+        let mut hash = [0u8; 16];
         let (hash_1, hash_2) = murmurhash3_x64_128(&xor_key, 42);
         hash[0..8].copy_from_slice(&hash_1.to_le_bytes());
         hash[8..16].copy_from_slice(&hash_2.to_le_bytes());

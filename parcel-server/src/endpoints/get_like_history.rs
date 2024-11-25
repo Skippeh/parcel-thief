@@ -7,7 +7,7 @@ use actix_web::{
     post,
     web::{Data, Json},
 };
-use chrono::NaiveDateTime;
+use chrono::DateTime;
 use parcel_common::api_types::{
     requests::get_like_history::{GetLikeHistoryRequest, GetLikeHistoryResponse, LikeHistory},
     IntoDsApiType,
@@ -29,7 +29,7 @@ pub async fn get_like_history(
     let given_likes = if request.since <= 0 {
         likes.get_unacknowleged_likes(&session.account_id).await?
     } else {
-        let since = NaiveDateTime::from_timestamp_millis(request.since)
+        let since = DateTime::from_timestamp_millis(request.since)
             .ok_or_else(|| anyhow::anyhow!("Could not convert since to datetime"))?;
         likes.get_likes_since(&session.account_id, &since).await?
     };
@@ -103,7 +103,7 @@ pub async fn get_like_history(
         summarized_like.likes_manual += like.likes_manual;
 
         // update timestamp if it's newer
-        let timestamp_millis = like.time.timestamp_millis();
+        let timestamp_millis = like.time.and_utc().timestamp_millis();
         if timestamp_millis > summarized_like.time {
             summarized_like.time = timestamp_millis;
         }
